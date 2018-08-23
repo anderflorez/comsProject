@@ -1,0 +1,186 @@
+
+#sidebar {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 280px;
+	background: #303030;
+}
+
+#sidebar a {
+	display: block;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+
+#sidebar a > div {
+	display: inline-block;
+	height: 100%;
+}
+
+#sidebar-head {
+	height: 70px;
+	border-bottom: 1px solid #404040;
+}
+
+#sidebar-head a {
+	display: inline-block;
+	height: 100%;
+	margin: 0 20px;
+}
+
+#sidebar-head > div {
+	display: inline-flex;
+	align-items: center;
+	height: 100%;
+	float: right;
+}
+
+#sidebar-head > div > button {
+	padding: 15px;
+	color: #FFFFFF;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+}
+
+#menu-close > button:focus {
+	outline: transparent;
+}
+
+#sidebar-head-logo > img {
+	display: inherit;
+	height: 100%;
+	padding: 15px 15px;
+}
+
+#sidebar-menu {
+	position: fixed;
+	top: 70px;
+	bottom: inherit;
+	width: inherit;
+	overflow: auto;
+}
+
+#sidebar-menu a {
+	color: #C0C0C0;
+	padding: 12px;
+}
+
+#sidebar-menu a:hover {
+	background-color: #505050;
+	color: #FFFFFF;
+}
+
+#sidebar-menu ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+.menu-icon {
+	padding: 0 15px;
+	font-size: 20px;
+}
+
+.page-container {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 280px;
+	right: 0;
+	overflow-y: auto;
+	background-color: #E0E0E0;
+}
+
+#header {
+	position: fixed;
+	top: inherit;
+	right: inherit;
+	left: inherit;
+	z-index: 10;
+	height: 70px;
+	background-color: #FFFFFF;
+	border-bottom: 1px solid #E8E8E8;
+}
+
+#header button {
+	background-color: transparent;
+	border: none;
+	margin: 0 5px;
+	padding: 12px;
+	cursor: pointer;
+}
+
+#header button:focus {
+	outline: transparent;
+}
+
+#nav-menu {
+	display: inline-flex;
+	align-items: center;
+	height: 100%;
+	float: left;
+	margin-left: 20px;
+}
+
+#nav-right {
+	display: inline-flex;
+	align-items: center;
+	height: 100%;
+	float: right;
+	margin-right: 20px;
+}
+
+.page-content {
+	position: absolute;
+	top: 80px;
+	left: 10px;
+	right: 10px;
+	margin-bottom: 10px;
+	padding: 25px;
+	border-radius: 5px;
+	background-color: #FFFFFF;
+}
+
+.dropdown-menu > li {
+	padding: 5px 0;
+}
+
+.dropdown-menu > li:hover {
+	background-color: #E0E0E0;
+}
+
+.dropdown-menu > li.divider {
+	padding: 0;
+	border-bottom: 1px solid #E0E0E0;
+}
+
+.dropdown-menu > li > a {
+	padding: 0 15px;
+	text-decoration: none;
+}
+
+.dropdown-menu i {
+	padding-right: 10px;
+	font-size: 14px;
+}
+
+a {
+	color: #000000;
+}
+
+a:hover {
+	color: #000000;
+}
+
+
+/*Content Navigation*/
+.nav {
+	margin-bottom: 15px;
+}
+
+/*General Spacing*/
+.topMargin25 {
+	margin-top: 25px;
+}
