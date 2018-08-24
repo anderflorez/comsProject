@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.unlimitedcompanies.coms.service.integrationTests.SecurityServiceIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.937 s - in com.unlimitedcompanies.coms.service.integrationTests.SecurityServiceIntegrationTest

@@ -66,7 +66,6 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	@Override
 	public Role saveRole(Role role)
 	{
-		System.out.println("=========================== Saving New Role ===========================");
 		dao.createRole(role);
 		return this.findRoleByRoleName(role.getRoleName());
 	}

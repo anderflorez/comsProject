@@ -1,0 +1,13 @@
+com/unlimitedcompanies/coms/dao/security/exceptions/DuplicateContactException.class
+com/unlimitedcompanies/coms/domain/security/Role.class
+com/unlimitedcompanies/coms/dao/security/ContactDao.class
+com/unlimitedcompanies/coms/domain/security/exceptions/InvalidPhoneNumberException.class
+com/unlimitedcompanies/coms/dao/securityImpl/ContactDaoImpl.class
+com/unlimitedcompanies/coms/dao/securityImpl/AuthenticationDaoImpl.class
+com/unlimitedcompanies/coms/domain/security/Contact.class
+com/unlimitedcompanies/coms/domain/security/Address.class
+com/unlimitedcompanies/coms/data/config/ApplicationConfig.class
+module-info.class
+com/unlimitedcompanies/coms/dao/security/AuthenticationDao.class
+com/unlimitedcompanies/coms/domain/security/Phone.class
+com/unlimitedcompanies/coms/domain/security/User.class

@@ -1,12 +1,15 @@
 module data
 {
+	requires transitive java.persistence;
+	requires transitive tomcat.jdbc;
 	requires transitive spring.orm;
 	requires transitive spring.tx;
-	requires transitive tomcat.jdbc;
-	requires transitive java.persistence;
+
+	requires java.sql;
+	requires java.management;
+	requires java.validation;
 	requires spring.beans;
 	requires spring.context;
-	requires java.validation;
 	
 	exports com.unlimitedcompanies.coms.dao.security;
 	exports com.unlimitedcompanies.coms.dao.security.exceptions;

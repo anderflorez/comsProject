@@ -57,7 +57,7 @@
 		</dependency>
 
 
-		<!-- Hibernate -->
+		<!-- Persistence and Hibernate -->
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>javax.persistence-api</artifactId>

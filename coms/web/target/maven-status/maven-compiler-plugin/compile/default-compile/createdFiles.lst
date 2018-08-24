@@ -1,0 +1,5 @@
+com/unlimitedcompanies/coms/webControllers/CreateInitialAdminAccountController.class
+com/unlimitedcompanies/coms/webControllers/DashboardController.class
+com/unlimitedcompanies/coms/webConfig/SecurityConfiguration.class
+com/unlimitedcompanies/coms/webConfig/WebApplicationConfig.class
+module-info.class

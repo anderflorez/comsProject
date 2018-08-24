@@ -29,9 +29,9 @@ public class ApplicationConfig
 	
 	@Bean(destroyMethod = "close")
 	@Profile("integrationTesting")
-	public DataSource testingDataSource()
+	public org.apache.tomcat.jdbc.pool.DataSource testingDataSource()
 	{
-		DataSource ds = new DataSource();
+		org.apache.tomcat.jdbc.pool.DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
 		ds.setUsername("comsdbadmin");

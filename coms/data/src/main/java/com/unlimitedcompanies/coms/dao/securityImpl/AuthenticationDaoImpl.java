@@ -58,7 +58,6 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public void createRole(Role role)
 	{
-		System.out.println("=========================== Creating Role in the DB ===========================");
 		em.createNativeQuery("INSERT INTO role (roleName) VALUES (:roleName)")
 				.setParameter("roleName", role.getRoleName()).executeUpdate();
 	}
@@ -88,9 +87,6 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 
 		foundRole.addUser(foundUser);
 		em.persist(foundRole);
-
-		System.out.println("Role users: " + foundRole.getMembers().size() + " Members");
-		System.out.println("User roles: " + foundUser.getRoles().size() + " Roles");
 	}
 
 	@Override
