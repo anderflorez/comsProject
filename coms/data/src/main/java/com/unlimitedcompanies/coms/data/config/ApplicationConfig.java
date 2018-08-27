@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @ComponentScan(basePackages = {"com.unlimitedcompanies.coms"})
 public class ApplicationConfig
-{
+{	
 	/*
 	 * 	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
 			<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
@@ -27,11 +27,12 @@ public class ApplicationConfig
 		</bean>
 	 */
 	
-	@Bean(destroyMethod = "close")
+	@Bean(name = "testingDataSource", destroyMethod = "close")
 	@Profile("integrationTesting")
-	public org.apache.tomcat.jdbc.pool.DataSource testingDataSource()
+	public DataSource testingDataSource()
 	{
-		org.apache.tomcat.jdbc.pool.DataSource ds = new DataSource();
+		System.out.println("=========== testingDataSource Bean");
+		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
 		ds.setUsername("comsdbadmin");
@@ -39,25 +40,14 @@ public class ApplicationConfig
 		return ds;
 	}
 	
-	@Bean(destroyMethod = "close")
-	@Profile("web")
-	public DataSource webDataSource()
+	@Bean(name = "productionDataSource", destroyMethod = "close")
+	@Profile("production")
+	public DataSource productionDataSource()
 	{
+		System.out.println("=========== productionDataSource Bean");
 		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&amp;useSSL=false&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC");
-		ds.setUsername("comsdbadmin");
-		ds.setPassword("Unlimited123!!");
-		return ds;
-	}
-	
-	@Bean(destroyMethod = "close")
-	@Profile("cli")
-	public DataSource cliDataSource()
-	{
-		DataSource ds = new DataSource();
-		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
 		ds.setUsername("comsdbadmin");
 		ds.setPassword("Unlimited123!!");
 		return ds;
@@ -77,7 +67,7 @@ public class ApplicationConfig
 	
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory (DataSource dataSource)
-	{		
+	{
 		LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
 		
 		HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();

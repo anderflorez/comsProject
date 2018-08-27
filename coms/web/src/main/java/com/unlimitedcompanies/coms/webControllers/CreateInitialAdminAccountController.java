@@ -1,9 +1,12 @@
 package com.unlimitedcompanies.coms.webControllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
@@ -31,16 +34,16 @@ public class CreateInitialAdminAccountController
 		int numberOfRoles = authenticationService.findNumberOfRoles();
 		if (numberOfUsers == 0 && numberOfRoles == 0)
 		{
-			return new ModelAndView("/app/initial-setup.jsp", "userSetup", new User(null, null, null));		
+			return new ModelAndView("/app/initial-setup.jsp");
 		}
 		else
 		{
-			return new ModelAndView("/");
+			return new ModelAndView("/app/login.jsp");
 		}
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processForm(User userSetup)
+	public ModelAndView processForm(@RequestParam("password") String pass)
 	{
 //		//Validation check
 //		if (results.hasErrors())
@@ -51,12 +54,13 @@ public class CreateInitialAdminAccountController
 		Role role = authenticationService.saveRole(new Role("Administrators"));
 		contactService.saveContact(new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com"));
 		Contact contact = contactService.findContactByEmail("uec_ops_support@unlimitedcompanies.com");
-		userSetup.setUsername("administrator");
-		userSetup.setContact(contact);
+		
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		User adminUser = new User("administrator", pe.encode(pass), contact);
 		
 		try
 		{
-			userSetup = authenticationService.saveUser(userSetup);
+			adminUser = authenticationService.saveUser(adminUser);
 		} catch (NonExistingContactException e)
 		{
 			// TODO: Create and display a validation error message for the user
@@ -64,7 +68,7 @@ public class CreateInitialAdminAccountController
 			e.printStackTrace();
 		}
 		
-		authenticationService.assignUserToRole(role, userSetup);
+		authenticationService.assignUserToRole(role, adminUser);
 
 		return new ModelAndView("/");
 	}
