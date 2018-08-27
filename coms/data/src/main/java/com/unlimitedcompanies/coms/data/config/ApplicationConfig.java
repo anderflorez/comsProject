@@ -31,7 +31,6 @@ public class ApplicationConfig
 	@Profile("integrationTesting")
 	public DataSource testingDataSource()
 	{
-		System.out.println("=========== testingDataSource Bean");
 		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
@@ -44,7 +43,6 @@ public class ApplicationConfig
 	@Profile("production")
 	public DataSource productionDataSource()
 	{
-		System.out.println("=========== productionDataSource Bean");
 		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&amp;useSSL=false&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC");
