@@ -47,7 +47,7 @@
 	
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>cli</param-value>
+		<param-value>integrationTesting</param-value>
 	</context-param>
 
 	<filter>

@@ -19,23 +19,23 @@
 						<h4>Administrator Account Setup</h4>
 					</div>
 					<div class="card-body">
-						<form:form modelAttribute="userSetup">
+						<form action="<c:url value="/initialSetup"/>" method="POST">
 							<div class="form-group">
-								<form:input path="password" type="password" class="form-control" placeholder="Password"/>
+								<input class="form-control" type="password" name="password" placeholder="Password"/>
 							</div>
 							<div class="form-group">
 								<input type="submit" name="newAdminAccount" id="newAdminAccount" class="form-control btn btn-lg btn-success btn-block" value="Create Account">
 							</div>
-						</form:form>
+						</form>
 					</div>
 				</div>
 			</div>
 		</div>		
 	</div>
 	
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" type="text/javascript" charset="utf-8"></script>
 
 </body>
 </html>
