@@ -10,6 +10,7 @@ public interface ContactService
 {
 	public void saveContact(Contact Contact);
 	public int findNumberOfContacts();
+	public List<Contact> findAllContacts();
 	public Contact findContactByEmail(String email);
 	public Contact findContactById(int id);
 	public void updateContact(int id, Contact updatedContact);

@@ -10,6 +10,7 @@ public interface ContactDao
 {
 	public void createContact(Contact contact);
 	public int getNumberOfContacts();
+	public List<Contact> getAllContacts();
 	public Contact searchContactByEmail(String contactEmail);
 	public Contact searchContactById(int Id);
 	public void updateContact(int id, Contact contact);

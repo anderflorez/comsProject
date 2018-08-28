@@ -20,9 +20,25 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#management").on("click", function() {
-		console.log("clicked on management");
-		$(".page-content").find("iframe").attr("src", "management.html");
+	$(".contactEditButton").on("click", function() {
+		let fname = $(this).parent().parent().find(".contactName").text();
+		let mname = $(this).parent().parent().find(".contactMiddle").text();
+		let lname = $(this).parent().parent().find(".contactLast").text();
+		let ename = $(this).parent().parent().find(".contactEmail").text();
+		let id = $(this).parent().parent().find(".contactid").text();
+		$("#newContactFName").val(fname);
+		$("#newContactMName").val(mname);
+		$("#newContactLName").val(lname);
+		$("#newContactEMail").val(ename);
+		$("#newContactId").val(id);
+	});
+	
+	$("#newContact").on("click", function() {
+		$("#newContactFName").val("");
+		$("#newContactMName").val("");
+		$("#newContactLName").val("");
+		$("#newContactEMail").val("");
+		$("#newContactId").val("");
 	});
 
 	function windowDashboardSized() {

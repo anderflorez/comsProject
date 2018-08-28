@@ -19,10 +19,7 @@ public class AuthFailureHandler implements AuthenticationFailureHandler
 										AuthenticationException exception) 
 			throws IOException, ServletException
 	{
-		// Find what the username was
 		String username = request.getParameter("username");
-		
-		// Redirect to the login page providing the username used
 		response.sendRedirect(request.getContextPath() + "/app/login.jsp?error&username=" + username);
 	}
 	

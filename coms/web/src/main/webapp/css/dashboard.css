@@ -184,3 +184,13 @@ a:hover {
 .topMargin25 {
 	margin-top: 25px;
 }
+
+
+.new-item {
+	margin-bottom: 20px;
+}
+
+.table thead th {
+	border-top: 1px solid #c3e6cb;
+	border-bottom: 2px solid #c3e6cb;
+}

@@ -40,6 +40,13 @@ public class ContactDaoImpl implements ContactDao
 				.setParameter("email", contact.getEmail())
 				.executeUpdate();
 	}
+	
+	@Override
+	public List<Contact> getAllContacts()
+	{
+		return em.createQuery("select contact from Contact as contact", Contact.class)
+							  .getResultList();
+	}
 
 	@Override
 	public Contact searchContactByEmail(String contactEmail)

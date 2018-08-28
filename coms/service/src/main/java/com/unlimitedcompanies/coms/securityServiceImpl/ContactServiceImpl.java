@@ -24,6 +24,12 @@ public class ContactServiceImpl implements ContactService
 	{
 		return dao.getNumberOfContacts();
 	}
+	
+	@Override
+	public List<Contact> findAllContacts()
+	{
+		return dao.getAllContacts();
+	}
 
 	@Override
 	public void saveContact(Contact contact)
