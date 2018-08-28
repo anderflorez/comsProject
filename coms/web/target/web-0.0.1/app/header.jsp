@@ -17,7 +17,7 @@
 			<ul class="dropdown-menu">
 				<li><a href="#"><i class="ti-settings"></i>Settings</a></li>
 				<li><a href="#"><i class="ti-user"></i>Profile</a></li>
-				<li><a id="management" href="<c:url value='/app/contacts.jsp'/>"><i class="fas fa-users-cog"></i>Management</a></li>
+				<li><a id="management" href="<c:url value='/contacts'/>"><i class="fas fa-users-cog"></i>Management</a></li>
 				<li class="divider"></li>
 				<li><a href="<c:url value='logout'/>"><i class="ti-power-off"></i>Logout</a></li>
 			</ul>					

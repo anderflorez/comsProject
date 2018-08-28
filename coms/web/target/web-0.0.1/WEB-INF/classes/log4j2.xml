@@ -15,6 +15,9 @@
 		<Logger level="INFO" name="org.hibernate">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
+		<Logger level="INFO" name="org.springframework.security">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
 		<Root level="INFO">
 			<AppenderRef ref="STDOUT" />
 		</Root>

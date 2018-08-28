@@ -1,4 +1,5 @@
 com/unlimitedcompanies/coms/webControllers/DashboardController.class
+com/unlimitedcompanies/coms/webControllers/Contacts.class
 module-info.class
 com/unlimitedcompanies/coms/webControllers/CreateInitialAdminAccountController.class
 com/unlimitedcompanies/coms/webConfig/SecurityConfiguration.class
