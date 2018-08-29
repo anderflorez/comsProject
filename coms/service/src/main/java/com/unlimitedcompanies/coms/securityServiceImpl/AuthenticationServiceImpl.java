@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.securityServiceImpl;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,12 @@ public class AuthenticationServiceImpl implements AuthenticationService
 		
 		dao.createUser(user, dateCreated, lastAccessed);
 		return this.findUserByUsername(user.getUsername());
+	}
+	
+	@Override
+	public List<User> findAllUsers()
+	{
+		return dao.getAllUsers();
 	}
 
 	@Override

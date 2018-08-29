@@ -174,23 +174,23 @@ a:hover {
 	color: #000000;
 }
 
-
-/*Content Navigation*/
-.nav {
+/* Extra Spaces */
+.mb15 {
 	margin-bottom: 15px;
 }
 
-/*General Spacing*/
-.topMargin25 {
+.mt25 {
 	margin-top: 25px;
 }
 
-
-.new-item {
-	margin-bottom: 20px;
+.mb25 {
+	margin-bottom: 25px;
 }
 
-.table thead th {
-	border-top: 1px solid #c3e6cb;
-	border-bottom: 2px solid #c3e6cb;
+.ml25 {
+	margin-left: 25px;
+}
+
+.mr25 {
+	margin-right: 25px;
 }

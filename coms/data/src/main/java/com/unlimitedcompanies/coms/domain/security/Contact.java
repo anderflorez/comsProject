@@ -29,6 +29,15 @@ public class Contact
 		this.email = email;
 	}
 	
+	public Contact(Contact contact)
+	{
+		this.contactId = null;
+		this.firstName = contact.firstName;
+		this.middleName = contact.middleName;
+		this.lastName = contact.lastName;
+		this.email = contact.email;
+	}
+	
 	public Integer getContactId()
 	{
 		return this.contactId;
@@ -72,6 +81,14 @@ public class Contact
 	public void setEmail(String email)
 	{
 		this.email = email;
+	}
+	
+	public void copyContact(Contact contact)
+	{
+		this.firstName = contact.firstName;
+		this.middleName = contact.middleName;
+		this.lastName = contact.lastName;
+		this.email = contact.email;
 	}
 
 	@Override

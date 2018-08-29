@@ -14,7 +14,7 @@ import com.unlimitedcompanies.coms.securityService.ContactService;
 
 @Controller
 @RequestMapping("/contacts")
-public class Contacts
+public class ContactManagementController
 {	
 	@Autowired
 	ContactService contactService;
@@ -24,27 +24,33 @@ public class Contacts
 	{
 		List<Contact> allContacts = contactService.findAllContacts();
 		
-		ModelAndView mav = new ModelAndView("/app/contacts.jsp");
-		mav.addObject("contact", new Contact(null, null, null, null));
+		ModelAndView mav = new ModelAndView("/app/contactManagement.jsp");
+		mav.addObject("contactObject", new Contact(null, null, null, null));
 		mav.addObject("contacts", allContacts);
 		
 		return mav;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView manageContacts(@RequestParam("newContactId") String conId, Contact newContact)
+	public ModelAndView processContacts(@RequestParam("objectId") String cId, Contact contactObject)
 	{
 		Integer editContactId;
 		try
 		{
-			editContactId = Integer.valueOf(conId);
+			editContactId = Integer.valueOf(cId);
 		} catch (NumberFormatException e)
 		{
 			editContactId = null;
 		}
 		
-		System.out.println("=========New Contact: " + newContact.getFirstName());
-		System.out.println("=========New Contact ID: " + editContactId);
+		if (editContactId != null)
+		{
+			contactService.updateContact(editContactId, contactObject);			
+		}
+		else
+		{
+			contactService.saveContact(contactObject);
+		}
 		
 		return showContacts();
 	}

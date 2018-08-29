@@ -1,6 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
+<!DOCTYPE html>
+<html>
 <c:import url="head.jsp"/>
+<body>
+
 <c:import url="sidebar.jsp"/>
 
 <div class="page-container">
@@ -14,4 +18,7 @@
 
 </div>
 	
-<c:import url="bottom.jsp"/>
+<c:import url="scriptDefinitions.jsp"/>
+
+</body>
+</html>

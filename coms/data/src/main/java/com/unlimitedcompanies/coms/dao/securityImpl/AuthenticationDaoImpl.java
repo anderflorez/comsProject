@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -39,6 +40,12 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 				.setParameter("lastAccess", lastAccessed)
 				.setParameter("contact", user.getContact())
 				.executeUpdate();
+	}
+	
+	@Override
+	public List<User> getAllUsers()
+	{
+		return em.createQuery("select user from User as user", User.class).getResultList();
 	}
 
 	@Override

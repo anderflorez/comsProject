@@ -1,0 +1,17 @@
+/*Content Navigation*/
+.nav {
+	margin-bottom: 15px;
+}
+
+.table thead th {
+	border-top: 1px solid #c3e6cb;
+	border-bottom: 2px solid #c3e6cb;
+}
+
+td > button {
+	background-color: transparent;
+	border: none;
+	line-height: 1;
+	font-size: 1.1rem;
+	cursor: pointer;
+}

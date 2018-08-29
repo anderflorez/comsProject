@@ -1,5 +1,7 @@
 package com.unlimitedcompanies.coms.dao.security;
 
+import java.util.List;
+
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -7,6 +9,7 @@ public interface AuthenticationDao
 {
 	public int getNumberOfUsers();
 	public void createUser(User user, String dateAdded, String lastAccessed);
+	public List<User> getAllUsers();
 	public User searchUserByUsername(String username);
 	public int getNumberOfRoles();
 	public void createRole(Role role);

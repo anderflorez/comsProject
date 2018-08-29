@@ -34,8 +34,7 @@ public class ContactServiceImpl implements ContactService
 	@Override
 	public void saveContact(Contact contact)
 	{
-		dao.createContact(contact);
-		
+		dao.createContact(contact);		
 	}
 
 	@Override
