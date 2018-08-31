@@ -22,52 +22,14 @@
 			<a class="nav-item nav-link" href="<c:url value='/roles'/>">Roles</a>
 		</nav>
 		
-		<div class="row new-item">
+		<div id="newUser" class="row mb15">
 			<div class="col-12">
-				<button id="newItem" type="button" class="float-right btn btn-sm btn-outline-success"
-					data-toggle="collapse" data-target="#manageUser"
-					aria-expanded="false" aria-controls="#manageUser">New User</button>
-			</div>
-			<div id="manageUser" class="collapse col-12 topMargin25">
-				<div class="container card card-body">
-					<form:form modelAttribute="userFormObject">
-						<div class="form-group row">
-							<label for="objectUsername" class="col-12 col-sm-3 col-lg-2 col-form-label">Username: </label>
-							<div class="col-12 col-sm-9 col-lg-10">
-								<form:input id="objectUsername" path="username" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group row">
-							<label for="objectPassword1" class="col-12 col-sm-3 col-lg-2 col-form-label">Password: </label>
-							<div class="col-12 col-sm-9 col-lg-10">
-								<input id="objectPassword1" name="objectPassword1" type="password" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group row">
-							<label for="objectPassword2" class="col-12 col-sm-3 col-lg-2 col-form-label">Repeat Password: </label>
-							<div class="col-12 col-sm-9 col-lg-10">
-								<input id="objectPassword2" name="objectPassword2" type="password" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group row">
-							<label for="objectStatus" class="col-12 col-sm-3 col-lg-2 col-form-label">E-Mail: </label>
-							<div class="col-12 col-sm-9 col-lg-10">
-								<form:select path="enabled" id="objectStatus" class="form-control">
-									<form:option value="true" label="Enabled"/>
-									<form:option value="false" label="Disabled"/>
-								</form:select>
-							</div>
-						</div>
-						<div class="float-right">
-							<button type="button" class="btn btn-secondary"
-								data-toggle="collapse" data-target="#manageUser">Cancel</button>
-							<input type="submit" class="btn btn-success" value="Save Contact">
-							<input id="objectId" name="objectId" type="text" class="d-none"/>
-						</div>
-					</form:form>
-				</div>
+				<button type="button" class="float-right btn btn-sm btn-outline-success" data-toggle="modal" data-target="#manageUser">
+					New User Account
+				</button>
 			</div>
 		</div>
+		
 		<div class="row">
 			<div class="col-12 table-responsive">
 				<table class="table table-hover">
@@ -78,32 +40,78 @@
 							<th scope="col">Username</th>
 							<th scope="col">Status</th>
 							<th scope="col">Added</th>
-							<th scope="col">Last Accessed</th>
+							<th scope="col">Last Access</th>
 						</tr>
 					</thead>
 					<tbody>
 						<c:forEach items="${users}" var="user">
 							<tr>
-								<td class="userId">${user.userId}</td>
+								<td class="userid">${user.userId}</td>
 								<td class="contactName">${user.contact.firstName} ${user.contact.lastName}</td>
 								<td class="username">${user.username}</td>
 								<td class="userStatus">${user.enabled}</td>
 								<td class="userAdded">${user.dateAdded}</td>
 								<td class="userLastAccess">${user.lastAccess}</td>
-								<td class="editButton">
-									<button id="userEditButton" type="button" data-toggle="collapse" data-target="#manageUser" 
-											aria-expanded="false" aria-controls="#manageUser">
+								<td class="userEditButton">
+									<button type="button" data-toggle="modal" data-target="#manageUser">
 										<i class="ti-pencil-alt"></i>
 									</button>
 								</td>
+								<td class="contactId d-none">${user.contact.contactId}</td>
 							</tr>
 						</c:forEach>
 					</tbody>
 				</table>
 			</div>
+		</div>		
+	</div>	
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="manageUser" tabindex="-1" role="dialog" aria-labelledby="manageUserLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title" id="manageUserLabel">Create New User Account</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<form:form modelAttribute="userObject">
+					<div class="form-group">
+						<label for="objectUsername">Username: </label>
+						<form:input id="objectUsername" path="username" class="form-control"/>
+					</div>
+					<div class="form-group">
+						<label for="objectPassword1">New Password: </label>
+						<input id="objectPassword1" name="objectPassword1" type="password" class="form-control"/>
+					</div>
+					<div class="form-group">
+						<label for="objectPassword2">Repeat Password: </label>
+						<input id="objectPassword2" name="objectPassword2" type="password" class="form-control"/>
+					</div>
+					<div class="form-group">
+						<label for="objectStatus">Status: </label>
+						<form:select id="objectStatus" path="enabled" class="form-control">
+							<form:option value="true" label="Enable"/>
+							<form:option value="false" label="Disable"/>
+						</form:select>
+					</div>
+					<div class="modal-footer">
+						<div class="float-right">
+							<input id="objectId" type="text" name="objectId" class="d-none"/>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+							<input type="submit" class="btn btn-success" value="Save Contact">
+						</div>
+					</div>
+				</form:form>
+			</div>
+
 		</div>
 	</div>
-	
 </div>
 
 <c:import url="scriptDefinitions.jsp"/>

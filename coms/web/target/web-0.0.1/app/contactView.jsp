@@ -44,7 +44,7 @@
 					</thead>
 					<tbody>
 						<c:forEach items="${contacts}" var="contact">
-							<tr>
+							<tr class="clickable-row" data-href="http://unlimitedcompanies.com?c=${contact.contactId}">
 								<td class="contactId">${contact.contactId}</td>
 								<td class="contactName">${contact.firstName}</td>
 								<td class="contactLast">${contact.lastName}</td>

@@ -13,39 +13,50 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 
 @Controller
-@RequestMapping("/contacts")
 public class ContactManagementController
 {	
 	@Autowired
 	ContactService contactService;
 	
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping("/contacts")
 	public ModelAndView showContacts()
 	{
 		List<Contact> allContacts = contactService.findAllContacts();
 		
-		ModelAndView mav = new ModelAndView("/app/contactManagement.jsp");
-		mav.addObject("contactObject", new Contact(null, null, null, null));
+		ModelAndView mav = new ModelAndView("/app/contactView.jsp");
 		mav.addObject("contacts", allContacts);
 		
 		return mav;
 	}
 	
-	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processContacts(@RequestParam("objectId") String cId, Contact contactObject)
+	@RequestMapping("/contactDetails")
+	public ModelAndView processContacts(@RequestParam("objectId") String cId)
 	{
-		Integer editContactId;
+		Integer detailedContactId;
 		try
 		{
-			editContactId = Integer.valueOf(cId);
+			detailedContactId = Integer.valueOf(cId);
+			Contact contact = contactService.findContactById(detailedContactId);
+			ModelAndView mv = new ModelAndView();
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 		} catch (NumberFormatException e)
 		{
-			editContactId = null;
+			detailedContactId = null;
+			//TODO: Send an error to be displayed in a modal
 		}
 		
-		if (editContactId != null)
+		if (detailedContactId != null)
 		{
-			contactService.updateContact(editContactId, contactObject);			
+			
 		}
 		else
 		{

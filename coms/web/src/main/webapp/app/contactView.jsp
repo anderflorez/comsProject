@@ -53,50 +53,6 @@
 	</div>	
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="manageContact" tabindex="-1" role="dialog" aria-labelledby="manageContactLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-
-			<div class="modal-header">
-				<h5 class="modal-title" id="manageContactLabel">Create New Contact</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-
-			<div class="modal-body">
-				<form:form modelAttribute="contactObject">
-					<div class="form-group">
-						<label for="contactFName">First Name: </label>
-						<form:input id="contactFName" path="firstName" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="contactMName">Middle Name: </label>
-						<form:input id="contactMName" path="middleName" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="contactLName">Last Name: </label>
-						<form:input id="contactLName" path="lastName" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="contactEMail">E-Mail: </label>
-						<form:input id="contactEMail" path="email" class="form-control"/>
-					</div>
-					<div class="modal-footer">
-						<div class="float-right">
-							<input id="objectId" type="text" name="objectId" class="d-none"/>
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-							<input type="submit" class="btn btn-success" value="Save Contact">
-						</div>						
-					</div>
-				</form:form>
-			</div>
-
-		</div>
-	</div>
-</div>
-
 <c:import url="scriptDefinitions.jsp"/>
 
 <!-- Scripts -->

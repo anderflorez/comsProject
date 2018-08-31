@@ -9,19 +9,27 @@ $(document).ready(function() {
 		let ename = $(this).parent().parent().find(".contactEmail").text();
 		let id = $(this).parent().parent().find(".contactid").text();
 		
-		$("#objectFName").val(fname);
-		$("#objectMName").val(mname);
-		$("#objectLName").val(lname);
-		$("#objectEMail").val(ename);
-		$("#objectId").val(id);
+		$("#contactFName").val(fname);
+		$("#contactMName").val(mname);
+		$("#contactLName").val(lname);
+		$("#contactEMail").val(ename);
+		$("#contactId").val(id);
 	});
 	
 	$("#newContact").find("button").on("click", function() {
-		$("#objectFName").val("");
-		$("#objectMName").val("");
-		$("#objectLName").val("");
-		$("#objectEMail").val("");
-		$("#objectId").val("");
+		$("#contactFName").val("");
+		$("#contactMName").val("");
+		$("#contactLName").val("");
+		$("#contactEMail").val("");
+		$("#contactId").val("");
+	});
+
+//	$("tbody").find("tr").on("click", function() {
+//		let id = $(this).find(".contactId").text();
+//	});
+	
+	$(".clickable-row").click(function() {
+		window.location = $(this).data("href");
 	});
 
 });
