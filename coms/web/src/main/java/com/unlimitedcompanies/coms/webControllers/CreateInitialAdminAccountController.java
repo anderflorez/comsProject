@@ -34,11 +34,11 @@ public class CreateInitialAdminAccountController
 		int numberOfRoles = authenticationService.findNumberOfRoles();
 		if (numberOfUsers == 0 && numberOfRoles == 0)
 		{
-			return new ModelAndView("/app/initial-setup.jsp");
+			return new ModelAndView("/pages/dashboard/initial-setup.jsp");
 		}
 		else
 		{
-			return new ModelAndView("/app/login.jsp");
+			return new ModelAndView("/pages/dashboard/login.jsp");
 		}
 	}
 	

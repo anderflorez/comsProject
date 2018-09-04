@@ -10,6 +10,6 @@ public class DashboardController
 	@RequestMapping("/")
 	public ModelAndView AddContact()
 	{
-		return new ModelAndView("/app/dashboard.jsp");
+		return new ModelAndView("/pages/dashboard/dashboard.jsp");
 	}
 }

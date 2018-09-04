@@ -56,17 +56,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 	{		
 		http.antMatcher("/**").authorizeRequests()
 					.antMatchers("/initialSetup").permitAll()
-					.antMatchers("/app/login.jsp").permitAll()
+					.antMatchers("/pages/dashboard/login.jsp").permitAll()
 					.anyRequest().authenticated()
 				
 				.and().formLogin()
 					.loginProcessingUrl("/login")
-					.loginPage("/app/login.jsp")
+					.loginPage("/pages/dashboard/login.jsp")
 					.failureHandler(authFailureHandler)
 					.permitAll()
 					
 				.and().logout()
-					.logoutSuccessUrl("/app/login.jsp")
+					.logoutSuccessUrl("/pages/dashboard/login.jsp")
 					
 				.and().csrf()
 					.disable();
