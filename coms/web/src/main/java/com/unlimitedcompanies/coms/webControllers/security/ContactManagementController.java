@@ -21,18 +21,37 @@ public class ContactManagementController
 	public ModelAndView showContact(@RequestParam("c") String cId)
 	{
 		Integer id = Integer.valueOf(cId);
+		Contact contact;
 		
-		Contact contact = contactService.findContactById(id);
-		ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp", "contactObject", contact);
+		if (id > 0)
+		{
+			contact = contactService.findContactById(id);
+			
+		} else
+		{
+			contact = new Contact(null, null, null, null);			
+		}
 		
+		ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp", "contact", contact);
 		return mv;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView processContact(Contact contact)
 	{	
-		System.out.println("========The contact id is: " + contact.getEmail());
-		contactService.updateContact(contact.getContactId(), contact);
-		return new ModelAndView("/contactDetails?c=" + contact.getContactId());
+		if (contact.getContactId() != null)
+		{
+			contactService.updateContact(contact.getContactId(), contact);
+			return new ModelAndView("/pages/security/contactManagement.jsp", "contact", contact);
+		} else
+		{
+			contactService.saveContact(contact);
+			if (contact.getEmail() != null)
+			{
+				Contact foundContact = contactService.findContactByEmail(contact.getEmail());
+				return new ModelAndView("/pages/security/contactManagement.jsp", "contact", foundContact);
+			}
+			return new ModelAndView("/contacts");
+		}
 	}
 }

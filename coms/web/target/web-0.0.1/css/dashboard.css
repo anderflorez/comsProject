@@ -143,6 +143,14 @@
 	background-color: #FFFFFF;
 }
 
+.page-content > div {
+	border: 1px solid #DDE2E6;
+	border-top: none;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	padding: 25px;
+}
+
 .dropdown-menu > li {
 	padding: 5px 0;
 }
@@ -197,4 +205,12 @@ a:hover {
 
 .mr25 {
 	margin-right: 25px;
+}
+
+@media(max-width: 768px) {
+	
+	.page-content > div {
+		padding: 15px;
+	}
+
 }

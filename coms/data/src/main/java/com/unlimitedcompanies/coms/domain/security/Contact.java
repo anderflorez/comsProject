@@ -19,7 +19,7 @@ public class Contact
 	private String email;
 	
 	protected Contact() {}
-
+	
 	public Contact(String firstName, String middleName, String lastName, String email)
 	{
 		this.contactId = null;
@@ -61,6 +61,11 @@ public class Contact
 	public String getEmail()
 	{
 		return email;
+	}
+	
+	public void setContactId(Integer contactId)
+	{
+		this.contactId = contactId;
 	}
 
 	public void setFirstName(String firstName)

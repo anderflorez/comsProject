@@ -5,6 +5,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Coms Login</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="<c:url value='/css/login.css'/>">
@@ -12,7 +13,7 @@
 <body>
 	<div class="container">
 		<div class="row">
-			<div class="offset-md-4 col-md-4 offset-sm-3 col-sm-6">
+			<div class="col-12 offset-sm-2 col-sm-8 offset-lg-4 col-lg-4">
 				<div class="card">
 					<div class="card-header">
 						<h3>Sign in</h3>
