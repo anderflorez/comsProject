@@ -84,31 +84,3 @@
 
 </body>
 </html>
-
-
-
-<!-- 				<div id="contactDetails">
-					<h1>${contact.firstName} ${contact.lastName} Contact Details</h1>
-					<hr>
-
-					<table id="objectDetailsTable">
-						<tbody>
-							<tr>
-								<th>First Name: </th>
-								<td>${contact.firstName}</td>
-							</tr>
-							<tr>
-								<th>Middle Name: </th>
-								<td>${contact.middleName}</td>
-							</tr>
-							<tr>
-								<th>Last Name: </th>
-								<td>${contact.lastName}</td>
-							</tr>
-							<tr>
-								<th>Email: </th>
-								<td>${contact.email}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div> -->
