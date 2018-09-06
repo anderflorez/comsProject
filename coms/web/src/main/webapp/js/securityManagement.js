@@ -6,20 +6,22 @@ $(document).ready(function() {
 		window.location = $(this).data("href");
 	});
 
-	if ($("#contactIdIndicator").val() == "") {
-		editOrAddContactView();
+	if ($("#objectIdIndicator").val() == "" || $("#objectIdIndicator").val() == null) {
+		editOrAddObjectView();
 	}
 
-	$("#editContact").click(function() {
-		editOrAddContactView();
+	$("#editObject").click(function() {
+		editOrAddObjectView();
 	});
 
-	function editOrAddContactView() {
+	function editOrAddObjectView() {
+		$("#manageDetailsTitle").addClass("d-none");
+		$("#manageEditTitle").removeClass("d-none");
 		$(".inputDisplay").find("input").removeAttr("readonly");
 		$(".inputDisplay").find("input").removeClass("form-control-plaintext");
 		$(".inputDisplay").find("input").addClass("form-control");
-		$("#editContact").parent().parent().hide();
-		$(".inputSubmit").find("a").removeClass("d-none");
-		$(".inputSubmit").find("input").removeClass("d-none");
+		$("#editObject").parent().parent().hide();
+		$(".restoreRW").find("a").removeClass("d-none");
+		$(".restoreRW").find("input").removeClass("d-none");
 	}
 });

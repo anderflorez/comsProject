@@ -88,14 +88,6 @@ class DomainSecurityUnitTest
 	{
 		// TODO: Create some good checking for date and date time
 		
-		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		User user = new User("John", "pass", contact);
-		
-		SimpleDateFormat sdfDate = new SimpleDateFormat("yyy-MM-dd");
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
-		
-		System.out.println("DATE ADDED DATE: " + sdfDate.format(user.getDateAdded()));
-		System.out.println("LAST ACCESSED DATETIME: " + sdfDateTime.format(user.getLastAccess()));
 	}
 	
 	@Test

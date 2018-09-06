@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,14 +68,26 @@ public class User
 		return enabled;
 	}
 
-	public Date getDateAdded()
+	public String getDateAdded()
 	{
-		return dateAdded;
+		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy");
+		return sdf.format(this.dateAdded);
+	}
+	
+	public Date getFullDateAdded()
+	{
+		return this.dateAdded;
 	}
 
-	public Date getLastAccess()
+	public String getLastAccess()
 	{
-		return lastAccess;
+		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy 'at' HH:mm:ss z");
+		return sdf.format(this.lastAccess);
+	}
+	
+	public Date getFullLastAccessDate()
+	{
+		return this.lastAccess;
 	}
 
 	public Contact getContact()
@@ -86,22 +99,32 @@ public class User
 	{
 		return this.roles;
 	}
+	
+	public void setUserId(Integer userId)
+	{
+		this.userId = userId;
+	}
 
 	public void setUsername(String username)
 	{
 		this.username = username;
 	}
 
-	public void setPassword(String password)
-	{
-		this.password = password;
-	}
-
 	public void setEnabled(byte enabled)
 	{
 		this.enabled = enabled;
 	}
+	
+	public void setDateAdded()
+	{
+		// Method Not Allowed
+	}
 
+	public void setLastAccess() 
+	{
+		// Method Not Allowed
+	}
+	
 	public void setLastAccess(Date lastAccess)
 	{
 		this.lastAccess = lastAccess;

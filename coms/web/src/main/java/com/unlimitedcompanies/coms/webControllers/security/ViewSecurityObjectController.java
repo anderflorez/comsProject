@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.securityService.AuthenticationService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 
 @Controller
@@ -16,15 +18,23 @@ public class ViewSecurityObjectController {
 	@Autowired
 	ContactService contactService;
 	
+	@Autowired
+	AuthenticationService authenticationService;
+	
 	@RequestMapping("/contacts")
 	public ModelAndView showContacts()
 	{
 		List<Contact> allContacts = contactService.findAllContacts();
 		
-		ModelAndView mav = new ModelAndView("/pages/security/contactView.jsp");
-		mav.addObject("contacts", allContacts);
+		return new ModelAndView("/pages/security/contactView.jsp", "contacts", allContacts);
+	}
+	
+	@RequestMapping("/users")
+	public ModelAndView showUsers()
+	{
+		List<User> allUsers = authenticationService.findAllUsers();
 		
-		return mav;
+		return new ModelAndView("/pages/security/userView.jsp", "users", allUsers);
 	}
 	
 }

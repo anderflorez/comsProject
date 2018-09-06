@@ -34,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	@Override
 	public User saveUser(User user) throws NonExistingContactException
 	{
-		if (user.getContact().getContactId() == null)
+		if (user.getContact() == null)
 		{
 			throw new NonExistingContactException();
 		}
@@ -42,8 +42,8 @@ public class AuthenticationServiceImpl implements AuthenticationService
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd");
 		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
 		
-		String dateCreated = dateFormat.format(user.getDateAdded());
-		String lastAccessed = dateTimeFormat.format(user.getLastAccess());
+		String dateCreated = dateFormat.format(user.getFullDateAdded());
+		String lastAccessed = dateTimeFormat.format(user.getFullLastAccessDate());
 		
 		Contact contact = contactDao.searchContactById(user.getContact().getContactId());
 		user.setContact(contact);
@@ -53,9 +53,21 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	}
 	
 	@Override
+	public User updateUser(Integer userId, User user) {
+		dao.updateUser(userId, user);
+		return this.findUserByUserId(userId);
+	}
+	
+	@Override
 	public List<User> findAllUsers()
 	{
 		return dao.getAllUsers();
+	}
+	
+	@Override
+	public User findUserByUserId(Integer id)
+	{
+		return dao.searchUserByUserId(id);
 	}
 
 	@Override

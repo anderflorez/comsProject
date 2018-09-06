@@ -18,15 +18,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan(basePackages = {"com.unlimitedcompanies.coms"})
 public class ApplicationConfig
 {	
-	/*
-	 * 	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
-			<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://localhost/coms?autoReconnect=true&amp;useSSL=false&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC" />
-			<property name="username" value="comsdbadmin" />
-			<property name="password" value="Unlimited123!!" />
-		</bean>
-	 */
-	
 	@Bean(name = "testingDataSource", destroyMethod = "close")
 	@Profile("integrationTesting")
 	public DataSource testingDataSource()
@@ -45,23 +36,11 @@ public class ApplicationConfig
 	{
 		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&amp;useSSL=false&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC");
+		ds.setUrl("jdbc:mysql://localhost/coms?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
 		ds.setUsername("comsdbadmin");
 		ds.setPassword("Unlimited123!!");
 		return ds;
 	}
-	
-	/*
-	 * 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-				<property name="showSql" value="true" />
-				<property name="generateDdl" value="false" />
-			</bean>
-		</property>
-		<property name="dataSource" ref="dataSource"/>
-	</bean>
-	 */
 	
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory (DataSource dataSource)
@@ -77,14 +56,6 @@ public class ApplicationConfig
 		
 		return emf;
 	}
-	
-	/*
-	 * 	<!-- TransactionManager -->
-		<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager" autowire="byType" />
-	
-		<!-- Transaction Configuration -->
-		<tx:annotation-driven/>
-	 */
 	
 	@Bean
 	public PlatformTransactionManager transactionManager(EntityManagerFactory emf)

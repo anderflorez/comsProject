@@ -3,13 +3,13 @@
 
 <!DOCTYPE html>
 <html>
-<c:import url="head.jsp" />
+<c:import url="../dashboard/head.jsp"/>
 <body>
 	
-<c:import url="sidebar.jsp" />
+<c:import url="../dashboard/sidebar.jsp" />
 
 <div class="page-container">
-	<c:import url="header.jsp" />
+	<c:import url="../dashboard/header.jsp" />
 
 	<!-- Styles -->
 	<link rel="stylesheet" type="text/css" href="<c:url value='/css/securityManagement.css'/>">
@@ -21,100 +21,87 @@
 			<a class="nav-item nav-link active" href="<c:url value='/users'/>">Users</a>
 			<a class="nav-item nav-link" href="<c:url value='/roles'/>">Roles</a>
 		</nav>
-		
-		<div id="newUser" class="row mb15">
-			<div class="col-12">
-				<button type="button" class="float-right btn btn-sm btn-outline-success" data-toggle="modal" data-target="#manageUser">
-					New User Account
-				</button>
+
+		<div id="contactManagement">
+			<c:if test="${user.userId != null}">
+				<h2 id="manageDetailsTitle">User Details</h2>
+				<h2 id="manageEditTitle" class="d-none">Edit User</h2>
+			</c:if>
+			
+			<c:if test="${user.userId == null}">
+				<h2>Create New User</h2>
+			</c:if>
+			<hr>
+			
+			<div class="row mb15">
+				<div class="col-12">
+					<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
+						Edit User
+					</button>
+					<a href="<c:url value='/users'/>" class="float-right btn btn-sm btn-outline-primary ml15">
+						Back
+					</a>
+				</div>
 			</div>
+			
+			<form:form modelAttribute="user">
+				<div class="form-group row">
+					<label for="userUsername" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Username: </strong></label>
+					<div class="col-12 col-md-9 col-lg-10 inputDisplay">
+						<form:input id="userUsername" path="username" readonly="true" class="form-control-plaintext"/>
+					</div>
+				</div>
+				<c:if test="${user.userId != null}">
+					<div class="form-group row">
+						<label for="userStatus" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Status: </strong></label>
+						<div class="ccol-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="userStatus" path="enabled" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="userDateAdded" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Date Added: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10">
+							<form:input id="userDateAdded" path="dateAdded" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="userLastAccess" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Last Access: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10">
+							<form:input id="userLastAccess" path="lastAccess" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+				</c:if>
+				<div class="form-group row restoreRW">
+					<label for="pass1" class="col-12 col-md-3 col-lg-2 col-form-label d-none"><strong>Password: </strong></label>
+					<div class="col-12 col-md-9 col-lg-10">
+						<input type="password" id="pass1" name="pass1" class="form-control d-none" placeholder="Password" />
+					</div>
+				</div>
+				<div class="form-group row restoreRW">
+					<!-- <label for="pass2" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Repeat Password: </strong></label> -->
+					<div class="col-12 offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+						<input type="password" id="pass2" name="pass2" class="form-control d-none" placeholder="Repeat Password" />
+					</div>
+				</div>
+
+				<form:input id="objectIdIndicator" path="userId" class="d-none"/>
+				<div class="form-group row restoreRW">
+					<div class="col-12">
+						<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save User">
+						<c:if test="${user.userId != null}">
+							<a href="<c:url value='/manageUser?u=${user.userId}'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+						</c:if>
+						<c:if test="${user.userId == null}">
+							<a href="<c:url value='/users'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+						</c:if>
+					</div>
+				</div>
+			</form:form>
 		</div>
-		
-		<div class="row">
-			<div class="col-12 table-responsive">
-				<table class="table table-hover">
-					<thead>
-						<tr class="table-success">
-							<th scope="col">Id</th>
-							<th scope="col">Contact Name</th>
-							<th scope="col">Username</th>
-							<th scope="col">Status</th>
-							<th scope="col">Added</th>
-							<th scope="col">Last Access</th>
-						</tr>
-					</thead>
-					<tbody>
-						<c:forEach items="${users}" var="user">
-							<tr>
-								<td class="userid">${user.userId}</td>
-								<td class="contactName">${user.contact.firstName} ${user.contact.lastName}</td>
-								<td class="username">${user.username}</td>
-								<td class="userStatus">${user.enabled}</td>
-								<td class="userAdded">${user.dateAdded}</td>
-								<td class="userLastAccess">${user.lastAccess}</td>
-								<td class="userEditButton">
-									<button type="button" data-toggle="modal" data-target="#manageUser">
-										<i class="ti-pencil-alt"></i>
-									</button>
-								</td>
-								<td class="contactId d-none">${user.contact.contactId}</td>
-							</tr>
-						</c:forEach>
-					</tbody>
-				</table>
-			</div>
-		</div>		
 	</div>	
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="manageUser" tabindex="-1" role="dialog" aria-labelledby="manageUserLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-
-			<div class="modal-header">
-				<h5 class="modal-title" id="manageUserLabel">Create New User Account</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-
-			<div class="modal-body">
-				<form:form modelAttribute="userObject">
-					<div class="form-group">
-						<label for="objectUsername">Username: </label>
-						<form:input id="objectUsername" path="username" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="objectPassword1">New Password: </label>
-						<input id="objectPassword1" name="objectPassword1" type="password" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="objectPassword2">Repeat Password: </label>
-						<input id="objectPassword2" name="objectPassword2" type="password" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<label for="objectStatus">Status: </label>
-						<form:select id="objectStatus" path="enabled" class="form-control">
-							<form:option value="true" label="Enable"/>
-							<form:option value="false" label="Disable"/>
-						</form:select>
-					</div>
-					<div class="modal-footer">
-						<div class="float-right">
-							<input id="objectId" type="text" name="objectId" class="d-none"/>
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-							<input type="submit" class="btn btn-success" value="Save Contact">
-						</div>
-					</div>
-				</form:form>
-			</div>
-
-		</div>
-	</div>
-</div>
-
-<c:import url="scriptDefinitions.jsp"/>
+<c:import url="../dashboard/scriptDefinitions.jsp"/>
 
 <!-- Scripts -->
 <script src="<c:url value='/js/securityManagement.js'/>" type="text/javascript" charset="utf-8" async defer></script>

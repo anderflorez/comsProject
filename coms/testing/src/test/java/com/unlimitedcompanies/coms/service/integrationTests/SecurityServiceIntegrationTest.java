@@ -119,15 +119,20 @@ class SecurityServiceIntegrationTest
 	public void findAddressByZipCodeTest()
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
-		contactService.saveContactAddress(new Address("0000 MyStreet Dr", "MyCity", "FL", "00001", contact));
-		contactService.saveContactAddress(new Address("1111 YourStreet Dr", "MyCity", "FL", "00011", contact));
-		contactService.saveContactAddress(new Address("2222 HisStreet Dr", "MyCity", "FL", "00001", contact));
-		contactService.saveContactAddress(new Address("3333 HerStreet Dr", "MyCity", "FL", "00001", contact));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		contactService.saveContact(new Contact("Robert", null, "Roe", "rroe@example.com"));
+		
+		Contact contact1 = contactService.findContactByEmail("johnd@example.com");
+		Contact contact2 = contactService.findContactByEmail("janed@example.com");
+		Contact contact3 = contactService.findContactByEmail("rroe@example.com");
+		
+		contactService.saveContactAddress(new Address("0000 MyStreet Dr", "MyCity", "FL", "00001", contact1));
+		contactService.saveContactAddress(new Address("1111 YourStreet Dr", "MyCity", "FL", "00011", contact2));
+		contactService.saveContactAddress(new Address("2222 HisStreet Dr", "MyCity", "FL", "00001", contact3));
 
 		List<Address> addresses = contactService.findContactAddressesByZipCode("00001");
 
-		assertEquals(3, addresses.size(), "Service test for finding address by zip code failed");
+		assertEquals(2, addresses.size(), "Service test for finding address by zip code failed");
 	}
 
 	@Test
@@ -214,6 +219,30 @@ class SecurityServiceIntegrationTest
 		assertEquals(1, authenticationService.findNumberOfUsers(), "Service test to save a new user failed");
 		assertNotNull(user.getUserId(), "Service test to save a new user failed");
 	}
+	
+	@Test
+	public void updateUsernameTest() throws NonExistingContactException
+	{
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		User user = authenticationService.saveUser(new User("jdoe", "mypass", contact));
+		user.setUsername("john.doe");
+		
+		User updatedUser = authenticationService.updateUser(user.getUserId(), user);
+		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
+	}
+	
+	@Test
+	public void updateUserStatus() throws NonExistingContactException
+	{
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		User user = authenticationService.saveUser(new User("jdoe", "mypass", contact));
+		user.setEnabled((byte) 0);
+		
+		User updatedUser = authenticationService.updateUser(user.getUserId(), user);
+		assertEquals((byte) 0, updatedUser.getEnabled(), "Service test for updating user status failed");
+	}
 
 	@Test
 	public void findUserByUsernameTest() throws NonExistingContactException 
@@ -226,7 +255,17 @@ class SecurityServiceIntegrationTest
 		User founduser = authenticationService.findUserByUsername("jdoe");
 
 		assertEquals(user, founduser, "Service test for finding user by username failed");
-
+	}
+	
+	@Test
+	public void findUserByUserId() throws NonExistingContactException
+	{
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		User user = authenticationService.saveUser(new User("jdoe", "mypass", contact));
+		
+		User foundUser = authenticationService.findUserByUserId(user.getUserId());
+		assertEquals(user, foundUser, "Service test for finding user by userId failed");
 	}
 
 	@Test

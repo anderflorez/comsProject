@@ -10,7 +10,10 @@ public interface AuthenticationService
 {
 	public int findNumberOfUsers();
 	public User saveUser(User user) throws NonExistingContactException;
+	public User updateUser(Integer userId, User user);
+
 	public List<User> findAllUsers();
+	public User findUserByUserId(Integer id);
 	public User findUserByUsername(String string);
 	public int findNumberOfRoles();
 	public Role saveRole(Role role);

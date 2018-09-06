@@ -23,11 +23,19 @@
 		</nav>
 
 		<div id="contactManagement">
-			<h2>Create New Contact</h2>	
+			<c:if test="${contact.contactId != null}">
+			<h2 id="manageDetailsTitle">Contact Details</h2>
+			<h2 id="manageEditTitle" class="d-none">Edit Contact</h2>
+			</c:if>
+			
+			<c:if test="${contact.contactId == null}">
+			<h2>Create New Contact</h2>
+			</c:if>
 			<hr>
+			
 			<div class="row mb15">
 				<div class="col-12">
-					<button id="editContact" class="float-right btn btn-sm btn-outline-success ml15">
+					<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
 						Edit Contact
 					</button>
 					<a href="<c:url value='/contacts'/>" class="float-right btn btn-sm btn-outline-primary ml15">
@@ -35,6 +43,7 @@
 					</a>
 				</div>
 			</div>
+			
 			<form:form modelAttribute="contact">
 				<div class="form-group row">
 					<label for="contactFName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>First Name: </strong></label>
@@ -60,8 +69,8 @@
 						<form:input id="contactEMail" path="email" readonly="true" class="form-control-plaintext"/>
 					</div>
 				</div>
-				<form:input id="contactIdIndicator" path="contactId" class="d-none"/>
-				<div class="form-group row inputSubmit">
+				<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
+				<div class="form-group row restoreRW">
 					<div class="col-12">
 						<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Contact">
 						<c:if test="${contact.contactId != null}">
@@ -84,31 +93,3 @@
 
 </body>
 </html>
-
-
-
-<!-- 				<div id="contactDetails">
-					<h1>${contact.firstName} ${contact.lastName} Contact Details</h1>
-					<hr>
-
-					<table id="objectDetailsTable">
-						<tbody>
-							<tr>
-								<th>First Name: </th>
-								<td>${contact.firstName}</td>
-							</tr>
-							<tr>
-								<th>Middle Name: </th>
-								<td>${contact.middleName}</td>
-							</tr>
-							<tr>
-								<th>Last Name: </th>
-								<td>${contact.lastName}</td>
-							</tr>
-							<tr>
-								<th>Email: </th>
-								<td>${contact.email}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div> -->

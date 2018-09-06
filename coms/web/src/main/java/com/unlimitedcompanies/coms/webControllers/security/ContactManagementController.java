@@ -18,8 +18,8 @@ public class ContactManagementController
 	ContactService contactService;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showContact(@RequestParam("c") String cId)
-	{
+	public ModelAndView showContactDetails(@RequestParam("c") String cId)
+	{		
 		Integer id = Integer.valueOf(cId);
 		Contact contact;
 		
@@ -29,7 +29,7 @@ public class ContactManagementController
 			
 		} else
 		{
-			contact = new Contact(null, null, null, null);			
+			contact = new Contact(null, null, null, null);
 		}
 		
 		ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp", "contact", contact);
