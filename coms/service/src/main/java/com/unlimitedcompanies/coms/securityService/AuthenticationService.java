@@ -21,6 +21,7 @@ public interface AuthenticationService
 	public Role updateRole(Integer roleId, Role role);
 	public List<Role> findAllRoles();
 	public Role findRoleById(int id);
+	public Role findRoleByIdWithMembers(Integer id);
 	public Role findRoleByRoleName(String roleName);
 	
 	public int findNumberOfAssignments();

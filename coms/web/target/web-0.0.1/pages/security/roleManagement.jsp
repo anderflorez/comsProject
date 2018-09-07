@@ -66,6 +66,33 @@
 					</div>
 				</div>
 			</form:form>
+
+			<div class="row mb25">
+				<div class="col-12">
+					<h2>Role Members</h2>
+					<hr>
+					<c:if test="${memberContacts != null}">
+						<div class="row">
+							<div class="col-12 table-responsive">
+								<table class="table table-hover">
+									<thead>
+										<tr class="table-success">
+											<th scope="col">User</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${memberContacts}" var="memberContact">
+											<tr>
+												<td>${memberContact.firstName} ${memberContact.lastName}</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</c:if>
+				</div>
+			</div>
 		</div>
 	</div>	
 </div>

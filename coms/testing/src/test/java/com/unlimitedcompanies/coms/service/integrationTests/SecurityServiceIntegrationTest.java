@@ -304,7 +304,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findRoleByRoleId()
+	public void findRoleByRoleIdTest()
 	{
 		Role initialrole = new Role("Administrator");
 		Role savedRole = authenticationService.saveRole(initialrole);

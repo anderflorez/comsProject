@@ -100,12 +100,21 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	{
 		return em.find(Role.class, id);
 	}
+	
+	@Override
+	public Role searchRoleByIdWithMembers(Integer id)
+	{
+		return em.createQuery("select role from Role as role left join fetch role.users where role.roleId = :roleid", Role.class)
+							  .setParameter("roleid", id)
+							  .getSingleResult();
+	}
 
 	@Override
 	public Role searchRoleByRoleName(String roleName)
 	{
 		return em.createQuery("select role from Role as role where role.roleName = :name", Role.class)
-				.setParameter("name", roleName).getSingleResult();
+				 .setParameter("name", roleName)
+				 .getSingleResult();
 	}
 
 	@Override
