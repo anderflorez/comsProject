@@ -70,7 +70,12 @@
 					</div>
 				</div>
 				<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
-				<div class="form-group row restoreRW">
+				<div class="row inputBtn">
+					<div class="col-12">
+						<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?u=0&c=${contact.contactId}'/>">
+							Create New User
+						</button>
+					</div>
 					<div class="col-12">
 						<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Contact">
 						<c:if test="${contact.contactId != null}">

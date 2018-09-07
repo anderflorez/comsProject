@@ -11,19 +11,20 @@ public class UserForm
 	private byte enabled;
 	private String dateAdded;
 	private String lastAccess;
+	private int contactId;
 
-	public UserForm(Integer userId, String username, String password1, String password2, byte enabled, String dateAdded,
-			String lastAccess)
+	public UserForm() {}
+
+	public UserForm(Integer userId, String username, byte enabled, String dateAdded, String lastAccess, int contactId)
 	{
 		this.userId = userId;
 		this.username = username;
-		this.password1 = password1;
-		this.password2 = password2;
 		this.enabled = enabled;
 		this.dateAdded = dateAdded;
 		this.lastAccess = lastAccess;
+		this.contactId = contactId;
 	}
-	
+
 	public UserForm(User user)
 	{
 		this.userId = user.getUserId();
@@ -31,6 +32,7 @@ public class UserForm
 		this.enabled = user.getEnabled();
 		this.dateAdded = user.getDateAdded();
 		this.lastAccess = user.getLastAccess();
+		this.contactId = user.getContact().getContactId();
 	}
 
 	public Integer getUserId()
@@ -103,4 +105,14 @@ public class UserForm
 		this.lastAccess = lastAccess;
 	}
 
+	public int getContactId()
+	{
+		return contactId;
+	}
+
+	public void setContactId(int contactId)
+	{
+		this.contactId = contactId;
+	}
+	
 }

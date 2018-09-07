@@ -23,14 +23,6 @@
 		</nav>
 
 		<div>
-			<div id="newUser" class="row mb15">
-				<div class="col-12">
-					<button type="button" class="float-right btn btn-sm btn-outline-success clickable" data-href="<c:url value='/manageUser?u=0'/>">
-						New User
-					</button>
-				</div>
-			</div>
-			
 			<div class="row">
 				<div class="col-12 table-responsive">
 					<table class="table table-hover">
@@ -44,7 +36,7 @@
 						</thead>
 						<tbody>
 							<c:forEach items="${users}" var="user">
-								<tr class="clickable" data-href="<c:url value='/manageUser?u=${user.userId}'/>">
+								<tr class="clickable" data-href="<c:url value='/manageUser?u=${user.userId}&c=-1'/>">
 									<td>${user.username}</td>
 									<td>${user.enabled}</td>
 									<td>${user.dateAdded}</td>

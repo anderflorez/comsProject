@@ -21,7 +21,8 @@ $(document).ready(function() {
 		$(".inputDisplay").find("input").removeClass("form-control-plaintext");
 		$(".inputDisplay").find("input").addClass("form-control");
 		$("#editObject").parent().parent().hide();
-		$(".restoreRW").find("a").removeClass("d-none");
-		$(".restoreRW").find("input").removeClass("d-none");
+		$(".inputBtn").find("a").removeClass("d-none");
+		$(".inputBtn").find("input").removeClass("d-none");
+		$(".inputBtn").find("button").addClass("d-none");
 	}
 });

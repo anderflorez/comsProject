@@ -27,55 +27,68 @@ public class UserManagementController
 	ContactService contactService;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showUserDetails(@RequestParam("u") String uId)
+	public ModelAndView showUserDetails(@RequestParam("u") String uId, @RequestParam("c") String cId)
 	{
-		Integer id = Integer.valueOf(uId);
-		UserForm userForm;
+		Integer uid = Integer.valueOf(uId);
+		Integer cid = Integer.valueOf(cId);
+		UserForm userForm = null;
 		
-		if (id > 0)
+		if (uid > 0)
 		{
-			User user = authenticationService.findUserByUserId(id);
-			
-		} else
+			User user = authenticationService.findUserByUserId(uid);
+			userForm = new UserForm(user);
+		} 
+		else if (uid == 0 && cid > 0)
 		{
-			user = new User(null, null, null);
+			userForm = new UserForm();
+			userForm.setContactId(cid);
 		}
 		
-		return new ModelAndView("/pages/security/userManagement.jsp", "user", userForm);
+		return new ModelAndView("/pages/security/userManagement.jsp", "userForm", userForm);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processUsers(UserForm user)
+	public ModelAndView processUsers(UserForm userForm)
 	{
 		System.out.println("================ In processUsers() ================");
-		System.out.println("initial user last access: " + user.getLastAccess());
-		if (user.getUserId() != null)
+		
+		if (userForm.getUserId() != null)
 		{
-			authenticationService.updateUser(user.getUserId(), user);
-			return new ModelAndView("/pages/security/userManagement.jsp", "user", user);
-		} else
+			User user = new User(userForm.getUsername(), null, null);
+			user.setEnabled(userForm.getEnabled());
+			user = authenticationService.updateUser(userForm.getUserId(), user);
+			userForm = new UserForm(user);
+			System.out.println("userForm contact id: " + userForm.getContactId());
+			System.out.println(user);
+		} 
+		else
 		{
-			try {
-				Contact contact = contactService.findContactById(3);
-				String password = null;
-				if (pass1.equals(pass2))
-				{
-					PasswordEncoder pe = new BCryptPasswordEncoder();
-					password = pe.encode(pass1);
-				} 
-				else
-				{
-					// TODO: Throw an error
-				}
-				
-				User actualUser = new User(user.getUsername(), password, contact);
-				user = authenticationService.saveUser(actualUser);
-			} catch (NonExistingContactException e) {
-				// TODO: send an error that can be shown to the user
+			//Find the contact and the password
+			// TODO: send some error if contact cannot be found
+			Contact contact = contactService.findContactById(userForm.getContactId());
+			String password = null;
+			
+			if (userForm.getPassword1().equals(userForm.getPassword2())) {
+				password = userForm.getPassword1();
+			}
+			else 
+			{
+				// TODO: Send some error if passwords don't match				
+			}
+						
+			//Create new user
+			try
+			{
+				User newUser = authenticationService.saveUser(new User(userForm.getUsername(), password, contact));
+				userForm = new UserForm(newUser);
+			} catch (NonExistingContactException e)
+			{
+				// TODO: Send an internal error to the user
 				e.printStackTrace();
 			}
-			System.out.println("new user last access: " + user.getLastAccess());
-			return new ModelAndView("/pages/security/userManagement.jsp", "user", user);
+			
 		}
+		
+		return new ModelAndView("/pages/security/userManagement.jsp", "userForm", userForm);
 	}
 }
