@@ -41,6 +41,16 @@ public class Role
 		return this.users;
 	}
 	
+	public void setRoleId(Integer roleId)
+	{
+		this.roleId = roleId;
+	}
+	
+	public void setRoleName(String roleName)
+	{
+		this.roleName = roleName;
+	}
+	
 	public void addUser(User user)
 	{
 		this.users.add(user);

@@ -88,7 +88,26 @@ public class AuthenticationServiceImpl implements AuthenticationService
 		dao.createRole(role);
 		return this.findRoleByRoleName(role.getRoleName());
 	}
-
+	
+	@Override
+	public Role updateRole(Integer roleId, Role role)
+	{
+		dao.updateRole(roleId, role);
+		return this.findRoleById(roleId);
+	}
+	
+	@Override
+	public List<Role> findAllRoles()
+	{
+		return dao.getAllRoles();
+	}
+	
+	@Override
+	public Role findRoleById(int id)
+	{
+		return dao.searchRoleById(id);
+	}
+	
 	@Override
 	public Role findRoleByRoleName(String roleName)
 	{
@@ -112,4 +131,5 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	{
 		dao.removeUserFromRole(role, user);
 	}
+
 }

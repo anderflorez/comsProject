@@ -20,11 +20,13 @@ public class ContactManagementController
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView showContactDetails(@RequestParam("c") String cId)
 	{		
+		// TODO: check for errors if the id is null or invalid
 		Integer id = Integer.valueOf(cId);
 		Contact contact;
 		
 		if (id > 0)
 		{
+			// TODO: show error if object is not found
 			contact = contactService.findContactById(id);
 			
 		} else

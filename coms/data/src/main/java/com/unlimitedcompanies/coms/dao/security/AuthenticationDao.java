@@ -10,14 +10,15 @@ public interface AuthenticationDao
 	public int getNumberOfUsers();
 	public void createUser(User user, String dateAdded, String lastAccessed);
 	public void updateUser(int userId, User user);
-	
 	public List<User> getAllUsers();
-	public User searchUserByUsername(String username);
 	public User searchUserByUserId(int id);
+	public User searchUserByUsername(String username);
 	
 	public int getNumberOfRoles();
 	public void createRole(Role role);
-	
+	public void updateRole(Integer roleId, Role role);
+	public List<Role> getAllRoles();
+	public Role searchRoleById(int id);
 	public Role searchRoleByRoleName(String roleName);
 	
 	public int findNumberOfUser_RoleAssignments();

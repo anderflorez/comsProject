@@ -29,12 +29,15 @@ public class UserManagementController
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView showUserDetails(@RequestParam("u") String uId, @RequestParam("c") String cId)
 	{
+		// TODO: check for errors if the id is null or invalid
 		Integer uid = Integer.valueOf(uId);
+		// TODO: check for errors if the id is null or invalid
 		Integer cid = Integer.valueOf(cId);
 		UserForm userForm = null;
 		
 		if (uid > 0)
 		{
+			// TODO: show error if object is not found
 			User user = authenticationService.findUserByUserId(uid);
 			userForm = new UserForm(user);
 		} 
@@ -49,17 +52,13 @@ public class UserManagementController
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView processUsers(UserForm userForm)
-	{
-		System.out.println("================ In processUsers() ================");
-		
+	{		
 		if (userForm.getUserId() != null)
 		{
 			User user = new User(userForm.getUsername(), null, null);
 			user.setEnabled(userForm.getEnabled());
 			user = authenticationService.updateUser(userForm.getUserId(), user);
 			userForm = new UserForm(user);
-			System.out.println("userForm contact id: " + userForm.getContactId());
-			System.out.println(user);
 		} 
 		else
 		{
@@ -69,7 +68,8 @@ public class UserManagementController
 			String password = null;
 			
 			if (userForm.getPassword1().equals(userForm.getPassword2())) {
-				password = userForm.getPassword1();
+				PasswordEncoder pe = new BCryptPasswordEncoder();
+				password = pe.encode(userForm.getPassword1());
 			}
 			else 
 			{

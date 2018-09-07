@@ -281,6 +281,37 @@ class SecurityServiceIntegrationTest
 		assertEquals(1, authenticationService.findNumberOfRoles(), "Service test for saving new role failed");
 		assertNotNull(role.getRoleId(), "Service test for saving new role failed");
 	}
+	
+	@Test
+	public void updateRoleTest()
+	{
+		Role role = authenticationService.saveRole(new Role("Administrator"));
+		Role newrole = new Role("Admins");
+		role = authenticationService.updateRole(role.getRoleId(), newrole);
+		
+		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
+		assertEquals(1, authenticationService.findNumberOfRoles(), "Service test for updating role has failed");
+	}
+	
+	@Test
+	public void findAllRolesTest()
+	{
+		authenticationService.saveRole(new Role("Administrator"));
+		authenticationService.saveRole(new Role("Manager"));
+		authenticationService.saveRole(new Role("Engineer"));
+		
+		assertEquals(3, authenticationService.findNumberOfRoles(), "Service test for finding all roles failed");
+	}
+	
+	@Test
+	public void findRoleByRoleId()
+	{
+		Role initialrole = new Role("Administrator");
+		Role savedRole = authenticationService.saveRole(initialrole);
+		Role foundRole = authenticationService.findRoleById(savedRole.getRoleId());
+		
+		assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
+	}
 
 	@Test
 	public void findRoleByRoleNameTest() 
@@ -289,7 +320,7 @@ class SecurityServiceIntegrationTest
 		authenticationService.saveRole(initialrole);
 		Role foundrole = authenticationService.findRoleByRoleName("Administrator");
 
-		assertEquals(initialrole, foundrole, "Service for finding role by roleName failed");
+		assertEquals(initialrole, foundrole, "Service test for finding role by roleName failed");
 	}
 
 	@Test

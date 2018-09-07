@@ -15,8 +15,12 @@ public interface AuthenticationService
 	public List<User> findAllUsers();
 	public User findUserByUserId(Integer id);
 	public User findUserByUsername(String string);
+	
 	public int findNumberOfRoles();
 	public Role saveRole(Role role);
+	public Role updateRole(Integer roleId, Role role);
+	public List<Role> findAllRoles();
+	public Role findRoleById(int id);
 	public Role findRoleByRoleName(String roleName);
 	
 	public int findNumberOfAssignments();

@@ -22,7 +22,7 @@
 			<a class="nav-item nav-link" href="<c:url value='/roles'/>">Roles</a>
 		</nav>
 
-		<div id="contactManagement">
+		<div id="userManagement">
 			<c:if test="${userForm.userId != null}">
 				<h2 id="manageDetailsTitle">User Details</h2>
 				<h2 id="manageEditTitle" class="d-none">Edit User</h2>

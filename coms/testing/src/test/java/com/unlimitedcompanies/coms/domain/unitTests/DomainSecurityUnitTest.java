@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.text.SimpleDateFormat;
-
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.domain.security.Address;

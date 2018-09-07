@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthenticationService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
@@ -37,4 +38,11 @@ public class ViewSecurityObjectController {
 		return new ModelAndView("/pages/security/userView.jsp", "users", allUsers);
 	}
 	
+	@RequestMapping("/roles")
+	public ModelAndView showRoles()
+	{
+		List<Role> allRoles = authenticationService.findAllRoles();
+		
+		return new ModelAndView("/pages/security/roleView.jsp", "roles", allRoles);
+	}
 }

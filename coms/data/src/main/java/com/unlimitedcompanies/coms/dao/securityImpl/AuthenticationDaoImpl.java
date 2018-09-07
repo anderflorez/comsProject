@@ -81,6 +81,25 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 		em.createNativeQuery("INSERT INTO role (roleName) VALUES (:roleName)")
 				.setParameter("roleName", role.getRoleName()).executeUpdate();
 	}
+	
+	@Override
+	public void updateRole(Integer roleId, Role role)
+	{
+		Role foundRole = em.find(Role.class, roleId);
+		foundRole.setRoleName(role.getRoleName());
+	}
+	
+	@Override
+	public List<Role> getAllRoles()
+	{
+		return em.createQuery("select role from Role as role", Role.class).getResultList();
+	}
+	
+	@Override
+	public Role searchRoleById(int id)
+	{
+		return em.find(Role.class, id);
+	}
 
 	@Override
 	public Role searchRoleByRoleName(String roleName)
