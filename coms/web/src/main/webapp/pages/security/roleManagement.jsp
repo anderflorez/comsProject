@@ -23,76 +23,81 @@
 		</nav>
 
 		<div id="roleManagement">
-			<c:if test="${role.roleId != null}">
-				<h2 id="manageDetailsTitle">Role Details</h2>
-				<h2 id="manageEditTitle" class="d-none">Edit Role</h2>
-			</c:if>
-			
-			<c:if test="${role.roleId == null}">
-				<h2>Create New Role</h2>
-			</c:if>
-			<hr>
-			
-			<div class="row mb15">
-				<div class="col-12">
-					<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
-						Edit Role
-					</button>
-					<a href="<c:url value='/roles'/>" class="float-right btn btn-sm btn-outline-primary ml15">
-						Back
-					</a>
-				</div>
-			</div>
-			
-			<form:form modelAttribute="role">
-				<div class="form-group row">
-					<label for="roleName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Role Name: </strong></label>
-					<div class="col-12 col-md-9 col-lg-10 inputDisplay">
-						<form:input id="roleName" path="roleName" readonly="true" class="form-control-plaintext"/>
-					</div>
-				</div>
-
-				<form:input id="objectIdIndicator" path="roleId" class="d-none"/>
-
-				<div class="row inputBtn">
+			<div class="jumbotron">
+				<c:if test="${role.roleId != null}">
+					<h2 id="manageDetailsTitle">Role Details</h2>
+					<h2 id="manageEditTitle" class="d-none">Edit Role</h2>
+				</c:if>
+				
+				<c:if test="${role.roleId == null}">
+					<h2>Create New Role</h2>
+				</c:if>
+				<hr>
+				
+				<div class="row mb15">
 					<div class="col-12">
-						<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Role">
-						<c:if test="${role.roleId != null}">
-							<a href="<c:url value='/manageRole?r=${role.roleId}'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
-						</c:if>
-						<c:if test="${role.roleId == null}">
-							<a href="<c:url value='/roles'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
-						</c:if>
+						<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
+							Edit Role
+						</button>
+						<a href="<c:url value='/roles'/>" class="float-right btn btn-sm btn-outline-primary ml15">
+							Back
+						</a>
 					</div>
 				</div>
-			</form:form>
-
-			<div class="row mb25">
-				<div class="col-12">
-					<h2>Role Members</h2>
-					<hr>
-					<c:if test="${memberContacts != null}">
-						<div class="row">
-							<div class="col-12 table-responsive">
-								<table class="table table-hover">
-									<thead>
-										<tr class="table-success">
-											<th scope="col">User</th>
-										</tr>
-									</thead>
-									<tbody>
-										<c:forEach items="${memberContacts}" var="memberContact">
-											<tr>
-												<td>${memberContact.firstName} ${memberContact.lastName}</td>
-											</tr>
-										</c:forEach>
-									</tbody>
-								</table>
-							</div>
+				
+				<form:form modelAttribute="role">
+					<div class="form-group row">
+						<label for="roleName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Role Name: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="roleName" path="roleName" readonly="true" class="form-control-plaintext"/>
 						</div>
-					</c:if>
-				</div>
+					</div>
+
+					<form:input id="objectIdIndicator" path="roleId" class="d-none"/>
+
+					<div class="row inputBtn">
+						<div class="col-12">
+							<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Role">
+							<c:if test="${role.roleId != null}">
+								<a href="<c:url value='/manageRole?r=${role.roleId}'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+							</c:if>
+							<c:if test="${role.roleId == null}">
+								<a href="<c:url value='/roles'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+							</c:if>
+						</div>
+					</div>
+				</form:form>
+				
 			</div>
+			<div class="jumbotron">
+				<div class="row mb25">
+					<div class="col-12">
+						<h2>Role Members</h2>
+						<hr>
+						<c:if test="${memberContacts != null}">
+							<div class="row">
+								<div class="col-12 table-responsive">
+									<table class="table table-hover">
+										<thead>
+											<tr class="table-success">
+												<th scope="col">User</th>
+											</tr>
+										</thead>
+										<tbody>
+											<c:forEach items="${memberContacts}" var="memberContact">
+												<tr>
+													<td>${memberContact.firstName} ${memberContact.lastName}</td>
+												</tr>
+											</c:forEach>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</c:if>
+					</div>
+				</div>				
+			</div>			
+
 		</div>
 	</div>	
 </div>

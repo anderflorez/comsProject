@@ -1,6 +1,0 @@
-com/unlimitedcompanies/coms/securityService/AuthenticationService.class
-com/unlimitedcompanies/coms/securityService/ContactService.class
-module-info.class
-com/unlimitedcompanies/coms/securityServiceImpl/ContactServiceImpl.class
-com/unlimitedcompanies/coms/securityServiceImpl/AuthenticationServiceImpl.class
-com/unlimitedcompanies/coms/securityServiceExceptions/NonExistingContactException.class

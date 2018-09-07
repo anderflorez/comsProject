@@ -23,70 +23,72 @@
 		</nav>
 
 		<div id="contactManagement">
-			<c:if test="${contact.contactId != null}">
-			<h2 id="manageDetailsTitle">Contact Details</h2>
-			<h2 id="manageEditTitle" class="d-none">Edit Contact</h2>
-			</c:if>
-			
-			<c:if test="${contact.contactId == null}">
-			<h2>Create New Contact</h2>
-			</c:if>
-			<hr>
-			
-			<div class="row mb15">
-				<div class="col-12">
-					<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
-						Edit Contact
-					</button>
-					<a href="<c:url value='/contacts'/>" class="float-right btn btn-sm btn-outline-primary ml15">
-						Back
-					</a>
-				</div>
-			</div>
-			
-			<form:form modelAttribute="contact">
-				<div class="form-group row">
-					<label for="contactFName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>First Name: </strong></label>
-					<div class="col-12 col-md-9 col-lg-10 inputDisplay">
-						<form:input id="contactFName" path="firstName" readonly="true" class="form-control-plaintext"/>
-					</div>
-				</div>
-				<div class="form-group row">
-					<label for="contactMName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Middle Name: </strong></label>
-					<div class="ccol-12 col-md-9 col-lg-10 inputDisplay">
-						<form:input id="contactMName" path="middleName" readonly="true" class="form-control-plaintext"/>
-					</div>
-				</div>
-				<div class="form-group row">
-					<label for="contactLName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Last Name: </strong></label>
-					<div class="col-12 col-md-9 col-lg-10 inputDisplay">
-						<form:input id="contactLName" path="lastName" readonly="true" class="form-control-plaintext"/>
-					</div>
-				</div>
-				<div class="form-group row">
-					<label for="contactEMail" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>E-Mail: </strong></label>
-					<div class="col-12 col-md-9 col-lg-10 inputDisplay">
-						<form:input id="contactEMail" path="email" readonly="true" class="form-control-plaintext"/>
-					</div>
-				</div>
-				<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
-				<div class="row inputBtn">
+			<div class="jumbotron">
+				<c:if test="${contact.contactId != null}">
+				<h2 id="manageDetailsTitle">Contact Details</h2>
+				<h2 id="manageEditTitle" class="d-none">Edit Contact</h2>
+				</c:if>
+				
+				<c:if test="${contact.contactId == null}">
+				<h2>Create New Contact</h2>
+				</c:if>
+				<hr>
+				
+				<div class="row mb15">
 					<div class="col-12">
-						<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?u=0&c=${contact.contactId}'/>">
-							Create New User
+						<button id="editObject" class="float-right btn btn-sm btn-outline-success ml15">
+							Edit Contact
 						</button>
-					</div>
-					<div class="col-12">
-						<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Contact">
-						<c:if test="${contact.contactId != null}">
-							<a href="<c:url value='/manageContact?c=${contact.contactId}'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
-						</c:if>
-						<c:if test="${contact.contactId == null}">
-							<a href="<c:url value='/contacts'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
-						</c:if>
+						<a href="<c:url value='/contacts'/>" class="float-right btn btn-sm btn-outline-primary ml15">
+							Back
+						</a>
 					</div>
 				</div>
-			</form:form>
+				
+				<form:form modelAttribute="contact">
+					<div class="form-group row">
+						<label for="contactFName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>First Name: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="contactFName" path="firstName" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="contactMName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Middle Name: </strong></label>
+						<div class="ccol-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="contactMName" path="middleName" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="contactLName" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Last Name: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="contactLName" path="lastName" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="contactEMail" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>E-Mail: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10 inputDisplay">
+							<form:input id="contactEMail" path="email" readonly="true" class="form-control-plaintext"/>
+						</div>
+					</div>
+					<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
+					<div class="row inputBtn">
+						<div class="col-12">
+							<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?u=0&c=${contact.contactId}'/>">
+								Create New User
+							</button>
+						</div>
+						<div class="col-12">
+							<input type="submit" class="btn btn-success float-right ml15 d-none" value="Save Contact">
+							<c:if test="${contact.contactId != null}">
+								<a href="<c:url value='/manageContact?c=${contact.contactId}'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+							</c:if>
+							<c:if test="${contact.contactId == null}">
+								<a href="<c:url value='/contacts'/>" class="btn btn-secondary float-right ml15 d-none">Cancel</a>
+							</c:if>
+						</div>
+					</div>
+				</form:form>
+			</div>			
 		</div>
 	</div>	
 </div>
