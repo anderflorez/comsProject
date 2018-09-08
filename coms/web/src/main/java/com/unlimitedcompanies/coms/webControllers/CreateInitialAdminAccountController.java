@@ -70,6 +70,6 @@ public class CreateInitialAdminAccountController
 		
 		authenticationService.assignUserToRole(role, adminUser);
 
-		return new ModelAndView("/");
+		return new ModelAndView("redirect:/pages/dashboard/login.jsp");
 	}
 }
