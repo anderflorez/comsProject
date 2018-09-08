@@ -23,32 +23,34 @@
 		</nav>
 
 		<div>
-			<div id="newRole" class="row mb15">
-				<div class="col-12">
-					<button type="button" class="float-right btn btn-sm btn-outline-success clickable" data-href="<c:url value='/manageRole?r=0'/>">
-						New Role
-					</button>
+			<div class="jumbotron">
+				<div id="newRole" class="row mb15">
+					<div class="col-12">
+						<button type="button" class="float-right btn btn-sm btn-outline-success clickable" data-href="<c:url value='/manageRole?r=0'/>">
+							New Role
+						</button>
+					</div>
 				</div>
-			</div>
-			
-			<div class="row">
-				<div class="col-12 table-responsive">
-					<table class="table table-hover">
-						<thead>
-							<tr class="table-success">
-								<th scope="col">Role Name</th>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach items="${roles}" var="role">
-								<tr class="clickable" data-href="<c:url value='/manageRole?r=${role.roleId}'/>">
-									<td>${role.roleName}</td>
+				
+				<div class="row">
+					<div class="col-12 table-responsive">
+						<table class="table table-hover">
+							<thead>
+								<tr class="table-success">
+									<th scope="col">Role Name</th>
 								</tr>
-							</c:forEach>
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								<c:forEach items="${roles}" var="role">
+									<tr class="clickable" data-href="<c:url value='/manageRole?r=${role.roleId}'/>">
+										<td>${role.roleName}</td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
 				</div>
-			</div>
+			</div>			
 		</div>
 	</div>
 </div>

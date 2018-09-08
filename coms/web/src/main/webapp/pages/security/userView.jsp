@@ -23,30 +23,32 @@
 		</nav>
 
 		<div>
-			<div class="row">
-				<div class="col-12 table-responsive">
-					<table class="table table-hover">
-						<thead>
-							<tr class="table-success">
-								<th scope="col">Username</th>
-								<th scope="col">Status</th>
-								<th scope="col">Added</th>
-								<th scope="col">Last Access</th>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach items="${users}" var="user">
-								<tr class="clickable" data-href="<c:url value='/manageUser?u=${user.userId}&c=-1'/>">
-									<td>${user.username}</td>
-									<td>${user.enabled}</td>
-									<td>${user.dateAdded}</td>
-									<td>${user.lastAccess}</td>
+			<div class="jumbotron">
+				<div class="row">
+					<div class="col-12 table-responsive">
+						<table class="table table-hover">
+							<thead>
+								<tr class="table-success">
+									<th scope="col">Username</th>
+									<th scope="col">Status</th>
+									<th scope="col">Added</th>
+									<th scope="col">Last Access</th>
 								</tr>
-							</c:forEach>
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								<c:forEach items="${users}" var="user">
+									<tr class="clickable" data-href="<c:url value='/manageUser?u=${user.userId}&c=-1'/>">
+										<td>${user.username}</td>
+										<td>${user.enabled}</td>
+										<td>${user.dateAdded}</td>
+										<td>${user.lastAccess}</td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
 				</div>
-			</div>
+			</div>			
 		</div>
 	</div>
 </div>
