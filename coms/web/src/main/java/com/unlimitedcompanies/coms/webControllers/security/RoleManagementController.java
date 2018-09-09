@@ -60,17 +60,10 @@ public class RoleManagementController
 		if (role.getRoleId() != null)
 		{
 			authenticationService.updateRole(role.getRoleId(), role);
-			ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp");
-			
-			mv.addObject("role", role);
-			mv.addObject("memberContacts", null);
-			return mv;
 		} else
 		{
 			role = authenticationService.saveRole(role);
-			ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp", "role", role);
-			mv.addObject("memberContacts", null);
-			return mv;
 		}
+		return new ModelAndView("redirect:/manageRole?r=" + role.getRoleId());
 	}
 }

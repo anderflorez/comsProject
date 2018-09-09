@@ -15,6 +15,7 @@ public interface AuthenticationService
 	public List<User> findAllUsers();
 	public User findUserByUserId(Integer id);
 	public User findUserByUsername(String string);
+	public User findUserByUsernameWithContact(String username);
 	
 	public int findNumberOfRoles();
 	public Role saveRole(Role role);

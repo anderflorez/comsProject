@@ -14,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.webSecurity.AuthFailureHandler;
+import com.unlimitedcompanies.coms.webappSecurity.AuthFailureHandler;
 
 @Configuration
 @EnableWebSecurity

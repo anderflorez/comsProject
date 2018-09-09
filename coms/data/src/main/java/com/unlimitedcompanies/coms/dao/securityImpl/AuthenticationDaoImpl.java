@@ -67,6 +67,14 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 		return em.createQuery("select user from User as user where user.username = :username", User.class)
 				.setParameter("username", username).getSingleResult();
 	}
+	
+	@Override
+	public User searchUserByUsernameWithContact(String username)
+	{
+		return em.createQuery("select user from User as user left join fetch user.contact where username = :username", User.class)
+							  .setParameter("username", username)
+							  .getSingleResult();
+	}
 
 	@Override
 	public int getNumberOfRoles()

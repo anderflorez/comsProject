@@ -89,6 +89,6 @@ public class UserManagementController
 			
 		}
 		
-		return new ModelAndView("/pages/security/userManagement.jsp", "userForm", userForm);
+		return new ModelAndView("redirect:/manageUser?u=" + userForm.getUserId() + "&c=0");
 	}
 }

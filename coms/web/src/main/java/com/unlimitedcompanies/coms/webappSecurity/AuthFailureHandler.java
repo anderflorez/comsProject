@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.webSecurity;
+package com.unlimitedcompanies.coms.webappSecurity;
 
 import java.io.IOException;
 

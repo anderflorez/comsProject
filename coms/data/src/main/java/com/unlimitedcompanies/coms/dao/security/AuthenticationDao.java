@@ -13,6 +13,7 @@ public interface AuthenticationDao
 	public List<User> getAllUsers();
 	public User searchUserByUserId(int id);
 	public User searchUserByUsername(String username);
+	public User searchUserByUsernameWithContact(String username);
 	
 	public int getNumberOfRoles();
 	public void createRole(Role role);

@@ -9,10 +9,10 @@
 <c:import url="../dashboard/sidebar.jsp" />
 
 <div class="page-container">
-	<c:import url="../dashboard/header.jsp" />
-
 	<!-- Styles -->
 	<link rel="stylesheet" type="text/css" href="<c:url value='/css/securityManagement.css'/>">
+	<c:import url="../dashboard/header.jsp" />
+
 	
 	<div class="page-content">
 
@@ -72,7 +72,7 @@
 			<div class="jumbotron">
 				<div class="row mb25">
 					<div class="col-12">
-						<h2>Role Members</h2>
+						<h2>Member users</h2>
 						<hr>
 						<c:if test="${memberContacts != null}">
 							<div class="row">
