@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -14,6 +15,7 @@ import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Phone;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -42,10 +44,18 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public List<Contact> getAllContacts()
+	public List<Contact> getAllContacts(User loggedUser)
 	{
-		return em.createQuery("select contact from Contact as contact", Contact.class)
-							  .getResultList();
+		if (loggedUser.getUsername().equals("administrator"))
+		{
+			return em.createQuery("select contact from Contact as contact", Contact.class)
+					.getResultList();
+		}
+		else
+		{
+			List<Contact> list = new ArrayList<>();
+			return list;
+		}
 	}
 
 	@Override
