@@ -5,6 +5,12 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -112,9 +118,14 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public Role searchRoleByIdWithMembers(Integer id)
 	{
-		return em.createQuery("select role from Role as role left join fetch role.users where role.roleId = :roleid", Role.class)
-							  .setParameter("roleid", id)
-							  .getSingleResult();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Role> criteria = builder.createQuery(Role.class).distinct(true);
+		
+		Root<Role> roleRoot = criteria.from(Role.class);
+		roleRoot.fetch("users", JoinType.LEFT);
+		criteria.where(builder.equal(roleRoot.get("roleId"), id));
+		
+		return em.createQuery(criteria).getSingleResult();
 	}
 
 	@Override
