@@ -1,7 +1,9 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -9,14 +11,16 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import javax.persistence.metamodel.EntityType;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthenticationDao;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -118,14 +122,71 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public Role searchRoleByIdWithMembers(Integer id)
 	{
+//		============================================
+		
+		
+		
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Role> criteria = builder.createQuery(Role.class).distinct(true);
+		CriteriaQuery<Role> query = builder.createQuery(Role.class).distinct(true);
+		Root<Role> role = query.from(Role.class);
+		Join<Role, User> users = role.join("users");
+		role.fetch("users", JoinType.LEFT);
+				
+		Subquery<?> subQuery = query.subquery(Integer.class);
+		Root<?> subRoot = subQuery.from(User.class);
+		Join<?, ?> contact = subRoot.join("contact");
+		subQuery.select(subRoot.get("userId"));
+		subQuery.where(builder.equal(contact.get("firstName"), "Administrator"));
 		
-		Root<Role> roleRoot = criteria.from(Role.class);
-		roleRoot.fetch("users", JoinType.LEFT);
-		criteria.where(builder.equal(roleRoot.get("roleId"), id));
+		query.where(builder.equal(users.get("userId"), subQuery));
 		
-		return em.createQuery(criteria).getSingleResult();
+		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
+		EntityType<?> selectedEntity = null;
+		for (EntityType<?> entity : entities)
+		{
+			if (entity.getName().equals("Role")) selectedEntity = entity; 
+		}
+		
+		return em.createQuery(query).getSingleResult();
+		
+//		============================================
+		
+//		Role role = em.createQuery("select role from Role as role "
+//							+ "left join fetch role.users "
+//							+ "where role.roleId = :roleId", Role.class)
+//							  .setParameter("roleId", id)
+//							  .getSingleResult();
+		
+//		System.out.println("========= The role obtained: " + role.getRoleName());
+//		System.out.println("========= The role users amount obtained: " + role.getMembers().size());
+//		
+//		return role;
+	}
+	
+	public Role roleSuperSearch()
+	{
+		Set<String> fetchItems = new HashSet<>();
+		fetchItems.add("users");
+		fetchItems.add("contact");
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Role> query = builder.createQuery(Role.class).distinct(true);
+		Root<Role> role = query.from(Role.class);
+		
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		return em.createQuery(query).getSingleResult();
 	}
 
 	@Override

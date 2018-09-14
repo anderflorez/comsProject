@@ -12,10 +12,10 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger level="TRACE" name="org.hibernate">
+		<Logger level="INFO" name="org.hibernate">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Root level="TRACE">
+		<Root level="ERROR">
 			<AppenderRef ref="STDOUT" />
 		</Root>
 	</Loggers>

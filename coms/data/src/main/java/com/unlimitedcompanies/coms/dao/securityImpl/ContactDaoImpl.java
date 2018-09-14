@@ -2,13 +2,11 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.metamodel.EntityType;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -55,7 +53,6 @@ public class ContactDaoImpl implements ContactDao
 		criteria.from(Contact.class);
 		
 		return em.createQuery(criteria).getResultList();
-		
 		
 		
 //		return em.createQuery("select contact from Contact as contact", Contact.class)
