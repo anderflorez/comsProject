@@ -74,7 +74,8 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public User searchUserByUsername(String username)
 	{
-		return em.createQuery("select user from User as user where user.username = :username", User.class)
+		return em.createQuery("select user.userId user.username user.enabled user.dateAdded user.lastAccess "
+				+ "from User as user where user.username = :username", User.class)
 				.setParameter("username", username).getSingleResult();
 	}
 	
@@ -122,72 +123,29 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public Role searchRoleByIdWithMembers(Integer id)
 	{
-//		============================================
-		
-		
-		
-		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Role> query = builder.createQuery(Role.class).distinct(true);
-		Root<Role> role = query.from(Role.class);
-		Join<Role, User> users = role.join("users");
-		role.fetch("users", JoinType.LEFT);
-				
-		Subquery<?> subQuery = query.subquery(Integer.class);
-		Root<?> subRoot = subQuery.from(User.class);
-		Join<?, ?> contact = subRoot.join("contact");
-		subQuery.select(subRoot.get("userId"));
-		subQuery.where(builder.equal(contact.get("firstName"), "Administrator"));
-		
-		query.where(builder.equal(users.get("userId"), subQuery));
-		
-		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
-		EntityType<?> selectedEntity = null;
-		for (EntityType<?> entity : entities)
-		{
-			if (entity.getName().equals("Role")) selectedEntity = entity; 
-		}
-		
-		return em.createQuery(query).getSingleResult();
-		
-//		============================================
-		
-//		Role role = em.createQuery("select role from Role as role "
-//							+ "left join fetch role.users "
-//							+ "where role.roleId = :roleId", Role.class)
-//							  .setParameter("roleId", id)
-//							  .getSingleResult();
-		
-//		System.out.println("========= The role obtained: " + role.getRoleName());
-//		System.out.println("========= The role users amount obtained: " + role.getMembers().size());
-//		
-//		return role;
+		return em.createQuery("select role from Role role "
+							+ "left join fetch role.users user "
+							+ "left join fetch user.contact contact "
+							+ "where (role.roleId = :roleId and ((user.username = 'admin') or (contact.firstName = 'Administrator')))", Role.class)
+							  .setParameter("roleId", id)
+							  .getSingleResult();
 	}
 	
-	public Role roleSuperSearch()
+	
+	public Role roleGeneralSearch()
 	{
-		Set<String> fetchItems = new HashSet<>();
-		fetchItems.add("users");
-		fetchItems.add("contact");
+		Role role = null;
+		String query;
+		role = em.createQuery("select role "
+							  + "from Role role", 
+							  Role.class)
+							  .getSingleResult();
 		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Role> query = builder.createQuery(Role.class).distinct(true);
-		Root<Role> role = query.from(Role.class);
-		
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		return em.createQuery(query).getSingleResult();
+		return role;
 	}
+	
+	
+	
 
 	@Override
 	public Role searchRoleByRoleName(String roleName)
@@ -225,5 +183,12 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 
 		foundRole.removeUser(foundUser);
 	}
+	
+	
+	
+	
+	
+	
+
 
 }

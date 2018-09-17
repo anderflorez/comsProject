@@ -6,6 +6,10 @@ import java.util.Map;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import com.unlimitedcompanies.coms.dao.search.ConditionGroup;
+import com.unlimitedcompanies.coms.dao.search.ConditionalOperator;
+import com.unlimitedcompanies.coms.dao.search.Method;
+import com.unlimitedcompanies.coms.dao.search.SearchCondition;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
@@ -35,19 +39,15 @@ public class Client
 			System.out.println("Found user member:" + user.getUsername());
 		}
 		
+		SearchCondition condition1 = new SearchCondition("Role", "roleId", "2", false, ConditionalOperator.EQUAL);
+		SearchCondition condition2 = new SearchCondition("User", "username", "admin", true, ConditionalOperator.EQUAL);
+		SearchCondition condition3 = new SearchCondition("Contact", "firstName", "Administrator", true, ConditionalOperator.EQUAL);
+		System.out.println(condition1);
+		System.out.println(condition2);
+		System.out.println(condition3);
 		
+		ConditionGroup conditionGroup = new ConditionGroup(Method.AND);
 		
-		
-		Map items = new HashMap();
-		items.put("item1", "value1");
-		items.put("item2", Integer.valueOf(1));
-		items.put("item3", new Contact("name", null, "last", null));
-		
-		ArrayList<String> itemKeys = new ArrayList<String>(items.keySet());
-		for (String key : itemKeys)
-		{
-			System.out.println("Checking the " + key + " value: " + items.get(key));
-		}
 	}
 
 }
