@@ -1,75 +1,76 @@
 package com.unlimitedcompanies.coms.dao.search;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Search
 {
-	private String resource;
-	private List<String> selectClause;
-	private Map<String, Search> joinClause;
-	private ConditionGroup whereClause;
+	private String resource; // Resource as resource
+	private Map<String, String> fields; // resource(alias), fieldName
+	private Map<String, String> joins; // resource(alias), fieldName as new-resource
+	private ConditionGroup conditionGroup;
+	private Map<String, Object> variables;
 
 	public Search(String resource)
 	{
 		this.resource = resource;
-	}
-
-	public Search(String resource, List<String> selectClause, Map<String, Search> joinClause)
-	{
-		this.resource = resource;
-		this.selectClause = selectClause;
-		this.joinClause = joinClause;
-	}
-
-	public String getResource()
-	{
-		return resource;
-	}
-
-	public List<String> getSelectClause()
-	{
-		return selectClause;
-	}
-
-	public Map<String, Search> getJoinClause()
-	{
-		return joinClause;
-	}
-
-	public ConditionGroup getWhereClause()
-	{
-		return whereClause;
-	}
-
-	public void setSelectClause(List<String> selectClause)
-	{
-		this.selectClause = selectClause;
+		conditionGroup = null;
+		variables = new HashMap<>();
 	}
 	
-	public String createQuery()
+	public void addField(String resource, String fieldName)
 	{
-		StringBuilder query = new StringBuilder("select ");
-		for (String field : selectClause)
+		if (resource.equals(this.resource) || this.joins.containsKey(resource))
 		{
-			query.append(this.getResource().toLowerCase() + "." + field + " ");
+			this.fields.put(resource, fieldName);			
 		}
-		
-		query.append("from " + this.getResource() + " " + this.getResource().toLowerCase() + " ");
-		
-		if (joinClause.size() > 0)
+		else
 		{
-			for (String relation : joinClause.keySet())
-			{
-				query.append("left join fetch " + 
-							 this.getResource().toLowerCase() + "." + relation + " " 
-							 + joinClause.get(relation).getResource().toLowerCase());
-			}
+			// TODO: Send back an exception as there is no such resource
 		}
-		
-		
-		
-		return query.toString();
+	}
+	
+	public void join(String resource, String relationshipFieldName)
+	{
+		this.joins.put(resource, relationshipFieldName);
+	}
+	
+	public void where(String resource, String fieldName, Object value, Operator operator)
+	{
+		SearchCondition sc = new SearchCondition(resource, fieldName, operator, value);
+		ConditionGroup cg = new ConditionGroup(Method.AND);
+		cg.addCondition(sc);
+		this.conditionGroup = cg;
+		this.variables.put(":" + fieldName, value);
+	}
+	
+	public void and(SearchCondition...searchConditions)
+	{
+		ConditionGroup cg = new ConditionGroup(Method.AND);
+		for (SearchCondition sc : searchConditions)
+		{
+			cg.addCondition(sc);
+		}
+		this.conditionGroup.addConditionGroupToSet(cg);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public void setConditionGroup(ConditionGroup conditionGroup)
+	{
+		this.conditionGroup = conditionGroup;
+	}
+	
+	public void addVariable(String valueName, Object value)
+	{
+		variables.put(valueName, value);
 	}
 
 }

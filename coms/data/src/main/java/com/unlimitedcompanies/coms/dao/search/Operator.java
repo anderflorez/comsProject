@@ -1,6 +1,6 @@
 package com.unlimitedcompanies.coms.dao.search;
 
-public enum ConditionalOperator
+public enum Operator
 {
 	EQUAL("="),
 	NOT_EQUAL("!="),
@@ -9,7 +9,7 @@ public enum ConditionalOperator
 	
 	private String operator;
 
-	private ConditionalOperator(String operator)
+	private Operator(String operator)
 	{
 		this.operator = operator;
 	}	

@@ -4,17 +4,15 @@ public class SearchCondition
 {
 	private String resource;
 	private String field;
-	private String value;
-	private boolean stringValue;
-	private ConditionalOperator operator;
+	private Operator operator;
+	private Object value;
 
-	public SearchCondition(String resource, String field, String value, boolean stringValue, ConditionalOperator operator)
+	public SearchCondition(String resource, String field, Operator operator, Object value)
 	{
 		this.resource = resource;
 		this.field = field;
-		this.value = value;
-		this.stringValue = stringValue;
 		this.operator = operator;
+		this.value = value;
 	}
 
 	public String getResource()
@@ -22,36 +20,29 @@ public class SearchCondition
 		return resource;
 	}
 
-	public String getField()
+	public String getFullFieldName()
 	{
 		return resource.toLowerCase() + "." + field;
 	}
-
-	public String getValue()
+	
+	public String getFieldName()
 	{
-		return value;
+		return this.field;
 	}
 
-	public boolean isStringValue()
-	{
-		return stringValue;
-	}
-
-	public ConditionalOperator getOperator()
+	public Operator getOperator()
 	{
 		return operator;
+	}
+	
+	public Object getValue()
+	{
+		return value;
 	}
 	
 	@Override
 	public String toString()
 	{
-		if (this.isStringValue())
-		{
-			return this.getField() + " " + this.getOperator() + " '" + this.getValue() + "'";
-		}
-		else 
-		{
-			return this.getField() + " " + this.getOperator() + " " + this.getValue();			
-		}
+		return this.getFullFieldName() + " " + this.getOperator() + " :" + this.getFieldName();
 	}
 }

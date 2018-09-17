@@ -1,6 +1,5 @@
 package com.unlimitedcompanies.coms.dao.search;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,30 +7,15 @@ public class ConditionGroup
 {
 	private Method method;
 	private Set<SearchCondition> conditions;
-	private ConditionGroup conditionGroup;
+	private Set<ConditionGroup> conditionGroupSet;
 
 	public ConditionGroup(Method method)
 	{
 		this.method = method;
 		this.conditions = new HashSet<>();
-		this.conditionGroup = null;
+		this.conditionGroupSet = new HashSet<>();
 	}
-
-	public String getMethod()
-	{
-		return method.toString();
-	}
-
-	public Set<SearchCondition> getConditions()
-	{
-		return Collections.unmodifiableSet(conditions);
-	}
-
-	public ConditionGroup getConditionGroup()
-	{
-		return conditionGroup;
-	}
-
+	
 	public void setMethod(Method method)
 	{
 		this.method = method;
@@ -42,9 +26,9 @@ public class ConditionGroup
 		this.conditions.add(condition);
 	}
 	
-	public void addConditionGroup(Method method)
+	public void addConditionGroupToSet(ConditionGroup conditionGroup)
 	{
-		this.conditionGroup = new ConditionGroup(method);
+		this.conditionGroupSet.add(conditionGroup);
 	}
 	
 	@Override
@@ -62,21 +46,28 @@ public class ConditionGroup
 				}
 				else 
 				{
-					group.append(this.getMethod());
+					group.append(" " + this.method + " ");
 					group.append(condition);
+				}
+
+				if (this.conditionGroupSet != null)
+				{
+					for (ConditionGroup cg : conditionGroupSet)
+					{
+						if (cg.conditions.size() > 0 || cg.conditionGroupSet.size() > 0)
+						{
+							group.append(" " + this.method + " ");
+							group.append(cg.toString());							
+						}
+					}
 				}
 			}
 			group.append(")");
 			
-			if (this.conditionGroup != null)
-			{
-				group.append(" " + this.getMethod() + " ");
-				group.append(this.conditionGroup.toString());
-			}
 		}
-		else if (this.conditionGroup != null)
+		else if (this.conditionGroupSet != null)
 		{
-			group.append(this.conditionGroup.toString());
+			group.append(this.conditionGroupSet.toString());
 		}
 		
 		return group.toString();
