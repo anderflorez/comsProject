@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unlimitedcompanies.coms.dao.search.Search;
 import com.unlimitedcompanies.coms.dao.security.AuthenticationDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
@@ -143,6 +144,18 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	public void removeUserFromRole(Role role, User user)
 	{
 		dao.removeUserFromRole(role, user);
+	}
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public Object superSearch(Search search)
+	{
+		return dao.superSearch(search);
 	}
 
 }

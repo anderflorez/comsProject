@@ -15,7 +15,22 @@ import com.unlimitedcompanies.coms.securityService.AuthenticationService;
 public class Client
 {
 	public static void main(String[] args)
-	{		
+	{
+		System.out.println(" =========== Search ===========");
+		Search search = new Search("Role");
+		search.join("Role", "users", "User");
+		search.join("User", "contact", "Contact");
+		search.addField("Role", "roleId");
+		search.addField("Role", "roleName");
+		search.addField("User", "username");
+		search.addField("Contact", "firstName");
+		search.where("User", "username", "administrator", Operator.EQUAL);
+		ConditionGroup conds = new ConditionGroup(Method.OR);
+		conds.addCondition("Role", "roleId", 2, Operator.EQUAL);
+		conds.addCondition("Contact", "firstName", "Administrator", Operator.EQUAL);
+		search.where(conds);
+		System.out.println(search);
+		
 		AnnotationConfigApplicationContext container = new AnnotationConfigApplicationContext();
 		container.getEnvironment().setActiveProfiles("production");
 		container.register(ApplicationConfig.class);
@@ -26,6 +41,8 @@ public class Client
 		int roleId = authenticationService.findRoleByRoleName("AdministratorGroup").getRoleId();
 		Role role = authenticationService.findRoleByIdWithMembers(roleId);
 		
+		Role testRole = (Role) authenticationService.superSearch(search);
+		
 		container.close();
 		
 		System.out.println("Found role name: " + role.getRoleName());
@@ -35,29 +52,8 @@ public class Client
 			System.out.println("Found user member:" + user.getUsername());
 		}
 		
-		System.out.println(" =========== Search Condition ===========");
-		SearchCondition condition1 = new SearchCondition("Role", "roleId", Operator.EQUAL, 2);
-		SearchCondition condition2 = new SearchCondition("User", "username", Operator.EQUAL, "administrator");
-		SearchCondition condition3 = new SearchCondition("Contact", "firstName", Operator.EQUAL, "Administrator");
-		System.out.println(condition1);
-		System.out.println(condition2);
-		System.out.println(condition3);
-		
-		System.out.println(" =========== Condition Group ===========");
-		ConditionGroup conditionGroup = new ConditionGroup(Method.AND);
-		conditionGroup.addCondition(condition1);
-		ConditionGroup cg = new ConditionGroup(Method.OR);
-		ConditionGroup cg2 = new ConditionGroup(Method.AND);
-		cg.addCondition(condition2);
-		cg.addCondition(condition3);
-		conditionGroup.addConditionGroupToSet(cg);
-		conditionGroup.addConditionGroupToSet(cg2);
-		System.out.println(conditionGroup);
-		
-		System.out.println(" =========== Search ===========");
-		Search search = new Search("Role");
-		search.addField("Role", "roleId");
-		search.addField("Role", "roleName");
+		System.out.println(" =========== Super Search Test ===========");
+		System.out.println(testRole.getRoleName());
 	}
 
 }

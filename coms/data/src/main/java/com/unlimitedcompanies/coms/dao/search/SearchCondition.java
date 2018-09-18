@@ -9,7 +9,7 @@ public class SearchCondition
 
 	public SearchCondition(String resource, String field, Operator operator, Object value)
 	{
-		this.resource = resource;
+		this.resource = resource.toLowerCase();
 		this.field = field;
 		this.operator = operator;
 		this.value = value;
@@ -22,7 +22,7 @@ public class SearchCondition
 
 	public String getFullFieldName()
 	{
-		return resource.toLowerCase() + "." + field;
+		return this.resource + "." + field;
 	}
 	
 	public String getFieldName()

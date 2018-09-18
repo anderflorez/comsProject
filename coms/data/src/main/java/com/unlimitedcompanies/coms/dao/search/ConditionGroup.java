@@ -1,6 +1,8 @@
 package com.unlimitedcompanies.coms.dao.search;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ConditionGroup
@@ -16,6 +18,27 @@ public class ConditionGroup
 		this.conditionGroupSet = new HashSet<>();
 	}
 	
+	public Method getMethod()
+	{
+		return this.method;
+	}
+	
+	public Map<String, Object> getValues()
+	{
+		Map<String, Object> values = new HashMap<String, Object>();
+		for (SearchCondition sc : conditions)
+		{
+			values.put(sc.getFieldName(), sc.getValue());
+		}
+		
+		for (ConditionGroup cg : this.conditionGroupSet)
+		{
+			values.putAll(cg.getValues());
+		}
+		
+		return values;
+	}
+	
 	public void setMethod(Method method)
 	{
 		this.method = method;
@@ -24,6 +47,12 @@ public class ConditionGroup
 	public void addCondition(SearchCondition condition)
 	{
 		this.conditions.add(condition);
+	}
+	
+	public void addCondition(String resource, String field, Object value, Operator operator)
+	{
+		SearchCondition sc = new SearchCondition(resource, field, operator, value);
+		this.conditions.add(sc);
 	}
 	
 	public void addConditionGroupToSet(ConditionGroup conditionGroup)
@@ -50,7 +79,7 @@ public class ConditionGroup
 					group.append(condition);
 				}
 
-				if (this.conditionGroupSet != null)
+				if (this.conditionGroupSet.size() > 0)
 				{
 					for (ConditionGroup cg : conditionGroupSet)
 					{
@@ -65,7 +94,7 @@ public class ConditionGroup
 			group.append(")");
 			
 		}
-		else if (this.conditionGroupSet != null)
+		else if (this.conditionGroupSet.size() > 0)
 		{
 			group.append(this.conditionGroupSet.toString());
 		}
