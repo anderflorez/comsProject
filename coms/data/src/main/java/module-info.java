@@ -12,6 +12,7 @@ module data
 	requires spring.context;
 	
 	exports com.unlimitedcompanies.coms.dao.security;
+	exports com.unlimitedcompanies.coms.dao.security.settings;
 	exports com.unlimitedcompanies.coms.dao.security.exceptions;
 	exports com.unlimitedcompanies.coms.domain.security;
 	exports com.unlimitedcompanies.coms.domain.security.exceptions;
