@@ -118,13 +118,13 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	@Override
 	public Role findRoleByIdWithMembers(Integer id)
 	{
-		return dao.searchRoleByIdWithMembers(id);
+		return dao.getRoleByIdWithMembers(id);
 	}
 
 	@Override
 	public Role findRoleByRoleName(String roleName)
 	{
-		return dao.searchRoleByRoleName(roleName);
+		return dao.getRoleByRoleName(roleName);
 	}
 
 	@Override

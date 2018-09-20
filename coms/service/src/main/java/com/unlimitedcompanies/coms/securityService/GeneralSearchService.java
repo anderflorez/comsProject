@@ -1,8 +1,8 @@
-package com.unlimitedcompanies.coms.dao.security;
+package com.unlimitedcompanies.coms.securityService;
 
 import com.unlimitedcompanies.coms.domain.search.Search;
 
-public interface GeneralSearchDao
+public interface GeneralSearchService
 {
 	public Object search(Search search);
 }

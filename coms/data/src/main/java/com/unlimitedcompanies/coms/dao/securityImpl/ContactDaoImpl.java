@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,16 +45,8 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public List<Contact> getAllContacts(User loggedUser)
 	{		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Contact> criteria = builder.createQuery(Contact.class);
-		
-		criteria.from(Contact.class);
-		
-		return em.createQuery(criteria).getResultList();
-		
-		
-//		return em.createQuery("select contact from Contact as contact", Contact.class)
-//				.getResultList();
+		return em.createQuery("select contact from Contact as contact", Contact.class)
+							  .getResultList();
 	}
 
 	@Override
@@ -89,7 +79,7 @@ public class ContactDaoImpl implements ContactDao
 	public void removeContact(int id)
 	{
 		Contact deleteContact = em.find(Contact.class, id);
-		em.remove(deleteContact);		
+		em.remove(deleteContact);
 	}
 
 	@Override
@@ -115,8 +105,8 @@ public class ContactDaoImpl implements ContactDao
 	public List<Address> searchContactAddressByZipCode(String zipCode)
 	{
 		return em.createQuery("select address from Address as address where address.zipCode = :zip", Address.class)
-				  .setParameter("zip", zipCode)
-				  .getResultList();
+				  			  .setParameter("zip", zipCode)
+				  			  .getResultList();
 	}
 
 	@Override

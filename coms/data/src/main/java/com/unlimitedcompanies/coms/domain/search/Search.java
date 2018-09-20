@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.search;
+package com.unlimitedcompanies.coms.domain.search;
 
 import java.util.Collections;
 import java.util.HashMap;

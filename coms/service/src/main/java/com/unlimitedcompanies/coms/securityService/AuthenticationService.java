@@ -2,7 +2,6 @@ package com.unlimitedcompanies.coms.securityService;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.data.search.Search;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;

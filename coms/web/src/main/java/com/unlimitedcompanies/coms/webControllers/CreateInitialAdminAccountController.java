@@ -45,6 +45,7 @@ public class CreateInitialAdminAccountController
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView processForm(@RequestParam("password") String pass)
 	{
+		// TODO: Implement validation checks
 //		//Validation check
 //		if (results.hasErrors())
 //		{

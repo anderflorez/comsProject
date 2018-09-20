@@ -6,7 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.search.Operator;
+import com.unlimitedcompanies.coms.domain.search.Operator;
 
 @Entity
 @Table(name = "orCondition")

@@ -109,26 +109,26 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	{
 		return em.find(Role.class, id);
 	}
-	
-	@Override
-	public Role searchRoleByIdWithMembers(Integer id)
-	{
-		return em.createQuery("select role from Role role "
-							+ "left join fetch role.users user "
-							+ "left join fetch user.contact contact "
-							+ "where (role.roleId = :roleId and ((user.username = 'admin') or (contact.firstName = 'Administrator')))", Role.class)
-							  .setParameter("roleId", id)
-							  .getSingleResult();
-	}
 
 	@Override
-	public Role searchRoleByRoleName(String roleName)
+	public Role getRoleByRoleName(String roleName)
 	{
 		return em.createQuery("select role from Role as role where role.roleName = :name", Role.class)
 				 .setParameter("name", roleName)
 				 .getSingleResult();
 	}
+	
+	@Override
+	public Role getRoleByIdWithMembers(Integer id)
+	{
+		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
+				+ "where role.roleId = :roleId", Role.class)
+				.setParameter("roleId", id)
+				.getSingleResult();
+	}
+	
 
+	// TODO: Delete this method as its purpose if for testing only
 	@Override
 	public int findNumberOfUser_RoleAssignments()
 	{
@@ -152,7 +152,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 	@Override
 	public void removeUserFromRole(Role role, User user)
 	{
-		Role foundRole = this.searchRoleByRoleName(role.getRoleName());
+		Role foundRole = this.getRoleByRoleName(role.getRoleName());
 		User foundUser = this.searchUserByUsername(user.getUsername());
 
 		foundRole.removeUser(foundUser);

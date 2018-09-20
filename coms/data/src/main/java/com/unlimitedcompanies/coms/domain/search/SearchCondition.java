@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.search;
+package com.unlimitedcompanies.coms.domain.search;
 
 public class SearchCondition
 {

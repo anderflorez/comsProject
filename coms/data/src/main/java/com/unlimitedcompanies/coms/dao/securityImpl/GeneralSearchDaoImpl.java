@@ -7,7 +7,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import com.unlimitedcompanies.coms.dao.security.GeneralSearchDao;
-import com.unlimitedcompanies.coms.data.search.Search;
+import com.unlimitedcompanies.coms.domain.search.Search;
 
 public class GeneralSearchDaoImpl implements GeneralSearchDao
 {

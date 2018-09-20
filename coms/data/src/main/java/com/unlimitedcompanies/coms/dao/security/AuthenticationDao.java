@@ -20,8 +20,8 @@ public interface AuthenticationDao
 	public void updateRole(Integer roleId, Role role);
 	public List<Role> getAllRoles();
 	public Role searchRoleById(int id);
-	public Role searchRoleByIdWithMembers(Integer id);
-	public Role searchRoleByRoleName(String roleName);
+	public Role getRoleByRoleName(String roleName);
+	public Role getRoleByIdWithMembers(Integer id);
 	
 	public int findNumberOfUser_RoleAssignments();
 	
