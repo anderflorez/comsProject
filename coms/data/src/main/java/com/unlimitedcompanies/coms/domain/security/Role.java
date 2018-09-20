@@ -1,11 +1,17 @@
 package com.unlimitedcompanies.coms.domain.security;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -18,6 +24,15 @@ public class Role
 	
 	@ManyToMany(mappedBy = "roles")
 	private List<User> users = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "role")
+	private Set<ResourcePermissions> resourcePermissions = new HashSet<>();
+	
+	@ManyToMany
+	@JoinTable(name = "role_resourceField", 
+			   joinColumns = {@JoinColumn(name = "roleId_FK")}, 
+			   inverseJoinColumns = {@JoinColumn(name = "resourceFieldId_FK")})
+	private List<ResourceField> restrictedFields = new ArrayList<>();
 	
 	protected Role() {}
 
@@ -38,7 +53,7 @@ public class Role
 	
 	public List<User> getMembers()
 	{
-		return this.users;
+		return Collections.unmodifiableList(this.users);
 	}
 	
 	public void setRoleId(Integer roleId)
@@ -61,6 +76,24 @@ public class Role
 	{
 		this.users.remove(user);
 		user.getRoles().remove(this);
+	}
+	
+	public void addResourcePermission(ResourcePermissions permission)
+	{
+		if (!this.resourcePermissions.contains(permission))
+		{
+			this.resourcePermissions.add(permission);
+			permission.assignRole(this);
+		}
+	}
+	
+	public void addRestrictedField(ResourceField field)
+	{
+		if (!this.restrictedFields.contains(field))
+		{
+			this.restrictedFields.add(field);
+			field.assignRestrictedRole(this);
+		}
 	}
 
 	@Override

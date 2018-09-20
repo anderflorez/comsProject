@@ -2,14 +2,12 @@ package com.unlimitedcompanies.coms.testClient;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.unlimitedcompanies.coms.dao.search.ConditionGroup;
-import com.unlimitedcompanies.coms.dao.search.Method;
-import com.unlimitedcompanies.coms.dao.search.Operator;
-import com.unlimitedcompanies.coms.dao.search.Search;
-import com.unlimitedcompanies.coms.dao.security.settings.SecuritySetup;
+import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetup;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.data.search.ConditionGroup;
+import com.unlimitedcompanies.coms.data.search.Method;
+import com.unlimitedcompanies.coms.data.search.Operator;
+import com.unlimitedcompanies.coms.data.search.Search;
 import com.unlimitedcompanies.coms.securityService.AuthenticationService;
 
 public class Client
@@ -36,17 +34,15 @@ public class Client
 		container.register(ApplicationConfig.class);
 		container.refresh();
 		
-		AuthenticationService authenticationService = container.getBean(AuthenticationService.class);
 		SecuritySetup securitySetup = container.getBean(SecuritySetup.class);
+		AuthenticationService authenticationService = container.getBean(AuthenticationService.class);
+		
+		securitySetup.checkAllResources();
 		
 //		int roleId = authenticationService.findRoleByRoleName("Administrators").getRoleId();
 //		Role role = authenticationService.findRoleByIdWithMembers(roleId);
 		
 //		Role testRole = (Role) authenticationService.superSearch(search);
-		
-		securitySetup.checkResourceList();
-		securitySetup.checkResourceFieldList();
-		System.out.println(securitySetup.findResourceByName("User").getResourceName());
 		
 		container.close();
 		

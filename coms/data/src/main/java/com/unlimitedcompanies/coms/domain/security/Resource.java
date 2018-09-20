@@ -1,7 +1,11 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -11,6 +15,12 @@ public class Resource
 	@Id
 	private Integer resourceId;
 	private String resourceName;
+	
+	@OneToMany(mappedBy = "resource")
+	private Set<ResourceField> resourceFields = new HashSet<>();
+	
+	@OneToMany(mappedBy = "resource")
+	private Set<ResourcePermissions> permissions = new HashSet<>();
 
 	public Resource() {}
 
@@ -28,6 +38,24 @@ public class Resource
 	public String getResourceName()
 	{
 		return resourceName;
+	}
+	
+	public void addField(ResourceField field)
+	{
+		if (!this.resourceFields.contains(field))
+		{
+			this.resourceFields.add(field);
+			field.assignResource(this);
+		}
+	}
+	
+	public void addPermission(ResourcePermissions permission)
+	{
+		if (!this.permissions.contains(permission))
+		{
+			this.permissions.add(permission);
+			permission.assignResource(this);
+		}
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.dao.security.settings;
+package com.unlimitedcompanies.coms.dao.securitySettingsImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,16 +12,25 @@ import javax.persistence.metamodel.EntityType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetup;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
 @Repository
 @Transactional
-public class SecuritySetup
+public class SecuritySetupImpl implements SecuritySetup
 {
 	@PersistenceContext
 	private EntityManager em;
+	
+	@Override
+	public void checkAllResources()
+	{
+		this.checkResourceList();
+		this.checkResourceFieldList();
+	}
 
+	@Override
 	public void checkResourceList()
 	{
 		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
@@ -39,6 +48,7 @@ public class SecuritySetup
 		}
 	}
 
+	@Override
 	public void checkResourceFieldList()
 	{		
 		List<ResourceField> fields = this.findAllResourceFieldsWithResources();
@@ -70,30 +80,35 @@ public class SecuritySetup
 		}
 	}
 	
+	@Override
 	public List<String> findAllResourceNames()
 	{
 		return em.createQuery("select resource.resourceName from Resource resource", String.class)
 							  .getResultList();
 	}
 	
+	@Override
 	public List<ResourceField> findAllResourceFieldsWithResources()
 	{
 		return em.createQuery("select field from ResourceField field left join fetch field.resource", ResourceField.class)
 							  .getResultList();
 	}
 
+	@Override
 	public Resource findResourceByName(String name)
 	{
 		return em.createQuery("select resource from Resource resource where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
 
+	@Override
 	public void registerResource(String resourceName)
 	{
 		em.createNativeQuery("INSERT INTO resource (resourceName) VALUES (:resourceName)")
 				.setParameter("resourceName", resourceName).executeUpdate();
 	}
 
+	@Override
 	public void registerResourceField(ResourceField resourceField)
 	{
 		em.createNativeQuery(

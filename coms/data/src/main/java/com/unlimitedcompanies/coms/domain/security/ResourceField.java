@@ -1,8 +1,12 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -18,6 +22,9 @@ public class ResourceField
 	@ManyToOne
 	@JoinColumn(name = "resourceId_FK")
 	private Resource resource;
+	
+	@ManyToMany(mappedBy = "restrictedFields")
+	private List<Role> restrictedForRoles = new ArrayList<>();
 
 	protected ResourceField()
 	{}
@@ -48,6 +55,24 @@ public class ResourceField
 	public Resource getResource()
 	{
 		return resource;
+	}
+	
+	public void assignResource(Resource resource)
+	{
+		if (!this.resource.equals(resource))
+		{
+			this.resource = resource;
+			resource.addField(this);
+		}
+	}
+	
+	public void assignRestrictedRole(Role role)
+	{
+		if (!this.restrictedForRoles.contains(role))
+		{
+			this.restrictedForRoles.add(role);
+			role.addRestrictedField(this);
+		}
 	}
 
 	@Override

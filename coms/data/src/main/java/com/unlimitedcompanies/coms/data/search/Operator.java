@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.dao.search;
+package com.unlimitedcompanies.coms.data.search;
 
 public enum Operator
 {

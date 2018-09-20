@@ -2,7 +2,6 @@ package com.unlimitedcompanies.coms.dao.security;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.dao.search.Search;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -29,6 +28,4 @@ public interface AuthenticationDao
 	public void assignUserToRole(Role role, User user);
 	public void removeUserFromRole(Role role, User user);
 	
-	
-	public Object superSearch(Search search);
 }

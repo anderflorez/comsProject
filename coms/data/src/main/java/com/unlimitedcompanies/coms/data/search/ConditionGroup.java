@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.dao.search;
+package com.unlimitedcompanies.coms.data.search;
 
 import java.util.HashMap;
 import java.util.HashSet;

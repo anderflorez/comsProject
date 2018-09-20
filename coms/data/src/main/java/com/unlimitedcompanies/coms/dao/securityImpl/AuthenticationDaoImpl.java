@@ -2,17 +2,14 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.unlimitedcompanies.coms.dao.search.Search;
 import com.unlimitedcompanies.coms.dao.security.AuthenticationDao;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
@@ -123,22 +120,6 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 							  .setParameter("roleId", id)
 							  .getSingleResult();
 	}
-	
-	
-	public Role roleGeneralSearch()
-	{
-		Role role = null;
-		String query;
-		role = em.createQuery("select role "
-							  + "from Role role", 
-							  Role.class)
-							  .getSingleResult();
-		
-		return role;
-	}
-	
-	
-	
 
 	@Override
 	public Role searchRoleByRoleName(String roleName)
@@ -176,24 +157,5 @@ public class AuthenticationDaoImpl implements AuthenticationDao
 
 		foundRole.removeUser(foundUser);
 	}
-	
-	
-	
-	
-	// TESTING
-	@Override
-	public Object superSearch(Search search)
-	{
-		Query q = em.createQuery(search.toString());
-		Map<String, Object> values = search.getValues();
-		for (String key : values.keySet())
-		{
-			q.setParameter(key, values.get(key));
-		}
-		
-		return q.getSingleResult();
-	}
-	
-
 
 }

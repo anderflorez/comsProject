@@ -2,7 +2,7 @@ package com.unlimitedcompanies.coms.securityService;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.dao.search.Search;
+import com.unlimitedcompanies.coms.data.search.Search;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
@@ -30,6 +30,4 @@ public interface AuthenticationService
 	public void assignUserToRole(Role role, User user);
 	public void removeUserFromRole(Role role, User user);
 	
-	
-	public Object superSearch(Search search);
 }
