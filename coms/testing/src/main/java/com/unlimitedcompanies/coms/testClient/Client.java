@@ -37,19 +37,19 @@ public class Client
 		
 		securitySetup.checkAllResources();
 		
-		int roleId = authenticationService.findRoleByRoleName("Administrators").getRoleId();
-		Role role = authenticationService.findRoleByIdWithMembers(roleId);
+//		int roleId = authenticationService.findRoleByRoleName("Administrators").getRoleId();
+//		Role role = authenticationService.findRoleByIdWithMembers(roleId);
 		
 //		Role testRole = (Role) authenticationService.superSearch(search);
 		
 		container.close();
 		
-		System.out.println("Found role name: " + role.getRoleName());
-		System.out.println("Found role members:");
-		for (User user : role.getMembers())
-		{
-			System.out.println("Found user member:" + user.getUsername());
-		}
+//		System.out.println("Found role name: " + role.getRoleName());
+//		System.out.println("Found role members:");
+//		for (User user : role.getMembers())
+//		{
+//			System.out.println("Found user member:" + user.getUsername());
+//		}
 		
 //		System.out.println(" =========== Super Search Test ===========");
 //		System.out.println(testRole.getRoleName());

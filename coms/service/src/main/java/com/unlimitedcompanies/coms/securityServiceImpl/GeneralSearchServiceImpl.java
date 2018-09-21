@@ -13,10 +13,10 @@ public class GeneralSearchServiceImpl implements GeneralSearchService
 	@Autowired
 	private GeneralSearchDao dao;
 	
-	@Override
-	public Object search(Search search)
-	{
-		return dao.search(search);
-	}
+//	@Override
+//	public Object search(Search search)
+//	{
+//		return dao.search(search);
+//	}
 
 }

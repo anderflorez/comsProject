@@ -22,27 +22,27 @@ public class ViewSecurityObjectController {
 	@Autowired
 	AuthenticationService authenticationService;
 	
-	@RequestMapping("/contacts")
-	public ModelAndView showContacts()
-	{
-		List<Contact> allContacts = contactService.findAllContacts();
-		
-		return new ModelAndView("/pages/security/contactView.jsp", "contacts", allContacts);
-	}
-	
-	@RequestMapping("/users")
-	public ModelAndView showUsers()
-	{
-		List<User> allUsers = authenticationService.findAllUsers();
-		
-		return new ModelAndView("/pages/security/userView.jsp", "users", allUsers);
-	}
-	
-	@RequestMapping("/roles")
-	public ModelAndView showRoles()
-	{
-		List<Role> allRoles = authenticationService.findAllRoles();
-		
-		return new ModelAndView("/pages/security/roleView.jsp", "roles", allRoles);
-	}
+//	@RequestMapping("/contacts")
+//	public ModelAndView showContacts()
+//	{
+//		List<Contact> allContacts = contactService.findAllContacts();
+//		
+//		return new ModelAndView("/pages/security/contactView.jsp", "contacts", allContacts);
+//	}
+//	
+//	@RequestMapping("/users")
+//	public ModelAndView showUsers()
+//	{
+//		List<User> allUsers = authenticationService.findAllUsers();
+//		
+//		return new ModelAndView("/pages/security/userView.jsp", "users", allUsers);
+//	}
+//	
+//	@RequestMapping("/roles")
+//	public ModelAndView showRoles()
+//	{
+//		List<Role> allRoles = authenticationService.findAllRoles();
+//		
+//		return new ModelAndView("/pages/security/roleView.jsp", "roles", allRoles);
+//	}
 }

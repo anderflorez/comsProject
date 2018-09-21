@@ -4,5 +4,5 @@ import com.unlimitedcompanies.coms.domain.search.Search;
 
 public interface GeneralSearchService
 {
-	public Object search(Search search);
+//	public Object search(Search search);
 }

@@ -23,48 +23,48 @@ public class RoleManagementController
 	@Autowired
 	AuthenticationService authenticationService;
 	
-	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showContactDetails(@RequestParam("r") String rId)
-	{		
-		// TODO: check for errors if the id is null or invalid
-		Integer id = Integer.valueOf(rId);
-		Role role;
-		ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp");
-		
-		if (id > 0)
-		{
-			// TODO: show error if object is not found
-			role = authenticationService.findRoleByIdWithMembers(id);
-			
-			List<Contact> memberContacts = new ArrayList<>();
-			for(User user : role.getMembers())
-			{
-				memberContacts.add(user.getContact());
-			}
-			
-			mv.addObject("role", role);
-			mv.addObject("memberContacts", memberContacts);
-			
-		} else
-		{
-			role = new Role(null);
-			mv.addObject("role", role);
-			mv.addObject("memberContacts", null);
-		}
-		
-		return mv;
-	}
-	
-	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processContact(Role role)
-	{	
-		if (role.getRoleId() != null)
-		{
-			authenticationService.updateRole(role.getRoleId(), role);
-		} else
-		{
-			role = authenticationService.saveRole(role);
-		}
-		return new ModelAndView("redirect:/manageRole?r=" + role.getRoleId());
-	}
+//	@RequestMapping(method = RequestMethod.GET)
+//	public ModelAndView showContactDetails(@RequestParam("r") String rId)
+//	{		
+//		// TODO: check for errors if the id is null or invalid
+//		Integer id = Integer.valueOf(rId);
+//		Role role;
+//		ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp");
+//		
+//		if (id > 0)
+//		{
+//			// TODO: show error if object is not found
+//			role = authenticationService.findRoleByIdWithMembers(id);
+//			
+//			List<Contact> memberContacts = new ArrayList<>();
+//			for(User user : role.getMembers())
+//			{
+//				memberContacts.add(user.getContact());
+//			}
+//			
+//			mv.addObject("role", role);
+//			mv.addObject("memberContacts", memberContacts);
+//			
+//		} else
+//		{
+//			role = new Role(null);
+//			mv.addObject("role", role);
+//			mv.addObject("memberContacts", null);
+//		}
+//		
+//		return mv;
+//	}
+//	
+//	@RequestMapping(method = RequestMethod.POST)
+//	public ModelAndView processContact(Role role)
+//	{	
+//		if (role.getRoleId() != null)
+//		{
+//			authenticationService.updateRole(role.getRoleId(), role);
+//		} else
+//		{
+//			role = authenticationService.saveRole(role);
+//		}
+//		return new ModelAndView("redirect:/manageRole?r=" + role.getRoleId());
+//	}
 }
