@@ -2,7 +2,7 @@ package com.unlimitedcompanies.coms.testClient;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetup;
+import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
@@ -12,6 +12,7 @@ public class Client
 {
 	public static void main(String[] args)
 	{
+		// TODO: Create an integration test for general searches
 //		System.out.println(" =========== Search ===========");
 //		Search search = new Search("Role");
 //		search.join("Role", "users", "User");
@@ -32,10 +33,10 @@ public class Client
 		container.register(ApplicationConfig.class);
 		container.refresh();
 		
-		SecuritySetup securitySetup = container.getBean(SecuritySetup.class);
+		SecuritySetupDao securitySetupDao = container.getBean(SecuritySetupDao.class);
 		AuthenticationService authenticationService = container.getBean(AuthenticationService.class);
 		
-		securitySetup.checkAllResources();
+//		securitySetup.checkAllResources();
 		
 //		int roleId = authenticationService.findRoleByRoleName("Administrators").getRoleId();
 //		Role role = authenticationService.findRoleByIdWithMembers(roleId);

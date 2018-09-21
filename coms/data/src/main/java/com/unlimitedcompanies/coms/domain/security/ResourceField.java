@@ -29,11 +29,11 @@ public class ResourceField
 	protected ResourceField()
 	{}
 
-	public ResourceField(String resourceFieldName, byte association, Resource resource)
+	public ResourceField(String resourceFieldName, boolean association, Resource resource)
 	{
 		this.resourceFieldId = null;
 		this.resourceFieldName = resourceFieldName;
-		this.association = association;
+		this.association = (byte) (association == true ? 1 : 0);
 		this.resource = resource;
 	}
 
@@ -47,9 +47,9 @@ public class ResourceField
 		return resourceFieldName;
 	}
 
-	public byte getAssociation()
+	public boolean getAssociation()
 	{
-		return association;
+		return this.association == 1 ? true : false;
 	}
 
 	public Resource getResource()

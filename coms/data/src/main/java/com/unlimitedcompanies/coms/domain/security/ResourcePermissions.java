@@ -165,12 +165,8 @@ public class ResourcePermissions
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + createRec;
-		result = prime * result + deleteRec;
-		result = prime * result + readRec;
 		result = prime * result + ((resource == null) ? 0 : resource.hashCode());
 		result = prime * result + ((role == null) ? 0 : role.hashCode());
-		result = prime * result + updateRec;
 		return result;
 	}
 
@@ -184,12 +180,6 @@ public class ResourcePermissions
 		if (getClass() != obj.getClass())
 			return false;
 		ResourcePermissions other = (ResourcePermissions) obj;
-		if (createRec != other.createRec)
-			return false;
-		if (deleteRec != other.deleteRec)
-			return false;
-		if (readRec != other.readRec)
-			return false;
 		if (resource == null)
 		{
 			if (other.resource != null)
@@ -201,8 +191,6 @@ public class ResourcePermissions
 			if (other.role != null)
 				return false;
 		} else if (!role.equals(other.role))
-			return false;
-		if (updateRec != other.updateRec)
 			return false;
 		return true;
 	}
