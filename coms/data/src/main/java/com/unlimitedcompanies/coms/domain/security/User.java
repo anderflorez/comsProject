@@ -74,6 +74,12 @@ public class User
 		return sdf.format(this.dateAdded);
 	}
 	
+	public String getDbDateAdded()
+	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd");
+		return dateFormat.format(this.dateAdded);
+	}
+	
 	public Date getFullDateAdded()
 	{
 		return this.dateAdded;
@@ -83,6 +89,12 @@ public class User
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy 'at' HH:mm:ss z");
 		return sdf.format(this.lastAccess);
+	}
+	
+	public String getDbLastAccess()
+	{
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
+		return dateTimeFormat.format(this.lastAccess);
 	}
 	
 	public Date getFullLastAccessDate()

@@ -1,20 +1,11 @@
 package com.unlimitedcompanies.coms.securityServiceImpl;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.unlimitedcompanies.coms.dao.security.AuthenticationDao;
+import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
-import com.unlimitedcompanies.coms.domain.security.Address;
-import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Phone;
-import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 
 @Service
@@ -25,8 +16,14 @@ public class ContactServiceImpl implements ContactService
 	ContactDao dao;
 	
 	@Autowired
-	AuthenticationDao authenticationDao;
+	AuthDao authenticationDao;
 
+//	@Override
+//	public void saveContact(Contact contact)
+//	{
+//		dao.createContact(contact);		
+//	}
+//
 //	@Override
 //	public int findNumberOfContacts()
 //	{
@@ -44,12 +41,6 @@ public class ContactServiceImpl implements ContactService
 //			loggedUser = authenticationDao.searchUserByUsernameWithContact(currentUserName);
 //		}
 //		return dao.getAllContacts(loggedUser);
-//	}
-//
-//	@Override
-//	public void saveContact(Contact contact)
-//	{
-//		dao.createContact(contact);		
 //	}
 //
 //	@Override

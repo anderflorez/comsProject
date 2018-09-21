@@ -1,7 +1,6 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -11,10 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
-import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Phone;
-import com.unlimitedcompanies.coms.domain.security.User;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -23,25 +19,25 @@ public class ContactDaoImpl implements ContactDao
 	@PersistenceContext
 	private EntityManager em;
 
-//	@Override
-//	public int getNumberOfContacts()
-//	{
-//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contact").getSingleResult();
-//		return bigInt.intValue();
-//	}
-//
-//	@Override
-//	public void createContact(Contact contact)
-//	{
-//		em.createNativeQuery(
-//				"INSERT INTO contact (firstName, middleName, lastName, email) VALUES (:fname, :mname, :lname, :email)")
-//				.setParameter("fname", contact.getFirstName())
-//				.setParameter("mname", contact.getMiddleName())
-//				.setParameter("lname", contact.getLastName())
-//				.setParameter("email", contact.getEmail())
-//				.executeUpdate();
-//	}
-//	
+	@Override
+	public int getNumberOfContacts()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contact").getSingleResult();
+		return bigInt.intValue();
+	}
+
+	@Override
+	public void createContact(Contact contact)
+	{
+		em.createNativeQuery(
+				"INSERT INTO contact (firstName, middleName, lastName, email) VALUES (:fname, :mname, :lname, :email)")
+				.setParameter("fname", contact.getFirstName())
+				.setParameter("mname", contact.getMiddleName())
+				.setParameter("lname", contact.getLastName())
+				.setParameter("email", contact.getEmail())
+				.executeUpdate();
+	}
+	
 //	@Override
 //	public List<Contact> getAllContacts(User loggedUser)
 //	{		
@@ -49,14 +45,14 @@ public class ContactDaoImpl implements ContactDao
 //							  .getResultList();
 //	}
 //
-//	@Override
-//	public Contact searchContactByEmail(String contactEmail)
-//	{
-//		return em.createQuery("select contact from Contact as contact where contact.email = :email", Contact.class)
-//							  .setParameter("email", contactEmail)
-//							  .getSingleResult();
-//	}
-//
+	@Override
+	public Contact getContactByEmail(String contactEmail)
+	{
+		return em.createQuery("select contact from Contact as contact where contact.email = :email", Contact.class)
+							  .setParameter("email", contactEmail)
+							  .getSingleResult();
+	}
+
 //	@Override
 //	public Contact searchContactById(int Id)
 //	{

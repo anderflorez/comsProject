@@ -1,11 +1,5 @@
 package com.unlimitedcompanies.coms.securityService;
 
-import java.util.List;
-
-import com.unlimitedcompanies.coms.domain.security.Address;
-import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Phone;
-
 public interface ContactService
 {
 //	public void saveContact(Contact Contact);
