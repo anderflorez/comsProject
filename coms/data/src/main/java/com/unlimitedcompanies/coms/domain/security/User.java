@@ -2,6 +2,7 @@ package com.unlimitedcompanies.coms.domain.security;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -109,7 +110,7 @@ public class User
 	
 	public List<Role> getRoles()
 	{
-		return this.roles;
+		return Collections.unmodifiableList(this.roles);
 	}
 	
 	public void setUserId(Integer userId)
@@ -149,8 +150,11 @@ public class User
 
 	public void addRole(Role role)
 	{
-		this.roles.add(role);
-		role.getMembers().add(this);
+		if (!roles.contains(role))
+		{
+			this.roles.add(role);
+			role.addUser(this);			
+		}
 	}
 	
 	public void removeRole(Role role)

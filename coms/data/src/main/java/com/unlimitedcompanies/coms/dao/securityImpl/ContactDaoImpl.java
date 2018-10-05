@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -38,13 +40,13 @@ public class ContactDaoImpl implements ContactDao
 				.executeUpdate();
 	}
 	
-//	@Override
-//	public List<Contact> getAllContacts(User loggedUser)
-//	{		
-//		return em.createQuery("select contact from Contact as contact", Contact.class)
-//							  .getResultList();
-//	}
-//
+	@Override
+	public List<Contact> getAllContacts(User loggedUser)
+	{		
+		return em.createQuery("select contact from Contact as contact", Contact.class)
+							  .getResultList();
+	}
+
 	@Override
 	public Contact getContactByEmail(String contactEmail)
 	{
@@ -53,14 +55,14 @@ public class ContactDaoImpl implements ContactDao
 							  .getSingleResult();
 	}
 
-//	@Override
-//	public Contact searchContactById(int Id)
-//	{
-//		return em.createQuery("select contact from Contact as contact where contact.contactId = :id", Contact.class)
-//							  .setParameter("id", Id)
-//							  .getSingleResult();
-//	}
-//
+	@Override
+	public Contact getContactById(String Id)
+	{
+		return em.createQuery("select contact from Contact as contact where contact.contactId = :id", Contact.class)
+							  .setParameter("id", Id)
+							  .getSingleResult();
+	}
+
 //	@Override
 //	public void updateContact(int id, Contact contact)
 //	{

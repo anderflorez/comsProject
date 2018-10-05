@@ -1,5 +1,7 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -13,26 +15,30 @@ import com.unlimitedcompanies.coms.domain.search.Operator;
 public class AndCondition
 {
 	@Id
-	private Integer andConditionId;
+	private String andConditionId;
 	private String fieldName;
 	private String fieldValue;
-	private Operator operator;
+	private String operator;
 
 	@ManyToOne
 	@JoinColumn(name = "andGroupId_FK")
 	private AndGroup andGroup;
 
-	public AndCondition() {}
-
-	public AndCondition(String fieldName, String fieldValue, Operator operator, AndGroup andGroup)
+	public AndCondition() 
 	{
+		this.andConditionId = UUID.randomUUID().toString();
+	}
+	
+	public AndCondition(String fieldName, String fieldValue, Operator operator)
+	{
+		this.andConditionId = UUID.randomUUID().toString();
 		this.fieldName = fieldName;
 		this.fieldValue = fieldValue;
-		this.operator = operator;
-		this.andGroup = andGroup;
+		this.operator = operator.toString();
+		this.andGroup = null;
 	}
 
-	public Integer getAndConditionId()
+	public String getAndConditionId()
 	{
 		return andConditionId;
 	}
@@ -49,7 +55,7 @@ public class AndCondition
 
 	public Operator getOperator()
 	{
-		return operator;
+		return Operator.getOperator(this.operator);
 	}
 
 	public AndGroup getAndGroup()
@@ -59,11 +65,13 @@ public class AndCondition
 	
 	public void assignToGroup(AndGroup andGroup)
 	{
-		if (!this.andGroup.equals(andGroup))
-		{
-			this.andGroup = andGroup;
-			andGroup.addAndCondition(this);
-		}
+		this.andGroup = andGroup;
+	}
+	
+	public void assignToGroupBidirectional(AndGroup andGroup)
+	{
+		this.andGroup = andGroup;
+		andGroup.addAndCondition(this);
 	}
 
 	@Override
@@ -110,6 +118,4 @@ public class AndCondition
 			return false;
 		return true;
 	}
-
-	
 }

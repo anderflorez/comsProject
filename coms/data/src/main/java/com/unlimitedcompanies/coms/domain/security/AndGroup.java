@@ -1,11 +1,15 @@
 package com.unlimitedcompanies.coms.domain.security;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -15,19 +19,45 @@ import javax.persistence.Table;
 public class AndGroup
 {
 	@Id
-	private Integer andGroupId;
-	
+	private String andGroupId;
+
 	@OneToOne(mappedBy = "andGroup")
 	private ResourcePermissions resourcePermission;
-	
-	@OneToMany
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "orGroupId_FK")
-	private Set<OrGroup> orGroup = new HashSet<>();
+	private OrGroup containerOrGroup;
+
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "andGroup")
+	private List<AndCondition> andConditions = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "andGroup")
-	private Set<AndCondition> andConditions = new HashSet<>();
-		
-	public AndGroup() {}
+	@OneToMany(mappedBy = "containerAndGroup")
+	private List<OrGroup> orGroups = new ArrayList<>();
+
+	public AndGroup()
+	{
+		this.andGroupId = UUID.randomUUID().toString();
+	}
+
+	public String getAndGroupId()
+	{
+		return this.andGroupId;
+	}
+	
+	public OrGroup getContainerOrGroup()
+	{
+		return this.containerOrGroup;
+	}
+	
+	public List<OrGroup> getOrGroups()
+	{
+		return Collections.unmodifiableList(this.orGroups);
+	}
+
+	public List<AndCondition> getConditions()
+	{
+		return Collections.unmodifiableList(this.andConditions);
+	}
 
 	public void assignToPermission(ResourcePermissions resourcePermission)
 	{
@@ -37,19 +67,27 @@ public class AndGroup
 			resourcePermission.assignConditionGroup(this);
 		}
 	}
-	
+
 	public void addOrGroup(OrGroup orGroup)
 	{
-		this.orGroup.add(orGroup);
+		this.containerOrGroup = orGroup;
 	}
-	
+
 	public void addAndCondition(AndCondition andCondition)
 	{
 		if (!this.andConditions.contains(andCondition))
 		{
 			this.andConditions.add(andCondition);
-			andCondition.assignToGroup(this);
 		}
+	}
+	
+	public void addAndConditionBidirectional(AndCondition andCondition)
+	{
+		if (!this.andConditions.contains(andCondition))
+		{
+			this.andConditions.add(andCondition);
+		}
+		andCondition.assignToGroup(this);
 	}
 
 	@Override
@@ -58,7 +96,7 @@ public class AndGroup
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((andConditions == null) ? 0 : andConditions.hashCode());
-		result = prime * result + ((resourcePermission == null) ? 0 : resourcePermission.hashCode());
+		result = prime * result + ((andGroupId == null) ? 0 : andGroupId.hashCode());
 		return result;
 	}
 
@@ -78,14 +116,13 @@ public class AndGroup
 				return false;
 		} else if (!andConditions.equals(other.andConditions))
 			return false;
-		if (resourcePermission == null)
+		if (andGroupId == null)
 		{
-			if (other.resourcePermission != null)
+			if (other.andGroupId != null)
 				return false;
-		} else if (!resourcePermission.equals(other.resourcePermission))
+		} else if (!andGroupId.equals(other.andGroupId))
 			return false;
 		return true;
 	}
-	
 	
 }

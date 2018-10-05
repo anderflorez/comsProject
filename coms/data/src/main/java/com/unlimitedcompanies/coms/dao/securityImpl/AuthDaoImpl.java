@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -10,6 +11,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
+import com.unlimitedcompanies.coms.domain.security.AndCondition;
+import com.unlimitedcompanies.coms.domain.security.AndGroup;
+import com.unlimitedcompanies.coms.domain.security.OrCondition;
+import com.unlimitedcompanies.coms.domain.security.OrGroup;
+import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -54,12 +61,12 @@ public class AuthDaoImpl implements AuthDao
 //		return em.createQuery("select user from User as user", User.class).getResultList();
 //	}
 //	
-//	@Override
-//	public User searchUserByUserId(int id)
-//	{
-//		return em.find(User.class, id);
-//	}
-//
+	@Override
+	public User getUserByUserId(int id)
+	{
+		return em.find(User.class, id);
+	}
+
 	@Override
 	public User getUserByUsername(String username)
 	{
@@ -68,14 +75,22 @@ public class AuthDaoImpl implements AuthDao
 							  .getSingleResult();
 	}
 	
-//	@Override
-//	public User searchUserByUsernameWithContact(String username)
-//	{
-//		return em.createQuery("select user from User as user left join fetch user.contact where username = :username", User.class)
-//							  .setParameter("username", username)
-//							  .getSingleResult();
-//	}
-//
+	@Override
+	public User getUserByUsernameWithContact(String username)
+	{
+		return em.createQuery("select user from User as user left join fetch user.contact where username = :username", User.class)
+							  .setParameter("username", username)
+							  .getSingleResult();
+	}
+
+	@Override
+	public User getFullUserByUsername(String username)
+	{
+		return em.createQuery("select user from User user left join fetch user.contact left join fetch user.roles where user.username = :username", User.class)
+							  .setParameter("username", username)
+							  .getSingleResult();
+	}
+	
 	@Override
 	public int getNumberOfRoles()
 	{
@@ -119,15 +134,7 @@ public class AuthDaoImpl implements AuthDao
 //				.getSingleResult();
 //	}
 //
-//	// TODO: Delete this method as its purpose if for testing only
-//	@Override
-//	public int findNumberOfUser_RoleAssignments()
-//	{
-//		BigInteger bigInt =
-//				(BigInteger) em.createNativeQuery("SELECT COUNT(user_role_Id) FROM user_role").getSingleResult();
-//		return bigInt.intValue();
-//	}
-//	
+	
 //	@Override
 //	public void updateRole(Integer roleId, Role role)
 //	{
@@ -161,6 +168,62 @@ public class AuthDaoImpl implements AuthDao
 	{
 		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(role_resource_Id) FROM role_resource").getSingleResult();
 		return bigInt.intValue();
+	}
+
+	@Override
+	public void createResourcePermission(ResourcePermissions newPermission)
+	{
+		em.persist(newPermission);
+	}
+	
+	@Override
+	public ResourcePermissions searchPermissionById(String id)
+	{
+		return em.find(ResourcePermissions.class, id);
+	}
+	
+	@Override
+	public List<ResourcePermissions> getAllRolePermissions(Role role)
+	{
+		return em.createQuery("select permissions from ResourcePermissions permissions where permissions.role = :role", ResourcePermissions.class)
+							  .setParameter("role", role)
+							  .getResultList();
+	}
+
+	@Override
+	public void createAndGroup(AndGroup andGroup)
+	{
+		em.persist(andGroup);
+	}
+
+	@Override
+	public AndGroup getAndGroupById(String andGroupId)
+	{
+		return em.find(AndGroup.class, andGroupId);
+	}
+
+	@Override
+	public void createAndCondition(AndCondition andCondition)
+	{
+		em.persist(andCondition);
+	}
+
+	@Override
+	public void createOrGroup(OrGroup orGroup)
+	{
+		em.persist(orGroup);		
+	}
+
+	@Override
+	public OrGroup getOrGroupById(String orGroupId)
+	{
+		return em.find(OrGroup.class, orGroupId);
+	}
+
+	@Override
+	public void createOrCondition(OrCondition orCondition)
+	{
+		em.persist(orCondition);
 	}
 
 }

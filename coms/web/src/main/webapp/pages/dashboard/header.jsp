@@ -12,7 +12,7 @@
 		</button>
 		<div id="user-menu" class="dropdown">
 			<button type="button" data-toggle="dropdown" class="dropdown-toggle">
-				<span>${loggedUser.contact.firstName} ${loggedUser.contact.lastName}</span>
+				<span>${user.contact.firstName} ${user.contact.lastName}</span>
 			</button>
 			<ul class="dropdown-menu">
 				<li><a href="#"><i class="ti-settings"></i>Settings</a></li>

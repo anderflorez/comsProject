@@ -2,11 +2,8 @@ package com.unlimitedcompanies.coms.testClient;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthenticationService;
+import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
 
 public class Client
 {
@@ -33,15 +30,16 @@ public class Client
 		container.register(ApplicationConfig.class);
 		container.refresh();
 		
-		SecuritySetupDao securitySetupDao = container.getBean(SecuritySetupDao.class);
-		AuthenticationService authenticationService = container.getBean(AuthenticationService.class);
+		SecuritySetupService setupService = container.getBean(SecuritySetupService.class);
+//		AuthService authService = container.getBean(AuthService.class);
 		
+//		setupService.initialSetup();
 //		securitySetup.checkAllResources();
 		
-//		int roleId = authenticationService.findRoleByRoleName("Administrators").getRoleId();
-//		Role role = authenticationService.findRoleByIdWithMembers(roleId);
+//		int roleId = authService.findRoleByRoleName("Administrators").getRoleId();
+//		Role role = authService.findRoleByIdWithMembers(roleId);
 		
-//		Role testRole = (Role) authenticationService.superSearch(search);
+//		Role testRole = (Role) authService.superSearch(search);
 		
 		container.close();
 		

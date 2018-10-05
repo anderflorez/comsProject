@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthenticationService;
+import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
 public class ViewSecurityObjectController {
@@ -20,20 +19,26 @@ public class ViewSecurityObjectController {
 	ContactService contactService;
 	
 	@Autowired
-	AuthenticationService authenticationService;
+	AuthService authService;
 	
-//	@RequestMapping("/contacts")
-//	public ModelAndView showContacts()
-//	{
-//		List<Contact> allContacts = contactService.findAllContacts();
-//		
-//		return new ModelAndView("/pages/security/contactView.jsp", "contacts", allContacts);
-//	}
-//	
+	@Autowired
+	AuthenticatedUserDetail userDetail;
+	
+	@RequestMapping("/contacts")
+	public ModelAndView showContacts()
+	{
+		List<Contact> allContacts = contactService.searchAllContacts();
+		ModelAndView mv = new ModelAndView("/pages/security/contactView.jsp");
+		mv.addObject("contacts", allContacts);
+		mv.addObject("user", userDetail.getUser());
+		
+		return mv;
+	}
+	
 //	@RequestMapping("/users")
 //	public ModelAndView showUsers()
 //	{
-//		List<User> allUsers = authenticationService.findAllUsers();
+//		List<User> allUsers = authService.findAllUsers();
 //		
 //		return new ModelAndView("/pages/security/userView.jsp", "users", allUsers);
 //	}
@@ -41,7 +46,7 @@ public class ViewSecurityObjectController {
 //	@RequestMapping("/roles")
 //	public ModelAndView showRoles()
 //	{
-//		List<Role> allRoles = authenticationService.findAllRoles();
+//		List<Role> allRoles = authService.findAllRoles();
 //		
 //		return new ModelAndView("/pages/security/roleView.jsp", "roles", allRoles);
 //	}

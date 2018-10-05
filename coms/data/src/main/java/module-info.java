@@ -10,7 +10,7 @@ module data
 	requires java.validation;
 	requires spring.beans;
 	requires spring.context;
-	requires spring.security.crypto;
+	requires spring.security.core;
 	
 	exports com.unlimitedcompanies.coms.data.config;
 	exports com.unlimitedcompanies.coms.domain.search;

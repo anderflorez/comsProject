@@ -1,30 +1,17 @@
 package com.unlimitedcompanies.coms.webControllers.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthenticationService;
-import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
-import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 
 @Controller
 @RequestMapping("/manageUser")
 public class UserManagementController
 {
-	@Autowired
-	AuthenticationService authenticationService;
-	
-	@Autowired
-	ContactService contactService;
+//	@Autowired
+//	AuthService authService;
+//	
+//	@Autowired
+//	ContactService contactService;
 	
 //	@RequestMapping(method = RequestMethod.GET)
 //	public ModelAndView showUserDetails(@RequestParam("u") String uId, @RequestParam("c") String cId)
@@ -38,7 +25,7 @@ public class UserManagementController
 //		if (uid > 0)
 //		{
 //			// TODO: show error if object is not found
-//			User user = authenticationService.findUserByUserId(uid);
+//			User user = authService.findUserByUserId(uid);
 //			userForm = new UserForm(user);
 //		} 
 //		else if (uid == 0 && cid > 0)
@@ -57,7 +44,7 @@ public class UserManagementController
 //		{
 //			User user = new User(userForm.getUsername(), null, null);
 //			user.setEnabled(userForm.getEnabled());
-//			user = authenticationService.updateUser(userForm.getUserId(), user);
+//			user = authService.updateUser(userForm.getUserId(), user);
 //			userForm = new UserForm(user);
 //		} 
 //		else
@@ -79,7 +66,7 @@ public class UserManagementController
 //			//Create new user
 //			try
 //			{
-//				User newUser = authenticationService.saveUser(new User(userForm.getUsername(), password, contact));
+//				User newUser = authService.saveUser(new User(userForm.getUsername(), password, contact));
 //				userForm = new UserForm(newUser);
 //			} catch (NonExistingContactException e)
 //			{

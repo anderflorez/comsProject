@@ -1,14 +1,17 @@
 package com.unlimitedcompanies.coms.dao.security;
 
+import java.util.List;
+
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 public interface ContactDao
 {
 	public int getNumberOfContacts();
 	public void createContact(Contact contact);
-//	public List<Contact> getAllContacts(User loggedUser);
+	public List<Contact> getAllContacts(User loggedUser);
 	public Contact getContactByEmail(String contactEmail);
-//	public Contact searchContactById(int Id);
+	public Contact getContactById(String id);
 //	public void updateContact(int id, Contact contact);
 //	public void removeContact(int id);
 //	

@@ -1,11 +1,15 @@
 package com.unlimitedcompanies.coms.domain.security;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -14,18 +18,41 @@ import javax.persistence.Table;
 public class OrGroup
 {
 	@Id
-	private Integer OrGroupId;
+	private String orGroupId;
 	
-	@OneToMany
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "andGroupId_FK")
-	private Set<AndGroup> andGroup = new HashSet<>();	
+	private AndGroup containerAndGroup;
 	
-	@OneToMany(mappedBy = "orGroup")
-	private Set<OrCondition> orConditions = new HashSet<>();	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "orGroup")
+	private List<OrCondition> orConditions = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "containerOrGroup")
+	private List<AndGroup> andGroups = new ArrayList<>();
+	
+	public OrGroup()
+	{
+		this.orGroupId = UUID.randomUUID().toString();
+	}
+	
+	public String getOrGroupId()
+	{
+		return this.orGroupId;
+	}
+	
+	public List<OrCondition> getConditions() 
+	{
+		return Collections.unmodifiableList(this.orConditions);
+	}
+	
+	public List<AndGroup> getAndGroups()
+	{
+		return Collections.unmodifiableList(this.andGroups);
+	}
 	
 	public void addAndGroup(AndGroup andGroup)
 	{
-		this.andGroup.add(andGroup);
+		this.containerAndGroup = andGroup;
 	}
 	
 	public void addOrCondition(OrCondition orCondition)
@@ -33,8 +60,16 @@ public class OrGroup
 		if (!this.orConditions.contains(orCondition))
 		{
 			this.orConditions.add(orCondition);
-			orCondition.assignToGroup(this);
 		}
+	}
+	
+	public void addOrConditionBidirectional(OrCondition orCondition)
+	{
+		if (!this.orConditions.contains(orCondition))
+		{
+			this.orConditions.add(orCondition);
+		}
+		orCondition.assignToGroup(this);
 	}
 
 	@Override
@@ -42,7 +77,9 @@ public class OrGroup
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((containerAndGroup == null) ? 0 : containerAndGroup.hashCode());
 		result = prime * result + ((orConditions == null) ? 0 : orConditions.hashCode());
+		result = prime * result + ((orGroupId == null) ? 0 : orGroupId.hashCode());
 		return result;
 	}
 
@@ -56,11 +93,23 @@ public class OrGroup
 		if (getClass() != obj.getClass())
 			return false;
 		OrGroup other = (OrGroup) obj;
+		if (containerAndGroup == null)
+		{
+			if (other.containerAndGroup != null)
+				return false;
+		} else if (!containerAndGroup.equals(other.containerAndGroup))
+			return false;
 		if (orConditions == null)
 		{
 			if (other.orConditions != null)
 				return false;
 		} else if (!orConditions.equals(other.orConditions))
+			return false;
+		if (orGroupId == null)
+		{
+			if (other.orGroupId != null)
+				return false;
+		} else if (!orGroupId.equals(other.orGroupId))
 			return false;
 		return true;
 	}

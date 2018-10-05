@@ -1,5 +1,7 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -12,7 +14,7 @@ import javax.persistence.Table;
 public class ResourcePermissions
 {
 	@Id
-	private Integer role_resource_Id;
+	private String roleResourceIdentifier;
 
 	@ManyToOne
 	@JoinColumn(name = "roleId_FK")
@@ -31,12 +33,15 @@ public class ResourcePermissions
 	private byte updateRec;
 	private byte deleteRec;
 
-	public ResourcePermissions() {}
+	public ResourcePermissions() 
+	{
+		this.roleResourceIdentifier = UUID.randomUUID().toString();
+	}
 
 	public ResourcePermissions(Role role, Resource resource, boolean createRec, boolean readRec, boolean updateRec,
 			boolean deleteRec)
 	{
-		this.role_resource_Id = null;
+		this.roleResourceIdentifier = UUID.randomUUID().toString();
 		this.role = role;
 		this.resource = resource;
 		this.createRec = (byte) (createRec == true ? 1 : 0);
@@ -48,7 +53,7 @@ public class ResourcePermissions
 	public ResourcePermissions(Role role, Resource resource, boolean createRec, boolean readRec, boolean updateRec,
 			boolean deleteRec, AndGroup conditions)
 	{
-		this.role_resource_Id = null;
+		this.roleResourceIdentifier = UUID.randomUUID().toString();
 		this.role = role;
 		this.resource = resource;
 		this.createRec = (byte) (createRec == true ? 1 : 0);
@@ -58,9 +63,9 @@ public class ResourcePermissions
 		this.andGroup = conditions;
 	}
 
-	public Integer getRole_resource_Id()
+	public String getPermissionId()
 	{
-		return role_resource_Id;
+		return roleResourceIdentifier;
 	}
 
 	public Role getRole()
@@ -113,24 +118,24 @@ public class ResourcePermissions
 		this.andGroup = andGroup;
 	}
 
-	public void setCreateRec(byte createRec)
+	public void setCreateRec(boolean createRec)
 	{
-		this.createRec = createRec;
+		this.createRec = (byte) (createRec == true ? 1 : 0);
 	}
 
-	public void setReadRec(byte readRec)
+	public void setReadRec(boolean readRec)
 	{
-		this.readRec = readRec;
+		this.readRec = (byte) (readRec == true ? 1 : 0);
 	}
 
-	public void setUpdateRec(byte updateRec)
+	public void setUpdateRec(boolean updateRec)
 	{
-		this.updateRec = updateRec;
+		this.updateRec = (byte) (updateRec == true ? 1 : 0);
 	}
 
-	public void setDeleteRec(byte deleteRec)
+	public void setDeleteRec(boolean deleteRec)
 	{
-		this.deleteRec = deleteRec;
+		this.deleteRec = (byte) (deleteRec == true ? 1 : 0);
 	}
 
 	public void assignRole(Role role)

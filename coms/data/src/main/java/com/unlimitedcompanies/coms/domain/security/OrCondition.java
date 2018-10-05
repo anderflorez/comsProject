@@ -1,6 +1,9 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -13,26 +16,30 @@ import com.unlimitedcompanies.coms.domain.search.Operator;
 public class OrCondition
 {
 	@Id
-	private Integer orConditionId;
+	private String orConditionId;
 	private String fieldName;
 	private String fieldValue;
-	private Operator operator;
+	private String operator;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "orGroupId_FK")
 	private OrGroup orGroup;
 
-	public OrCondition() {}
-
-	public OrCondition(String fieldName, String fieldValue, Operator operator, OrGroup orGroup)
+	public OrCondition() 
 	{
-		this.fieldName = fieldName;
-		this.fieldValue = fieldValue;
-		this.operator = operator;
-		this.orGroup = orGroup;
+		this.orConditionId = UUID.randomUUID().toString();
 	}
 
-	public Integer getOrConditionId()
+	public OrCondition(String fieldName, String fieldValue, Operator operator)
+	{
+		this.orConditionId = UUID.randomUUID().toString();
+		this.fieldName = fieldName;
+		this.fieldValue = fieldValue;
+		this.operator = operator.toString();
+		this.orGroup = null;
+	}
+
+	public String getOrConditionId()
 	{
 		return orConditionId;
 	}
@@ -49,7 +56,7 @@ public class OrCondition
 
 	public Operator getOperator()
 	{
-		return operator;
+		return Operator.getOperator(this.operator);
 	}
 
 	public OrGroup getOrGroup()
@@ -59,11 +66,13 @@ public class OrCondition
 	
 	public void assignToGroup(OrGroup orGroup)
 	{
-		if (!this.orGroup.equals(orGroup))
-		{
-			this.orGroup = orGroup;
-			orGroup.addOrCondition(this);
-		}
+		this.orGroup = orGroup;
+	}
+	
+	public void assignToGroupBidirectional(OrGroup orGroup)
+	{
+		this.orGroup = orGroup;
+		orGroup.addOrCondition(this);
 	}
 
 	@Override

@@ -11,11 +11,11 @@ public class UserForm
 	private byte enabled;
 	private String dateAdded;
 	private String lastAccess;
-	private int contactId;
+	private String contactId;
 
 	public UserForm() {}
 
-	public UserForm(Integer userId, String username, byte enabled, String dateAdded, String lastAccess, int contactId)
+	public UserForm(Integer userId, String username, byte enabled, String dateAdded, String lastAccess, String contactId)
 	{
 		this.userId = userId;
 		this.username = username;
@@ -105,12 +105,12 @@ public class UserForm
 		this.lastAccess = lastAccess;
 	}
 
-	public int getContactId()
+	public String getContactId()
 	{
 		return contactId;
 	}
 
-	public void setContactId(int contactId)
+	public void setContactId(String contactId)
 	{
 		this.contactId = contactId;
 	}

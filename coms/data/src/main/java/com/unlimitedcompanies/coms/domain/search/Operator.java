@@ -19,4 +19,16 @@ public enum Operator
 	{
 		return this.operator;
 	}
+	
+	public String toStringLetters()
+	{
+		if (this.operator.equals("=")) { return "EQUAL"; }
+		else {return null;}
+	}
+	
+	public static Operator getOperator(String o)
+	{
+		if (o.equals("=")) { return Operator.EQUAL; }
+		else {return null;}
+	}
 }

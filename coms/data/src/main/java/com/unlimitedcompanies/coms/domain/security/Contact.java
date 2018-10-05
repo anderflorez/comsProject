@@ -1,5 +1,7 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -10,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 public class Contact
 {
 	@Id
-	private Integer contactId;
+	private String contactId;
 	
 	@NotEmpty
 	private String firstName;
@@ -18,11 +20,14 @@ public class Contact
 	private String lastName;
 	private String email;
 	
-	protected Contact() {}
+	protected Contact()
+	{
+		this.contactId = UUID.randomUUID().toString();
+	}
 	
 	public Contact(String firstName, String middleName, String lastName, String email)
 	{
-		this.contactId = null;
+		this.contactId = UUID.randomUUID().toString();;
 		this.firstName = firstName;
 		this.middleName = middleName;
 		this.lastName = lastName;
@@ -31,14 +36,14 @@ public class Contact
 	
 	public Contact(Contact contact)
 	{
-		this.contactId = null;
+		this.contactId = UUID.randomUUID().toString();;
 		this.firstName = contact.firstName;
 		this.middleName = contact.middleName;
 		this.lastName = contact.lastName;
 		this.email = contact.email;
 	}
 	
-	public Integer getContactId()
+	public String getContactId()
 	{
 		return this.contactId;
 	}
@@ -63,7 +68,7 @@ public class Contact
 		return email;
 	}
 	
-	public void setContactId(Integer contactId)
+	public void setContactId(String contactId)
 	{
 		this.contactId = contactId;
 	}
