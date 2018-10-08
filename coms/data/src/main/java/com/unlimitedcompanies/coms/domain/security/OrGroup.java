@@ -27,7 +27,7 @@ public class OrGroup
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "orGroup")
 	private List<OrCondition> orConditions = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "containerOrGroup")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "containerOrGroup")
 	private List<AndGroup> andGroups = new ArrayList<>();
 	
 	public OrGroup()
@@ -50,11 +50,6 @@ public class OrGroup
 		return Collections.unmodifiableList(this.andGroups);
 	}
 	
-	public void addAndGroup(AndGroup andGroup)
-	{
-		this.containerAndGroup = andGroup;
-	}
-	
 	public void addOrCondition(OrCondition orCondition)
 	{
 		if (!this.orConditions.contains(orCondition))
@@ -70,6 +65,21 @@ public class OrGroup
 			this.orConditions.add(orCondition);
 		}
 		orCondition.assignToGroup(this);
+	}
+	
+	public void setContainerAndGroup(AndGroup andGroup)
+	{
+		this.containerAndGroup = andGroup;
+	}
+	
+	public void addAndGroup(AndGroup andGroup)
+	{
+		this.andGroups.add(andGroup);
+	}
+	
+	public void assignAndGroupList(List<AndGroup> andGroups)
+	{
+		this.andGroups = andGroups;
 	}
 
 	@Override

@@ -226,4 +226,20 @@ public class AuthDaoImpl implements AuthDao
 		em.persist(orCondition);
 	}
 
+	@Override
+	public List<AndGroup> getAssociatedAndGroups(OrGroup orGroup)
+	{
+		return em.createQuery("select a from AndGroup a where a.orGroups = :orGroup", AndGroup.class)
+							  .setParameter("orGroup", orGroup)
+							  .getResultList();
+	}
+
+	@Override
+	public List<OrGroup> getAssociatedOrGroups(AndGroup andGroup)
+	{
+		return em.createQuery("select o from OrGroup o where o.andGroups = :orGroup", OrGroup.class)
+							  .setParameter("andGroup", andGroup)
+							  .getResultList();
+	}
+
 }

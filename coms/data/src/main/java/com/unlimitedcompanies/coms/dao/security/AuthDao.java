@@ -45,4 +45,6 @@ public interface AuthDao
 	public OrGroup getOrGroupById(String orGroupId);
 //	public List<OrGroup> getOrGroups(int andGroupId);
 	public void createOrCondition(OrCondition orCondition);
+	public List<AndGroup> getAssociatedAndGroups(OrGroup orGroup);
+	public List<OrGroup> getAssociatedOrGroups(AndGroup andGroup);
 }

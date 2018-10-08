@@ -148,6 +148,13 @@ public class AuthServiceImpl implements AuthService
 	public ResourcePermissions savePermission(ResourcePermissions permission)
 	{
 		authDao.createResourcePermission(permission);
+		if (permission.getAndGroup() != null && permission.getAndGroup().getOrGroups().size() > 0)
+		{
+			for (OrGroup o : permission.getAndGroup().getOrGroups())
+			{
+				this.saveFullOrGroup(o);
+			}
+		}
 		return this.searchPermissionById(permission.getPermissionId());
 	}
 	
@@ -199,6 +206,69 @@ public class AuthServiceImpl implements AuthService
 	public void saveOrCondition(OrCondition orCondition)
 	{
 		authDao.createOrCondition(orCondition);
+	}
+	
+	private void saveFullAndGroup(AndGroup andGroup)
+	{
+		if (!andGroup.getOrGroups().isEmpty())
+		{
+			for (OrGroup o : andGroup.getOrGroups())
+			{
+				this.saveFullOrGroup(o);
+			}
+		}
+		authDao.createAndGroup(andGroup);
+	}
+	
+	private void saveFullOrGroup(OrGroup orGroup)
+	{
+		if (!orGroup.getAndGroups().isEmpty())
+		{
+			for (AndGroup a : orGroup.getAndGroups())
+			{
+				this.saveFullAndGroup(a);
+			}
+		}
+		authDao.createOrGroup(orGroup);
+	}
+	
+	@Override
+	public AndGroup fullAndGroupSearch(AndGroup andGroup)
+	{
+		List<OrGroup> orGroups = this.searchAssociatedOrGroups(andGroup);
+		if (!orGroups.isEmpty())
+		{
+			for (OrGroup o : orGroups)
+			{
+				o = this.fullOrGroupSearch(o);				
+			}
+			andGroup.assignOrGroupList(orGroups);
+		}
+		return andGroup;
+	}
+	
+	private OrGroup fullOrGroupSearch(OrGroup orGroup)
+	{
+		List<AndGroup> andGroups = this.searchAssociatedAndGroups(orGroup);
+		if (!andGroups.isEmpty())
+		{
+			for (AndGroup a : andGroups)
+			{
+				a = this.fullAndGroupSearch(a);
+			}
+			orGroup.assignAndGroupList(andGroups);
+		}
+		return orGroup;
+	}
+
+	private List<AndGroup> searchAssociatedAndGroups(OrGroup orGroup)
+	{
+		return authDao.getAssociatedAndGroups(orGroup);
+	}
+
+	private List<OrGroup> searchAssociatedOrGroups(AndGroup andGroup)
+	{
+		return authDao.getAssociatedOrGroups(andGroup);
 	}
 
 }

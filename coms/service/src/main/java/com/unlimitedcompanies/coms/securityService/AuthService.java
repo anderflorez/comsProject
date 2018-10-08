@@ -45,5 +45,5 @@ public interface AuthService
 	public OrGroup saveOrGroup(OrGroup orGroup);
 	public OrGroup searchOrGroupById(String orGroupId);
 	public void saveOrCondition(OrCondition orCondition);
-	
+	public AndGroup fullAndGroupSearch(AndGroup andGroup);
 }

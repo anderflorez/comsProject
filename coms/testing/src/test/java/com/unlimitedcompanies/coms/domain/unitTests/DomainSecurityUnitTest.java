@@ -230,8 +230,50 @@ class DomainSecurityUnitTest
 		orCondition1.assignToGroupBidirectional(orGroup1);
 		orCondition2.assignToGroupBidirectional(orGroup1);
 		
-		andGroup1.addOrGroup(orGroup1);
+		andGroup1.setContainerOrGroup(orGroup1);
 		
 		assertTrue(andGroup1.getContainerOrGroup().getConditions().contains(orCondition2));
+	}
+	
+	@Test
+	public void deepPermissionWithConditionsTest()
+	{
+		Role role = new Role("Administrator");
+		Resource resource = new Resource("Contact");
+		
+		AndGroup andGroup1 = new AndGroup();
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		andGroup1.addAndConditionBidirectional(andCondition1);
+		andGroup1.addAndConditionBidirectional(andCondition2);
+		
+		OrGroup orGroup2 = new OrGroup();
+		OrCondition orCondition1 = new OrCondition("roleName", "Administrator", Operator.NOT_EQUAL);
+		orGroup2.addOrConditionBidirectional(orCondition1);
+		
+		OrGroup orGroup3 = new OrGroup();
+		OrCondition orCondition2 = new OrCondition("userId", "5", Operator.LESS_THAN);
+		orGroup3.addOrConditionBidirectional(orCondition2);
+		
+		AndGroup andGroup4 = new AndGroup();
+		AndCondition andCondition3 = new AndCondition("contactId", "2", Operator.GRATER_THAN);
+		andGroup4.addAndConditionBidirectional(andCondition3);
+		
+		andGroup1.addOrGroup(orGroup2);
+		andGroup1.addOrGroup(orGroup3);
+		orGroup2.addAndGroup(andGroup4);
+		
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
+		
+		List<AndGroup> foundAndGroup = null;
+		for (OrGroup o : permission.getAndGroup().getOrGroups())
+		{
+			assertTrue(o.equals(orGroup2) || o.equals(orGroup3));
+			if (o.getAndGroups().size() > 0)
+			{
+				foundAndGroup = o.getAndGroups();
+			}
+		}
+		assertTrue(foundAndGroup.contains(andGroup4));
 	}
 }
