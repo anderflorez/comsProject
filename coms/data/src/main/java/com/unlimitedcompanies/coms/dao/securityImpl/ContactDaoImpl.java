@@ -32,7 +32,8 @@ public class ContactDaoImpl implements ContactDao
 	public void createContact(Contact contact)
 	{
 		em.createNativeQuery(
-				"INSERT INTO contact (firstName, middleName, lastName, email) VALUES (:fname, :mname, :lname, :email)")
+				"INSERT INTO contact (contactId, firstName, middleName, lastName, email) VALUES (:id, :fname, :mname, :lname, :email)")
+				.setParameter("id", contact.getContactId())
 				.setParameter("fname", contact.getFirstName())
 				.setParameter("mname", contact.getMiddleName())
 				.setParameter("lname", contact.getLastName())

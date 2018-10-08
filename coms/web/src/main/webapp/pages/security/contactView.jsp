@@ -57,6 +57,10 @@
 	</div>
 </div>
 
+<div class="alert alert-danger userAlert">
+Be sure to have your pages set up with the latest design and development standards. That means using an HTML5 doctype and including a viewport meta tag for proper responsive behaviors. Put it all together and your pages should look like this: Bootstrap employs a handful of important global styles and settings that you’ll need to be aware of when using it, all of which are almost exclusively geared towards the normalization of cross browser styles. Let’s dive in. For more straightforward sizing in CSS, we switch the global box-sizing value from content-box to border-box. This ensures padding does not affect the final computed width of an element, but it can cause problems with some third party software like Google Maps and Google Custom Search Engine.
+</div>
+
 <c:import url="../dashboard/scriptDefinitions.jsp"/>
 
 <!-- Scripts -->

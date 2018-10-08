@@ -166,7 +166,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public int getNumberOfPermissions()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(role_resource_Id) FROM role_resource").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleResourceIdentifier) FROM role_resource").getSingleResult();
 		return bigInt.intValue();
 	}
 

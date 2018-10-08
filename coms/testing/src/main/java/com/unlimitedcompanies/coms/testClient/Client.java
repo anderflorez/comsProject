@@ -33,8 +33,8 @@ public class Client
 		SecuritySetupService setupService = container.getBean(SecuritySetupService.class);
 //		AuthService authService = container.getBean(AuthService.class);
 		
-//		setupService.initialSetup();
-//		securitySetup.checkAllResources();
+		setupService.initialSetup();
+		setupService.checkAllResources();
 		
 //		int roleId = authService.findRoleByRoleName("Administrators").getRoleId();
 //		Role role = authService.findRoleByIdWithMembers(roleId);
