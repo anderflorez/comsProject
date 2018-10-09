@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
@@ -48,23 +49,29 @@ public class AuthDaoImpl implements AuthDao
 				.executeUpdate();
 	}
 	
-//	@Override
-//	public void updateUser(int userId, User user) {
-//		User foundUser = em.find(User.class, userId);
-//		foundUser.setUsername(user.getUsername());
-//		foundUser.setEnabled(user.getEnabled());
-//	}
-//	
-//	@Override
-//	public List<User> getAllUsers()
-//	{
-//		return em.createQuery("select user from User as user", User.class).getResultList();
-//	}
-//	
+	@Override
+	public void updateUser(int userId, User user) {
+		User foundUser = em.find(User.class, userId);
+		foundUser.setUsername(user.getUsername());
+		foundUser.setEnabled(user.getEnabled());
+	}
+	
+	@Override
+	public List<User> getAllUsers()
+	{
+		return em.createQuery("select user from User as user", User.class).getResultList();
+	}
+	
 	@Override
 	public User getUserByUserId(int id)
 	{
-		return em.find(User.class, id);
+		User user = em.find(User.class, id);
+		if (user == null)
+		{
+			throw new NoResultException();
+		}
+		
+		return user;
 	}
 
 	@Override

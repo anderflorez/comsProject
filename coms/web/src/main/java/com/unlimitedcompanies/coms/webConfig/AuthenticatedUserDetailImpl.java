@@ -24,10 +24,8 @@ public class AuthenticatedUserDetailImpl implements AuthenticatedUserDetail
 	@Override
 	public User getUser()
 	{
-		System.out.println("=======>Returning user");
 		if (user == null)
 		{
-			System.out.println("=======>Getting user information from DB");
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			if (!(authentication instanceof AnonymousAuthenticationToken))
 			{

@@ -71,7 +71,7 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 
-		assertNotNull(contactService.findContactByEmail("john@example.com"),
+		assertNotNull(contactService.searchContactByEmail("john@example.com"),
 				"Service test  to find contact by email failed");
 	}
 
@@ -79,32 +79,25 @@ class SecurityServiceIntegrationTest
 	public void findContactByIdTest()
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
-		Contact initialContact = contactService.findContactByEmail("john@example.com");
+		Contact initialContact = contactService.searchContactByEmail("john@example.com");
 
-		Contact foundContact = contactService.findContactById(initialContact.getContactId());
+		Contact foundContact = contactService.searchContactById(initialContact.getContactId());
 
 		assertEquals(initialContact, foundContact, "Service test to find contact by id failed");
 	}
 
-	// @Test
-	// public void updateContactTest()
-	// {
-	// contactService.saveContact(new Contact("John", null, "Doe",
-	// "john@example.com"));
-	// Contact initialContact =
-	// contactService.findContactByEmail("john@example.com");
-	// Contact correctedContact = new Contact("Jane", null, "Roe",
-	// "jane@example.com");
-	//
-	// contactService.updateContact(initialContact.getContactId(),
-	// correctedContact);
-	// Contact foundContact =
-	// contactService.findContactById(initialContact.getContactId());
-	//
-	// assertEquals(correctedContact, foundContact, "Service test for updating
-	// contact failed");
-	// }
-	//
+	@Test
+	public void updateContactTest()
+	{
+		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		Contact correctedContact = new Contact("Jane", null, "Roe", "jane@example.com");
+
+		contactService.updateContact(initialContact.getContactId(), correctedContact);
+		Contact foundContact = contactService.searchContactById(initialContact.getContactId());
+
+		assertEquals(correctedContact, foundContact, "Service test for updating contact failed");
+	}
+
 	// @Test
 	// public void deleteSingleContactTest()
 	// {
@@ -114,13 +107,13 @@ class SecurityServiceIntegrationTest
 	// "janed@example.com"));
 	//
 	// Contact deleteContact =
-	// contactService.findContactByEmail("johnd@example.com");
+	// contactService.searchContactByEmail("johnd@example.com");
 	// contactService.deleteContact(deleteContact);
 	//
 	// assertEquals(1, contactService.findNumberOfContacts(), "Service test for
 	// deleting a single contact failed");
 	// }
-	//
+
 	// @Test
 	// public void numberOfAddressesTest()
 	// {
@@ -265,27 +258,25 @@ class SecurityServiceIntegrationTest
 	public void saveNewUserTest() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 
 		User user = authService.saveUser(new User("username", "mypass", contact));
 		assertEquals(1, authService.findNumberOfUsers(), "Service test to save a new user failed");
 		assertNotNull(user.getUserId(), "Service test to save a new user failed");
 	}
 
-	// @Test
-	// public void updateUsernameTest() throws NonExistingContactException
-	// {
-	// contactService.saveContact(new Contact("John", null, "Doe",
-	// "johnd@example.com"));
-	// Contact contact = contactService.findContactByEmail("johnd@example.com");
-	// User user = authService.saveUser(new User("jdoe", "mypass", contact));
-	// user.setUsername("john.doe");
-	//
-	// User updatedUser = authService.updateUser(user.getUserId(), user);
-	// assertEquals("john.doe", updatedUser.getUsername(), "Service test for
-	// updating user username failed");
-	// }
-	//
+	@Test
+	public void updateUsernameTest() throws NonExistingContactException
+	{
+		
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		user.setUsername("john.doe");
+
+		User updatedUser = authService.updateUser(user.getUserId(), user);
+		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
+	}
+
 	// @Test
 	// public void updateUserStatus() throws NonExistingContactException
 	// {
@@ -300,11 +291,32 @@ class SecurityServiceIntegrationTest
 	// user status failed");
 	// }
 	//
+	
+	@Test
+	public void findAllUsersTest()
+	{
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		Contact contact3 = contactService.saveContact(new Contact("Richard", null, "Doe", "rich@example.com"));
+
+		try
+		{
+			authService.saveUser(new User("username1", "mypass", contact1));
+			authService.saveUser(new User("username2", "mypass", contact2));
+			authService.saveUser(new User("username3", "mypass", contact3));
+		} catch (NonExistingContactException e)
+		{
+			e.printStackTrace();
+		}
+		
+		assertEquals(3, authService.searchAllUsers().size(), "Find all users integration test failed");
+	}
+	
 	@Test
 	public void findUserByUsernameTest() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = new User("jdoe", "mypass", contact);
 		authService.saveUser(user);
 
@@ -317,7 +329,7 @@ class SecurityServiceIntegrationTest
 	public void findUserByUsernameWithContactTest() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = new User("jdoe", "mypass", contact);
 		authService.saveUser(user);
 
@@ -331,10 +343,10 @@ class SecurityServiceIntegrationTest
 	public void findUserByUserId() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = authService.saveUser(new User("jdoe", "mypass", contact));
 
-		User foundUser = authService.findUserByUserId(user.getUserId());
+		User foundUser = authService.searchUserByUserId(user.getUserId());
 		assertEquals(user, foundUser, "Service test for finding user by userId failed");
 	}
 
@@ -402,7 +414,7 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = authService.saveUser(new User("jdoe", "mypass", contact));
 		Role role = authService.saveRole(new Role("Administrator"));
 
@@ -437,7 +449,7 @@ class SecurityServiceIntegrationTest
 	public void findUserWithContactAndRoles() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.findContactByEmail("johnd@example.com");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = new User("jdoe", "mypass", contact);
 		authService.saveUser(user);
 		Role role1 = authService.saveRole(new Role("Administrator"));
@@ -603,7 +615,7 @@ class SecurityServiceIntegrationTest
 		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getAndGroups().contains(andGroup4),
 				"Save permission with chained conditions integration test failed");
 	}
-	
+
 	@Test
 	public void retrieveFullPermissionWithAllConditionsTest()
 	{
@@ -629,15 +641,15 @@ class SecurityServiceIntegrationTest
 		orGroup2.addAndGroup(andGroup4);
 		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
 		authService.savePermission(permission);
-		
+
 		ResourcePermissions foundPermission = authService.searchPermissionById(permission.getPermissionId());
 		assertEquals(permission.getAndGroup(), foundPermission.getAndGroup());
 		assertEquals(permission.getAndGroup().getOrGroups(), foundPermission.getAndGroup().getOrGroups());
 		if (foundPermission.getAndGroup().getOrGroups().get(0) == orGroup2)
 		{
 			assertTrue(foundPermission.getAndGroup().getOrGroups().get(0).getAndGroups().contains(andGroup4));
-		}
-		else {
+		} else
+		{
 			assertTrue(foundPermission.getAndGroup().getOrGroups().get(1).getAndGroups().contains(andGroup4));
 		}
 	}

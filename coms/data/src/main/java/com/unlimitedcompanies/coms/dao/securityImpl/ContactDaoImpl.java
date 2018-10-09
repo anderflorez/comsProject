@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
@@ -31,14 +32,17 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public void createContact(Contact contact)
 	{
-		em.createNativeQuery(
-				"INSERT INTO contact (contactId, firstName, middleName, lastName, email) VALUES (:id, :fname, :mname, :lname, :email)")
-				.setParameter("id", contact.getContactId())
-				.setParameter("fname", contact.getFirstName())
-				.setParameter("mname", contact.getMiddleName())
-				.setParameter("lname", contact.getLastName())
-				.setParameter("email", contact.getEmail())
-				.executeUpdate();
+		em.persist(contact);
+		
+		// TODO: Delete after it's been tested
+//		em.createNativeQuery(
+//				"INSERT INTO contact (contactId, firstName, middleName, lastName, email) VALUES (:id, :fname, :mname, :lname, :email)")
+//				.setParameter("id", contact.getContactId())
+//				.setParameter("fname", contact.getFirstName())
+//				.setParameter("mname", contact.getMiddleName())
+//				.setParameter("lname", contact.getLastName())
+//				.setParameter("email", contact.getEmail())
+//				.executeUpdate();
 	}
 	
 	@Override
@@ -46,6 +50,17 @@ public class ContactDaoImpl implements ContactDao
 	{		
 		return em.createQuery("select contact from Contact as contact", Contact.class)
 							  .getResultList();
+	}
+	
+	@Override
+	public Contact getContactById(String Id)
+	{
+		Contact contact = em.find(Contact.class, Id);
+		if (contact == null)
+		{
+			throw new NoResultException();
+		}
+		return contact;
 	}
 
 	@Override
@@ -57,23 +72,15 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public Contact getContactById(String Id)
+	public void updateContact(String id, Contact contact)
 	{
-		return em.createQuery("select contact from Contact as contact where contact.contactId = :id", Contact.class)
-							  .setParameter("id", Id)
-							  .getSingleResult();
+		Contact foundContact = this.getContactById(id);
+		foundContact.setFirstName(contact.getFirstName());
+		foundContact.setMiddleName(contact.getMiddleName());
+		foundContact.setLastName(contact.getLastName());
+		foundContact.setEmail(contact.getEmail());
 	}
 
-//	@Override
-//	public void updateContact(int id, Contact contact)
-//	{
-//		Contact foundContact = em.find(Contact.class, id);
-//		foundContact.setFirstName(contact.getFirstName());
-//		foundContact.setMiddleName(contact.getMiddleName());
-//		foundContact.setLastName(contact.getLastName());
-//		foundContact.setEmail(contact.getEmail());
-//	}
-//
 //	@Override
 //	public void removeContact(int id)
 //	{

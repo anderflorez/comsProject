@@ -10,9 +10,9 @@ public interface ContactDao
 	public int getNumberOfContacts();
 	public void createContact(Contact contact);
 	public List<Contact> getAllContacts(User loggedUser);
-	public Contact getContactByEmail(String contactEmail);
 	public Contact getContactById(String id);
-//	public void updateContact(int id, Contact contact);
+	public Contact getContactByEmail(String contactEmail);
+	public void updateContact(String id, Contact contact);
 //	public void removeContact(int id);
 //	
 //	public int getNumberOfAddresses();

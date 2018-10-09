@@ -182,9 +182,9 @@ a:hover {
 	color: #000000;
 }
 
-.userAlert {
-    margin: 3rem 20rem;
-    text-align: center;
+.alert {
+	margin: 50px 15vw;
+	text-align: center;
 }
 
 /* Extra Spaces */

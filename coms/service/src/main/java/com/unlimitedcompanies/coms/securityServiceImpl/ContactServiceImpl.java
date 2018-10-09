@@ -26,9 +26,10 @@ public class ContactServiceImpl implements ContactService
 	AuthDao authenticationDao;
 
 	@Override
-	public void saveContact(Contact contact)
+	public Contact saveContact(Contact contact)
 	{
-		dao.createContact(contact);		
+		dao.createContact(contact);
+		return dao.getContactById(contact.getContactId());
 	}
 
 	@Override
@@ -49,25 +50,25 @@ public class ContactServiceImpl implements ContactService
 		}
 		return dao.getAllContacts(loggedUser);
 	}
-
+	
 	@Override
-	public Contact findContactByEmail(String email)
-	{
-		return dao.getContactByEmail(email);
-	}
-
-	@Override
-	public Contact findContactById(String id)
+	public Contact searchContactById(String id)
 	{
 		return dao.getContactById(id);
 	}
+
+	@Override
+	public Contact searchContactByEmail(String email)
+	{
+		return dao.getContactByEmail(email);
+	}
 	
-//	@Override
-//	public void updateContact(int id, Contact updatedContact)
-//	{
-//		dao.updateContact(id, updatedContact);
-//	}
-//
+	@Override
+	public void updateContact(String id, Contact updatedContact)
+	{
+		dao.updateContact(id, updatedContact);
+	}
+
 //	@Override
 //	public void deleteContact(Contact contact)
 //	{

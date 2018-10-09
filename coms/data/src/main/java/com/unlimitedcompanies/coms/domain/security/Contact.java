@@ -27,7 +27,7 @@ public class Contact
 	
 	public Contact(String firstName, String middleName, String lastName, String email)
 	{
-		this.contactId = UUID.randomUUID().toString();;
+		this.contactId = UUID.randomUUID().toString();
 		this.firstName = firstName;
 		this.middleName = middleName;
 		this.lastName = lastName;
@@ -36,7 +36,7 @@ public class Contact
 	
 	public Contact(Contact contact)
 	{
-		this.contactId = UUID.randomUUID().toString();;
+		this.contactId = UUID.randomUUID().toString();
 		this.firstName = contact.firstName;
 		this.middleName = contact.middleName;
 		this.lastName = contact.lastName;
@@ -71,6 +71,11 @@ public class Contact
 	public void setContactId(String contactId)
 	{
 		this.contactId = contactId;
+	}
+
+	public void removeContactId()
+	{
+		this.contactId = null;
 	}
 
 	public void setFirstName(String firstName)

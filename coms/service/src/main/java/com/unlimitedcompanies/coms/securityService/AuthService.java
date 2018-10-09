@@ -16,10 +16,10 @@ public interface AuthService
 {
 	public int findNumberOfUsers();
 	public User saveUser(User user) throws NonExistingContactException;
-//	public User updateUser(Integer userId, User user);
-//
-//	public List<User> findAllUsers();
-	public User findUserByUserId(Integer id);
+	public User updateUser(int userId, User user);
+
+	public List<User> searchAllUsers();
+	public User searchUserByUserId(Integer id);
 	public User searchUserByUsername(String string);
 	public User searchUserByUsernameWithContact(String username);
 	public User searchFullUserByUsername(String username);

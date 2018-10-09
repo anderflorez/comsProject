@@ -6,12 +6,12 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 
 public interface ContactService
 {
-	public void saveContact(Contact Contact);
+	public Contact saveContact(Contact Contact);
 	public int findNumberOfContacts();
 	public List<Contact> searchAllContacts();
-	public Contact findContactByEmail(String email);
-	public Contact findContactById(String id);
-//	public void updateContact(int id, Contact updatedContact);
+	public Contact searchContactById(String id);
+	public Contact searchContactByEmail(String email);
+	public void updateContact(String id, Contact updatedContact);
 //	public void deleteContact(Contact contact);
 //	
 //	public int findNumberOfContactAddresses();

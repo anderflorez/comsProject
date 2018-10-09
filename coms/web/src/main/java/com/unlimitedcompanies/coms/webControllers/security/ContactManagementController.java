@@ -22,41 +22,62 @@ public class ContactManagementController
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView showContactDetails(@RequestParam("c") String cId)
 	{	
-		Contact contact = null;
+		Contact contact = new Contact(null, null, null, null);
 		String error = null;
 		
-		// TODO: show error if object is not found
-		try
+		if (cId.equals("0"))
 		{
-			contact = contactService.findContactById(cId);
-		} catch (NoResultException e)
+			ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp");
+			contact.removeContactId();
+			mv.addObject("contact", contact);
+			mv.addObject("error", error);
+			return mv;
+		}
+		else
 		{
-			error = "The contact couldn't be found";
+			try
+			{
+				contact = contactService.searchContactById(cId);
+			} catch (NoResultException e)
+			{
+				error = "The contact couldn't be found";
+			}			
+			ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp");
+			mv.addObject("contact", contact);
+			mv.addObject("error", error);
+			return mv;
 		}
 		
-		ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp");
-		mv.addObject("contact", contact);
-		mv.addObject("error", error);
-		
-		return mv;
 	}
 	
-//	@RequestMapping(method = RequestMethod.POST)
-//	public ModelAndView processContact(Contact contact)
-//	{	
-//		if (contact.getContactId() != null)
-//		{
-//			contactService.updateContact(contact.getContactId(), contact);
-//			return new ModelAndView("redirect:/manageContact?c=" + contact.getContactId());
-//		} else
-//		{
-//			contactService.saveContact(contact);
-//			if (contact.getEmail() != null)
-//			{
-//				Contact foundContact = contactService.findContactByEmail(contact.getEmail());
-//				return new ModelAndView("redirect:/manageContact?c=" + foundContact.getContactId());
-//			}
-//			return new ModelAndView("redirect:/contacts");
-//		}
-//	}
+	@RequestMapping(method = RequestMethod.POST)
+	public ModelAndView processContact(Contact contact)
+	{	
+		if (!contact.getContactId().isEmpty() && contact.getContactId() != null && !contact.getFirstName().isEmpty())
+		{
+			try
+			{
+				contactService.updateContact(contact.getContactId(), contact);
+			} 
+			catch (NoResultException e)
+			{
+				ModelAndView mv = new ModelAndView("redirect:/contacts");
+				mv.addObject("error", "The contact you are editing couldn't be found");
+				return mv;
+			}
+			
+			return new ModelAndView("redirect:/contactDetail?c=" + contact.getContactId());
+		} 
+		else if (!contact.getFirstName().isEmpty() && contact.getFirstName() != null)
+		{
+			Contact savedContact = contactService.saveContact(new Contact(contact));
+			return new ModelAndView("redirect:/manageContact?c=" + savedContact.getContactId());
+		}
+		else 
+		{
+			ModelAndView mv = new ModelAndView("redirect:/contacts");
+			mv.addObject("error", "Error: There is not enough information to save the contact");
+			return mv;
+		}
+	}
 }

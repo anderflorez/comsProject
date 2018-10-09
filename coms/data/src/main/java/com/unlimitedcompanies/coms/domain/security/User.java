@@ -36,7 +36,7 @@ public class User
 				inverseJoinColumns = {@JoinColumn(name = "role_FK")})
 	private List<Role> roles = new ArrayList<>();
 	
-	protected User() {}
+	public User() {}
 
 	public User(String username, String password, Contact contact)
 	{

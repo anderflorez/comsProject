@@ -37,7 +37,7 @@
 							</thead>
 							<tbody>
 								<c:forEach items="${users}" var="user">
-									<tr class="clickable" data-href="<c:url value='/manageUser?u=${user.userId}&c=-1'/>">
+									<tr class="clickable" data-href="<c:url value='/userDetail?u=${user.userId}'/>">
 										<td>${user.username}</td>
 										<td>${user.enabled}</td>
 										<td>${user.dateAdded}</td>

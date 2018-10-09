@@ -51,21 +51,21 @@ public class AuthServiceImpl implements AuthService
 		return this.searchUserByUsername(user.getUsername());
 	}
 
-//	@Override
-//	public User updateUser(Integer userId, User user)
-//	{
-//		authDao.updateUser(userId, user);
-//		return this.findUserByUserId(userId);
-//	}
-//
-//	@Override
-//	public List<User> findAllUsers()
-//	{
-//		return authDao.getAllUsers();
-//	}
+	@Override
+	public User updateUser(int userId, User user)
+	{
+		authDao.updateUser(userId, user);
+		return this.searchUserByUserId(userId);
+	}
 
 	@Override
-	public User findUserByUserId(Integer id)
+	public List<User> searchAllUsers()
+	{
+		return authDao.getAllUsers();
+	}
+
+	@Override
+	public User searchUserByUserId(Integer id)
 	{
 		return authDao.getUserByUserId(id);
 	}
