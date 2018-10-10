@@ -39,7 +39,7 @@
 								<c:forEach items="${users}" var="user">
 									<tr class="clickable" data-href="<c:url value='/userDetail?u=${user.userId}'/>">
 										<td>${user.username}</td>
-										<td>${user.enabled}</td>
+										<td>${user.getEnabledStatus().toString()}</td>
 										<td>${user.dateAdded}</td>
 										<td>${user.lastAccess}</td>
 									</tr>
@@ -52,6 +52,15 @@
 		</div>
 	</div>
 </div>
+
+<c:if test="${error != null}">
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		${error}
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+</c:if>
 
 <c:import url="../dashboard/scriptDefinitions.jsp"/>
 

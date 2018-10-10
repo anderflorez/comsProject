@@ -1,17 +1,13 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.GeneralSearchDao;
-import com.unlimitedcompanies.coms.domain.search.Search;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)

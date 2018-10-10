@@ -22,7 +22,7 @@ import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.domain.security.exceptions.InvalidPhoneNumberException;
+import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
 
 class DomainSecurityUnitTest
 {
@@ -135,8 +135,8 @@ class DomainSecurityUnitTest
 	public void andGroupWithConditionsSetInGroupTest()
 	{
 		AndGroup andGroup = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup.addAndConditionBidirectional(andCondition1);
 		andGroup.addAndConditionBidirectional(andCondition2);
 		
@@ -151,8 +151,8 @@ class DomainSecurityUnitTest
 	public void andGroupWithConditionsSetInConditionTest()
 	{
 		AndGroup andGroup = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andCondition1.assignToGroupBidirectional(andGroup);
 		andCondition2.assignToGroupBidirectional(andGroup);
 		
@@ -167,8 +167,8 @@ class DomainSecurityUnitTest
 	public void orGroupWithConditionsSetInGroupTest()
 	{
 		OrGroup orGroup = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUAL);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUAL);
+		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
+		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
 		orGroup.addOrConditionBidirectional(orCondition1);
 		orGroup.addOrConditionBidirectional(orCondition2);
 		
@@ -183,8 +183,8 @@ class DomainSecurityUnitTest
 	public void orGroupWithConditionsSetInConditionTest()
 	{
 		OrGroup orGroup = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUAL);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUAL);
+		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
+		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
 		orCondition1.assignToGroupBidirectional(orGroup);
 		orCondition2.assignToGroupBidirectional(orGroup);
 		
@@ -201,8 +201,8 @@ class DomainSecurityUnitTest
 		Role role = new Role("Administrator");
 		Resource resource = new Resource("Contact");
 		AndGroup conditionGroup = new AndGroup();
-		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		conditionGroup.addAndConditionBidirectional(condition1);
 		conditionGroup.addAndConditionBidirectional(condition2);
 		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, conditionGroup);
@@ -219,14 +219,14 @@ class DomainSecurityUnitTest
 	public void chainedConditionGroupsTest()
 	{
 		AndGroup andGroup1 = new AndGroup();		
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andCondition1.assignToGroupBidirectional(andGroup1);
 		andCondition2.assignToGroupBidirectional(andGroup1);
 		
 		OrGroup orGroup1 = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUAL);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUAL);
+		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
+		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
 		orCondition1.assignToGroupBidirectional(orGroup1);
 		orCondition2.assignToGroupBidirectional(orGroup1);
 		
@@ -242,8 +242,8 @@ class DomainSecurityUnitTest
 		Resource resource = new Resource("Contact");
 		
 		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup1.addAndConditionBidirectional(andCondition1);
 		andGroup1.addAndConditionBidirectional(andCondition2);
 		
@@ -276,4 +276,5 @@ class DomainSecurityUnitTest
 		}
 		assertTrue(foundAndGroup.contains(andGroup4));
 	}
+	
 }

@@ -55,7 +55,7 @@ public class AndCondition
 
 	public Operator getOperator()
 	{
-		return Operator.getOperator(this.operator);
+		return Operator.getNewOperator(this.operator);
 	}
 
 	public AndGroup getAndGroup()

@@ -66,7 +66,7 @@
 					<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
 					<div class="row">
 						<div class="col-12">
-							<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?u=0&c=${contact.contactId}'/>">
+							<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?c=${contact.contactId}'/>">
 								Create New User
 							</button>
 						</div>

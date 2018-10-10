@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 
 import java.util.HashSet;
 import java.util.List;
@@ -509,8 +507,8 @@ class SecurityServiceIntegrationTest
 		Role role = authService.saveRole(new Role("Administrator"));
 		Resource resource = setupService.findResourceByName("Contact");
 		AndGroup andGroup = authService.saveAndGroup(new AndGroup());
-		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup.addAndConditionBidirectional(condition1);
 		andGroup.addAndConditionBidirectional(condition2);
 
@@ -538,8 +536,8 @@ class SecurityServiceIntegrationTest
 		Resource resource = setupService.findResourceByName("Contact");
 
 		AndGroup andGroup1 = authService.saveAndGroup(new AndGroup());
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup1.addAndConditionBidirectional(andCondition1);
 		andGroup1.addAndConditionBidirectional(andCondition2);
 
@@ -580,8 +578,8 @@ class SecurityServiceIntegrationTest
 		Resource resource = setupService.findResourceByName("Contact");
 
 		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup1.addAndConditionBidirectional(andCondition1);
 		andGroup1.addAndConditionBidirectional(andCondition2);
 
@@ -623,8 +621,8 @@ class SecurityServiceIntegrationTest
 		Role role = authService.saveRole(new Role("Administrator"));
 		Resource resource = setupService.findResourceByName("Contact");
 		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andGroup1.addAndConditionBidirectional(andCondition1);
 		andGroup1.addAndConditionBidirectional(andCondition2);
 		OrGroup orGroup2 = new OrGroup();
@@ -669,8 +667,8 @@ class SecurityServiceIntegrationTest
 	{
 		AndGroup andGroup = new AndGroup();
 
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUAL);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUAL);
+		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
+		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		andCondition1.assignToGroupBidirectional(andGroup);
 		andCondition2.assignToGroupBidirectional(andGroup);
 
@@ -691,8 +689,8 @@ class SecurityServiceIntegrationTest
 	{
 		OrGroup orGroup = new OrGroup();
 
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUAL);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUAL);
+		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
+		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
 		orCondition1.assignToGroupBidirectional(orGroup);
 		orCondition2.assignToGroupBidirectional(orGroup);
 

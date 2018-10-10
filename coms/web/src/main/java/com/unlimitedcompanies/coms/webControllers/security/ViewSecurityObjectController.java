@@ -14,6 +14,7 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
@@ -51,7 +52,8 @@ public class ViewSecurityObjectController {
 		try
 		{
 			contact = contactService.searchContactById(id);
-		} catch (NoResultException e)
+		} 
+		catch (NoResultException e)
 		{
 			contact = new Contact(null, null, null, null);
 			mv.addObject("error", "The contact could not be found");
@@ -61,31 +63,37 @@ public class ViewSecurityObjectController {
 	}
 	
 	@RequestMapping("/users")
-	public ModelAndView showUsers()
+	public ModelAndView showUsers(@RequestParam(name = "error", required = false) String error)
 	{
 		List<User> allUsers = authService.searchAllUsers();
 		ModelAndView mv = new ModelAndView("/pages/security/userView.jsp");
 		mv.addObject("users", allUsers);
 		mv.addObject("user", authUser.getUser());
+		if (error != null)
+		{
+			mv.addObject("error", error);
+		}
 		return mv;
 	}
 	
 	@RequestMapping("/userDetail")
-	public ModelAndView showUserDetails(@RequestParam(name = "u") String id)
+	public ModelAndView showUserDetails(@RequestParam("u") String id)
 	{
+		// TODO: Check for possible invalid input for u
+		
 		int userId = Integer.valueOf(id);
-		User user;
+		UserForm userForm;
 		ModelAndView mv = new ModelAndView("/pages/security/userDetails.jsp");
 		try
 		{
-			user = authService.searchUserByUserId(userId);
+			userForm = new UserForm(authService.searchUserByUserId(userId));
 		} 
 		catch (NoResultException e)
 		{
-			user = new User();
+			userForm = new UserForm();
 			mv.addObject("error", "The user could not be found");
 		}
-		mv.addObject("userDetails", user);
+		mv.addObject("userForm", userForm);
 		return mv;
 	}
 	

@@ -14,6 +14,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
+
 @Entity
 @Table(name="user")
 public class User
@@ -22,7 +24,11 @@ public class User
 	private Integer userId;
 	private String username;
 	private String password;
-	private byte enabled;
+	
+	// status 0 - inactive
+	// status 1 - active
+	// status 2 - access denied
+	private UserStatus enabled;
 	private Date dateAdded;
 	private Date lastAccess;
 	
@@ -44,7 +50,7 @@ public class User
 		this.username = username;
 		this.password = password;
 		this.contact = contact;
-		this.enabled = 1;
+		this.enabled = UserStatus.ACTIVE;
 		this.dateAdded = new Date();
 		this.lastAccess = this.dateAdded;
 	}
@@ -64,7 +70,12 @@ public class User
 		return password;
 	}
 
-	public byte getEnabled()
+	public Integer getEnabled()
+	{
+		return enabled.getStatusCode();
+	}
+	
+	public UserStatus getEnabledStatus()
 	{
 		return enabled;
 	}
@@ -123,9 +134,14 @@ public class User
 		this.username = username;
 	}
 
-	public void setEnabled(byte enabled)
+	public void setEnabled(Integer status)
 	{
-		this.enabled = enabled;
+		this.enabled = UserStatus.getNewUserStatus(status);
+	}
+	
+	public void setEnabled(UserStatus status)
+	{
+		this.enabled = status;
 	}
 	
 	public void setDateAdded()

@@ -1,81 +1,159 @@
 package com.unlimitedcompanies.coms.webControllers.security;
 
+import javax.persistence.NoResultException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.securityService.AuthService;
+import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
+import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 
 @Controller
 @RequestMapping("/manageUser")
 public class UserManagementController
 {
-//	@Autowired
-//	AuthService authService;
-//	
-//	@Autowired
-//	ContactService contactService;
+	@Autowired
+	AuthService authService;
 	
-//	@RequestMapping(method = RequestMethod.GET)
-//	public ModelAndView showUserDetails(@RequestParam("u") String uId, @RequestParam("c") String cId)
-//	{
-//		// TODO: check for errors if the id is null or invalid
-//		Integer uid = Integer.valueOf(uId);
-//		// TODO: check for errors if the id is null or invalid
-//		Integer cid = Integer.valueOf(cId);
-//		UserForm userForm = null;
-//		
-//		if (uid > 0)
-//		{
-//			// TODO: show error if object is not found
-//			User user = authService.findUserByUserId(uid);
-//			userForm = new UserForm(user);
-//		} 
-//		else if (uid == 0 && cid > 0)
-//		{
-//			userForm = new UserForm();
-//			userForm.setContactId(cid);
-//		}
-//		
-//		return new ModelAndView("/pages/security/userManagement.jsp", "userForm", userForm);
-//	}
-//	
-//	@RequestMapping(method = RequestMethod.POST)
-//	public ModelAndView processUsers(UserForm userForm)
-//	{		
-//		if (userForm.getUserId() != null)
-//		{
-//			User user = new User(userForm.getUsername(), null, null);
-//			user.setEnabled(userForm.getEnabled());
-//			user = authService.updateUser(userForm.getUserId(), user);
-//			userForm = new UserForm(user);
-//		} 
-//		else
-//		{
-//			//Find the contact and the password
-//			// TODO: send some error if contact cannot be found
-//			Contact contact = contactService.findContactById(userForm.getContactId());
-//			String password = null;
-//			
-//			if (userForm.getPassword1().equals(userForm.getPassword2())) {
-//				PasswordEncoder pe = new BCryptPasswordEncoder();
-//				password = pe.encode(userForm.getPassword1());
-//			}
-//			else 
-//			{
-//				// TODO: Send some error if passwords don't match				
-//			}
-//						
-//			//Create new user
-//			try
-//			{
-//				User newUser = authService.saveUser(new User(userForm.getUsername(), password, contact));
-//				userForm = new UserForm(newUser);
-//			} catch (NonExistingContactException e)
-//			{
-//				// TODO: Send an internal error to the user
-//				e.printStackTrace();
-//			}
-//			
-//		}
-//		
-//		return new ModelAndView("redirect:/manageUser?u=" + userForm.getUserId() + "&c=0");
-//	}
+	@Autowired
+	ContactService contactService;
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView showUserDetails(@RequestParam(name = "u", required = false) String uId, 
+										@RequestParam(name = "c", required = false) String cId)
+	{
+		ModelAndView mv = new ModelAndView("/pages/security/userManagement.jsp");
+		UserForm userForm = null;
+		String error = null;
+		
+		if (uId == null)
+		{
+			if (cId == null)
+			{
+				mv.setViewName("/contacts");
+				error = "Error: There is not enough information to create a new user";
+			}
+			else
+			{
+				try
+				{
+					Contact contact = contactService.searchContactById(cId);
+					userForm = new UserForm();
+					userForm.setContactId(contact.getContactId());
+					mv.addObject("userForm", userForm);
+				} catch (NoResultException e)
+				{
+					mv.setViewName("/contacts");
+					error = "Error: The contact being used to create the new user could not be found";
+				}
+			}
+		}
+		else 
+		{
+			int userId;
+			try
+			{
+				userId = Integer.valueOf(uId);
+				User user = authService.searchUserByUserId(userId);
+				userForm = new UserForm(user);
+				mv.addObject("userForm", userForm);
+			} 
+			catch (NumberFormatException e)
+			{
+				mv.setViewName("/users");
+				error = "Error: The user information provided is invalid";
+			}
+			catch (NoResultException e)
+			{
+				mv.setViewName("/users");
+				error = "Error: The user to be updated could not be found";
+			}
+		}
+		
+		mv.addObject("error", error);
+		return mv;
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public ModelAndView processUsers(UserForm userForm)
+	{
+		ModelAndView mv = new ModelAndView("/userDetail");
+		Integer u = null;
+		String error = null;
+		
+		if (userForm.getUserId() == null)
+		{
+			// This is a request to create a new user
+			try
+			{
+				//Get the needed info
+				Contact contact = contactService.searchContactById(userForm.getContactId());
+				
+				String password = null;
+				if (userForm.getPassword1().equals(userForm.getPassword2())) {
+					PasswordEncoder pe = new BCryptPasswordEncoder();
+					password = pe.encode(userForm.getPassword1());
+				}
+				else 
+				{
+					return new ModelAndView("redirect:/manageUser?c=" + userForm.getContactId());
+				}
+				
+				//Create and store the new user
+				User newUser = authService.saveUser(new User(userForm.getUsername(), password, contact));
+				u = newUser.getUserId();
+				mv.addObject("u", u.toString());
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			} 
+			catch (NoResultException e)
+			{
+				error = "Error: The contact provided could not be found";
+				mv.setViewName("/contacts");
+				mv.addObject("error", error);
+			} 
+			catch (NonExistingContactException e)
+			{
+				error = "Error: The contact provided could not be found";
+				mv.setViewName("/contacts");
+				mv.addObject("error", error);
+			}
+			
+		} 
+		else
+		{
+			// This is a request to update an existing user
+			
+			if (userForm.getUsername() != null)
+			{
+				User user = new User(userForm.getUsername(), null, null);
+				user.setEnabled(userForm.getEnabledStatus());
+				user = authService.updateUser(userForm.getUserId(), user);				
+				mv.addObject("u", user.getUserId());
+			}			
+		}
+		
+		return new ModelAndView("redirect:/userDetail?u=" + userForm.getUserId());
+	}
 }

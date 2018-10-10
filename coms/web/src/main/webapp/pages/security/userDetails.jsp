@@ -29,16 +29,18 @@
 				
 				<div class="row mb15">
 					<div class="col-12">
-						<a href="<c:url value='/manageUser?u=${userDetails.userId}'/>" class="float-right btn btn-sm btn-outline-success ml15">
-							Edit User
-						</a>
+						<c:if test="${error == null}">
+							<a href="<c:url value='/manageUser?u=${userForm.userId}'/>" class="float-right btn btn-sm btn-outline-success ml15">
+								Edit User
+							</a>
+						</c:if>
 						<a href="<c:url value='/users'/>" class="float-right btn btn-sm btn-outline-primary ml15">
 							Back
 						</a>
 					</div>
 				</div>
 				
-				<form:form modelAttribute="userDetails">
+				<form:form modelAttribute="userForm">
 					<div class="form-group row">
 						<label for="userUsername" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Username: </strong></label>
 						<div class="col-12 col-md-9 col-lg-10">

@@ -18,10 +18,10 @@ public class Client
 //		search.addField("Role", "roleName");
 //		search.addField("User", "username");
 //		search.addField("Contact", "firstName");
-//		search.where("User", "username", "administrator", Operator.EQUAL);
+//		search.where("User", "username", "administrator", Operator.EQUALS);
 //		ConditionGroup conds = new ConditionGroup(Method.OR);
-//		conds.addCondition("Role", "roleId", 2, Operator.EQUAL);
-//		conds.addCondition("Contact", "firstName", "Administrator", Operator.EQUAL);
+//		conds.addCondition("Role", "roleId", 2, Operator.EQUALS);
+//		conds.addCondition("Contact", "firstName", "Administrator", Operator.EQUALS);
 //		search.where(conds);
 //		System.out.println(search);
 		

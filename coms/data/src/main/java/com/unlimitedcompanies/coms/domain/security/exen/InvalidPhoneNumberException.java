@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.domain.security.exceptions;
+package com.unlimitedcompanies.coms.domain.security.exen;
 
 public class InvalidPhoneNumberException extends Exception
 {

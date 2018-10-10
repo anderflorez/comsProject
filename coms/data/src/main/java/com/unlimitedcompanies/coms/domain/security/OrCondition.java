@@ -56,7 +56,7 @@ public class OrCondition
 
 	public Operator getOperator()
 	{
-		return Operator.getOperator(this.operator);
+		return Operator.getNewOperator(this.operator);
 	}
 
 	public OrGroup getOrGroup()

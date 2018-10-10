@@ -18,5 +18,5 @@ module data
 	exports com.unlimitedcompanies.coms.dao.securitySettings;
 	exports com.unlimitedcompanies.coms.dao.security.exceptions;
 	exports com.unlimitedcompanies.coms.domain.security;
-	exports com.unlimitedcompanies.coms.domain.security.exceptions;
+	exports com.unlimitedcompanies.coms.domain.security.exen;
 }

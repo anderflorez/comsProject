@@ -16,7 +16,6 @@ import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.OrCondition;
 import com.unlimitedcompanies.coms.domain.security.OrGroup;
-import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
@@ -47,13 +46,6 @@ public class AuthDaoImpl implements AuthDao
 				.setParameter("lastAccess", user.getDbLastAccess())
 				.setParameter("contact", user.getContact())
 				.executeUpdate();
-	}
-	
-	@Override
-	public void updateUser(int userId, User user) {
-		User foundUser = em.find(User.class, userId);
-		foundUser.setUsername(user.getUsername());
-		foundUser.setEnabled(user.getEnabled());
 	}
 	
 	@Override
@@ -96,6 +88,13 @@ public class AuthDaoImpl implements AuthDao
 		return em.createQuery("select user from User user left join fetch user.contact left join fetch user.roles where user.username = :username", User.class)
 							  .setParameter("username", username)
 							  .getSingleResult();
+	}
+	
+	@Override
+	public void updateUser(int userId, User user) {
+		User foundUser = em.find(User.class, userId);
+		foundUser.setUsername(user.getUsername());
+		foundUser.setEnabled(user.getEnabled());
 	}
 	
 	@Override

@@ -6,7 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.domain.security.exceptions.InvalidPhoneNumberException;
+import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
 
 @Entity
 @Table(name="phone")

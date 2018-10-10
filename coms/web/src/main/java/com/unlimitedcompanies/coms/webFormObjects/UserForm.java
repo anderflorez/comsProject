@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.webFormObjects;
 
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 
 public class UserForm
 {
@@ -8,14 +9,14 @@ public class UserForm
 	private String username;
 	private String password1;
 	private String password2;
-	private byte enabled;
+	private UserStatus enabled;
 	private String dateAdded;
 	private String lastAccess;
 	private String contactId;
 
 	public UserForm() {}
 
-	public UserForm(Integer userId, String username, byte enabled, String dateAdded, String lastAccess, String contactId)
+	public UserForm(Integer userId, String username, UserStatus enabled, String dateAdded, String lastAccess, String contactId)
 	{
 		this.userId = userId;
 		this.username = username;
@@ -29,7 +30,7 @@ public class UserForm
 	{
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.enabled = user.getEnabled();
+		this.enabled = user.getEnabledStatus();
 		this.dateAdded = user.getDateAdded();
 		this.lastAccess = user.getLastAccess();
 		this.contactId = user.getContact().getContactId();
@@ -74,15 +75,35 @@ public class UserForm
 	{
 		this.password2 = password2;
 	}
+	
+	public String getEnabled()
+	{
+		if (this.enabled == null)
+		{
+			return "";
+		}
+		return enabled.toString();
+	}
 
-	public byte getEnabled()
+	public Integer getEnabledCode()
+	{
+		return enabled.getStatusCode();
+	}
+	
+	public UserStatus getEnabledStatus()
 	{
 		return enabled;
 	}
 
-	public void setEnabled(byte enabled)
+	public void setEnabled(String status)
 	{
-		this.enabled = enabled;
+		int s = Integer.valueOf(status);
+		this.enabled = UserStatus.getNewUserStatus(s);
+	}
+	
+	public void setEnabled(UserStatus status)
+	{
+		this.enabled = status;
 	}
 
 	public String getDateAdded()
