@@ -40,26 +40,33 @@
 							<form:input id="userUsername" path="username" class="form-control"/>
 						</div>
 					</div>
-					<c:if test="${userForm.userId != null}">
-						<div class="form-group row">
-							<label for="userStatus" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Status: </strong></label>
-							<div class="ccol-12 col-md-9 col-lg-10">
-								<form:input id="userStatus" path="enabled" class="form-control"/>
+					<div class="form-group row">
+						<label for="userStatus" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Status: </strong></label>
+						<div class="col-12 col-md-9 col-lg-10">
+							<div class="radio">
+								<div>
+									<label>
+										<c:if test="${userForm.userId != null}">
+											<form:radiobutton path="enabled" value="Inactive" id="userStatus"/> Inactive
+										</c:if>
+										<c:if test="${userForm.userId == null}">
+											<form:radiobutton path="enabled" value="Inactive" id="userStatus" checked="true"/> Inactive
+										</c:if>
+									</label>
+								</div>
+								<div>
+									<label>
+										<form:radiobutton path="enabled" value="Active"/> Active
+									</label>								
+								</div>
+								<div>
+									<label>
+										<form:radiobutton path="enabled" value="Denied"/> Denied									
+									</label>								
+								</div>
 							</div>
 						</div>
-						<div class="form-group row">
-							<label for="userDateAdded" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Date Added: </strong></label>
-							<div class="col-12 col-md-9 col-lg-10">
-								<form:input id="userDateAdded" path="dateAdded" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group row">
-							<label for="userLastAccess" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Last Access: </strong></label>
-							<div class="col-12 col-md-9 col-lg-10">
-								<form:input id="userLastAccess" path="lastAccess" class="form-control"/>
-							</div>
-						</div>
-					</c:if>
+					</div>
 
 					<c:if test="${userForm.userId == null}">
 						<div class="form-group row">
@@ -69,7 +76,6 @@
 							</div>
 						</div>
 						<div class="form-group row">
-							<!-- <label for="pass2" class="col-12 col-md-3 col-lg-2 col-form-label"><strong>Repeat Password: </strong></label> -->
 							<div class="col-12 offset-md-3 col-md-9 offset-lg-2 col-lg-10">
 								<form:input path="password2" type="password" class="form-control" placeholder="Confirm Password" />
 							</div>

@@ -100,25 +100,25 @@ public class AuthServiceImpl implements AuthService
 		return this.findRoleByRoleName(role.getRoleName());
 	}
 
-//	@Override
-//	public Role updateRole(Integer roleId, Role role)
-//	{
-//		authDao.updateRole(roleId, role);
-//		return this.findRoleById(roleId);
-//	}
-//
-//	@Override
-//	public List<Role> findAllRoles()
-//	{
-//		return authDao.getAllRoles();
-//	}
-//
-//	@Override
-//	public Role findRoleById(int id)
-//	{
-//		return authDao.searchRoleById(id);
-//	}
-//
+	@Override
+	public List<Role> searchAllRoles()
+	{
+		return authDao.getAllRoles();
+	}
+
+	@Override
+	public Role searchRoleById(int id)
+	{
+		return authDao.getRoleById(id);
+	}
+
+	@Override
+	public Role updateRole(int roleId, Role role)
+	{
+		authDao.updateRole(roleId, role);
+		return this.searchRoleById(roleId);
+	}
+
 //	@Override
 //	public Role findRoleByIdWithMembers(Integer id)
 //	{

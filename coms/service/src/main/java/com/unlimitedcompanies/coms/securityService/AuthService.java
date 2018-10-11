@@ -25,9 +25,9 @@ public interface AuthService
 	
 	public int findNumberOfRoles();
 	public Role saveRole(Role role);
-//	public Role updateRole(Integer roleId, Role role);
-//	public List<Role> findAllRoles();
-//	public Role findRoleById(int id);
+	public List<Role> searchAllRoles();
+	public Role searchRoleById(int id);
+	public Role updateRole(int roleId, Role role);
 //	public Role findRoleByIdWithMembers(Integer id);
 	public Role findRoleByRoleName(String roleName);
 //	

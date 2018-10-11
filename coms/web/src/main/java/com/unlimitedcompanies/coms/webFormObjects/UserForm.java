@@ -9,14 +9,14 @@ public class UserForm
 	private String username;
 	private String password1;
 	private String password2;
-	private UserStatus enabled;
+	private String enabled;
 	private String dateAdded;
 	private String lastAccess;
 	private String contactId;
 
 	public UserForm() {}
 
-	public UserForm(Integer userId, String username, UserStatus enabled, String dateAdded, String lastAccess, String contactId)
+	public UserForm(Integer userId, String username, String enabled, String dateAdded, String lastAccess, String contactId)
 	{
 		this.userId = userId;
 		this.username = username;
@@ -30,7 +30,7 @@ public class UserForm
 	{
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.enabled = user.getEnabledStatus();
+		this.enabled = user.getEnabledStatus().toString();
 		this.dateAdded = user.getDateAdded();
 		this.lastAccess = user.getLastAccess();
 		this.contactId = user.getContact().getContactId();
@@ -78,32 +78,49 @@ public class UserForm
 	
 	public String getEnabled()
 	{
-		if (this.enabled == null)
-		{
-			return "";
-		}
-		return enabled.toString();
+		return enabled;
 	}
 
 	public Integer getEnabledCode()
 	{
-		return enabled.getStatusCode();
+		Integer code;
+		if (this.enabled == null || this.enabled.isEmpty())
+		{
+			code = null;
+		}
+		else {
+			if (this.enabled.equals("Inactive")) code = 0;
+			else if (this.enabled.equals("Active")) code = 1;
+			else if (this.enabled.equals("Denied")) code = 2;
+			else code = null;
+		}
+		return code;
 	}
 	
 	public UserStatus getEnabledStatus()
 	{
-		return enabled;
+		UserStatus status;
+		if (this.enabled == null || this.enabled.isEmpty())
+		{
+			status = null;
+		}
+		else {
+			if (this.enabled.equals("Inactive")) status = UserStatus.INACTIVE;
+			else if (this.enabled.equals("Active")) status = UserStatus.ACTIVE;
+			else if (this.enabled.equals("Denied")) status = UserStatus.DENIED;
+			else status = null;
+		}
+		return status;
 	}
 
 	public void setEnabled(String status)
 	{
-		int s = Integer.valueOf(status);
-		this.enabled = UserStatus.getNewUserStatus(s);
+		this.enabled = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
 	}
 	
 	public void setEnabled(UserStatus status)
 	{
-		this.enabled = status;
+		this.enabled = status.toString();
 	}
 
 	public String getDateAdded()

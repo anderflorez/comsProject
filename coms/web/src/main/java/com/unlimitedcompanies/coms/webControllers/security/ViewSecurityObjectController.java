@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
@@ -18,16 +19,16 @@ import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
-public class ViewSecurityObjectController {
+public class ViewSecurityObjectController
+{	
+	@Autowired
+	AuthenticatedUserDetail authUser;
 	
 	@Autowired
 	ContactService contactService;
 	
 	@Autowired
 	AuthService authService;
-	
-	@Autowired
-	AuthenticatedUserDetail authUser;
 	
 	@RequestMapping("/contacts")
 	public ModelAndView showContacts(@RequestParam(name = "error", required = false) String error)
@@ -59,6 +60,7 @@ public class ViewSecurityObjectController {
 			mv.addObject("error", "The contact could not be found");
 		}
 		mv.addObject("contact", contact);
+		mv.addObject("user", authUser.getUser());
 		return mv;
 	}
 	
@@ -78,30 +80,64 @@ public class ViewSecurityObjectController {
 	
 	@RequestMapping("/userDetail")
 	public ModelAndView showUserDetails(@RequestParam("u") String id)
-	{
-		// TODO: Check for possible invalid input for u
-		
-		int userId = Integer.valueOf(id);
-		UserForm userForm;
+	{		
 		ModelAndView mv = new ModelAndView("/pages/security/userDetails.jsp");
+		UserForm userForm;
 		try
 		{
+			int userId = Integer.valueOf(id);
 			userForm = new UserForm(authService.searchUserByUserId(userId));
 		} 
 		catch (NoResultException e)
 		{
 			userForm = new UserForm();
-			mv.addObject("error", "The user could not be found");
+			mv.addObject("error", "Error: The user could not be found");
+		}
+		catch (NumberFormatException e)
+		{
+			userForm = new UserForm();
+			mv.addObject("error", "Error: The user information provided is invalid");
 		}
 		mv.addObject("userForm", userForm);
+		mv.addObject("user", authUser.getUser());
 		return mv;
 	}
 	
-//	@RequestMapping("/roles")
-//	public ModelAndView showRoles()
-//	{
-//		List<Role> allRoles = authService.findAllRoles();
-//		
-//		return new ModelAndView("/pages/security/roleView.jsp", "roles", allRoles);
-//	}
+	@RequestMapping("/roles")
+	public ModelAndView showRoles()
+	{
+		List<Role> allRoles = authService.searchAllRoles();
+		ModelAndView mv = new ModelAndView("/pages/security/roleView.jsp");
+		mv.addObject("roles", allRoles);
+		mv.addObject("user", authUser.getUser());
+		return mv;
+	}
+	
+	@RequestMapping("/roleDetail")
+	public ModelAndView showRoleDetails(@RequestParam("r") String id)
+	{
+		ModelAndView mv = new ModelAndView("/pages/security/roleDetails.jsp");
+		Role role;
+		try
+		{
+			int roleId = Integer.valueOf(id);
+			role = authService.searchRoleById(roleId);
+			mv.addObject("role", role);
+		} 
+		catch (NoResultException e)
+		{
+			role = new Role(null);
+			mv.addObject("role", role);
+			mv.addObject("error", "Error: The role provided could not be found");
+		}
+		catch (NumberFormatException e)
+		{
+			role = new Role(null);
+			mv.addObject("role", role);
+			mv.addObject("error", "Error: The role information provided is invalid");
+		}
+		
+		mv.addObject("user", authUser.getUser());
+		return mv;
+	}
 }

@@ -23,11 +23,11 @@ public interface AuthDao
 	
 	public int getNumberOfRoles();
 	public void createRole(Role role);
-//	public List<Role> getAllRoles();
-//	public Role searchRoleById(int id);
+	public List<Role> getAllRoles();
+	public Role getRoleById(int id);
 	public Role getRoleByRoleName(String roleName);
 //	public Role getRoleByIdWithMembers(Integer id);
-//	public void updateRole(Integer roleId, Role role);
+	public void updateRole(int roleId, Role role);
 //	
 	public void assignUserToRole(User user, Role role);
 //	public void removeUserFromRole(Role role, User user);

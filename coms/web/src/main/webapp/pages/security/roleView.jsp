@@ -26,7 +26,7 @@
 			<div class="jumbotron">
 				<div id="newRole" class="row mb15">
 					<div class="col-12">
-						<button type="button" class="float-right btn btn-sm btn-outline-success clickable" data-href="<c:url value='/manageRole?r=0'/>">
+						<button type="button" class="float-right btn btn-sm btn-outline-success clickable" data-href="<c:url value='/manageRole'/>">
 							New Role
 						</button>
 					</div>
@@ -42,7 +42,7 @@
 							</thead>
 							<tbody>
 								<c:forEach items="${roles}" var="role">
-									<tr class="clickable" data-href="<c:url value='/manageRole?r=${role.roleId}'/>">
+									<tr class="clickable" data-href="<c:url value='/roleDetail?r=${role.roleId}'/>">
 										<td>${role.roleName}</td>
 									</tr>
 								</c:forEach>
@@ -54,6 +54,15 @@
 		</div>
 	</div>
 </div>
+
+<c:if test="${error != null}">
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		${error}
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+</c:if>
 
 <c:import url="../dashboard/scriptDefinitions.jsp"/>
 

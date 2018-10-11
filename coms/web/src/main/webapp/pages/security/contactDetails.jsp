@@ -29,9 +29,17 @@
 				
 				<div class="row mb15">
 					<div class="col-12">
-						<a href="<c:url value='/manageContact?c=${contact.contactId}'/>" class="float-right btn btn-sm btn-outline-success ml15">
-							Edit Contact
-						</a>
+						<c:if test="${error == null}">
+							<div class="dropdown float-right ml15">
+								<a href="#" class="btn btn-sm btn-success dropdown-toggle" role="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Actions
+								</a>
+								<div class="dropdown-menu" aria-labelledby="actionMenu">
+									<a href="<c:url value='/manageContact?c=${contact.contactId}'/>" class="dropdown-item">Edit Contact</a>
+									<a href="<c:url value='/manageUser?c=${contact.contactId}'/>" class="dropdown-item">Create User</a>
+								</div>
+							</div>
+						</c:if>
 						<a href="<c:url value='/contacts'/>" class="float-right btn btn-sm btn-outline-primary ml15">
 							Back
 						</a>
@@ -63,14 +71,7 @@
 							<form:input id="contactEMail" path="email" readonly="true" class="form-control-plaintext"/>
 						</div>
 					</div>
-					<form:input id="objectIdIndicator" path="contactId" class="d-none"/>
-					<div class="row">
-						<div class="col-12">
-							<button type="button" class="btn btn-sm btn-success clickable" data-href="<c:url value='/manageUser?c=${contact.contactId}'/>">
-								Create New User
-							</button>
-						</div>
-					</div>
+					<form:input path="contactId" class="d-none"/>
 				</form:form>
 			</div>			
 		</div>

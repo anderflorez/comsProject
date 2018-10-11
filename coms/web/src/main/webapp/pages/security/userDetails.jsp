@@ -22,7 +22,7 @@
 			<a class="nav-item nav-link" href="<c:url value='/roles'/>">Roles</a>
 		</nav>
 
-		<div id="userManagement">
+		<div>
 			<div class="jumbotron">
 				<h2 id="manageDetailsTitle">User Details</h2>
 				<hr>
@@ -30,9 +30,14 @@
 				<div class="row mb15">
 					<div class="col-12">
 						<c:if test="${error == null}">
-							<a href="<c:url value='/manageUser?u=${userForm.userId}'/>" class="float-right btn btn-sm btn-outline-success ml15">
-								Edit User
-							</a>
+							<div class="dropdown float-right ml15">
+								<a href="#" class="btn btn-sm btn-success dropdown-toggle" role="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Actions
+								</a>
+								<div class="dropdown-menu" aria-labelledby="actionMenu">
+									<a href="<c:url value='/manageUser?u=${userForm.userId}'/>" class="dropdown-item">Edit User</a>
+								</div>
+							</div>
 						</c:if>
 						<a href="<c:url value='/users'/>" class="float-right btn btn-sm btn-outline-primary ml15">
 							Back

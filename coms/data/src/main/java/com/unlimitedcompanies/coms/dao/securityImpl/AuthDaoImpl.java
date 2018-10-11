@@ -111,18 +111,23 @@ public class AuthDaoImpl implements AuthDao
 				.setParameter("roleName", role.getRoleName()).executeUpdate();
 	}
 	
-//	@Override
-//	public List<Role> getAllRoles()
-//	{
-//		return em.createQuery("select role from Role as role", Role.class).getResultList();
-//	}
-//	
-//	@Override
-//	public Role searchRoleById(int id)
-//	{
-//		return em.find(Role.class, id);
-//	}
-//
+	@Override
+	public List<Role> getAllRoles()
+	{
+		return em.createQuery("from Role", Role.class).getResultList();
+	}
+	
+	@Override
+	public Role getRoleById(int id)
+	{
+		Role role = em.find(Role.class, id);
+		if (role == null)
+		{
+			throw new NoResultException();
+		}
+		return role;
+	}
+
 	@Override
 	public Role getRoleByRoleName(String roleName)
 	{
@@ -141,13 +146,17 @@ public class AuthDaoImpl implements AuthDao
 //	}
 //
 	
-//	@Override
-//	public void updateRole(Integer roleId, Role role)
-//	{
-//		Role foundRole = em.find(Role.class, roleId);
-//		foundRole.setRoleName(role.getRoleName());
-//	}	
-//
+	@Override
+	public void updateRole(int roleId, Role role)
+	{
+		Role foundRole = em.find(Role.class, roleId);
+		if (foundRole == null)
+		{
+			throw new NoResultException();
+		}
+		foundRole.setRoleName(role.getRoleName());
+	}	
+
 	@Override
 	public void assignUserToRole(User user, Role role)
 	{
