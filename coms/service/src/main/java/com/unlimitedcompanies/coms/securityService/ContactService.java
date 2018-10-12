@@ -12,7 +12,7 @@ public interface ContactService
 	public Contact searchContactById(String id);
 	public Contact searchContactByEmail(String email);
 	public void updateContact(String id, Contact updatedContact);
-//	public void deleteContact(Contact contact);
+	public void deleteContact(String contactId);
 //	
 //	public int findNumberOfContactAddresses();
 //	public void saveContactAddress(Address address);
@@ -23,4 +23,5 @@ public interface ContactService
 //	public void saveContactPhone(Phone phone);
 //	public List<Phone> findContactPhoneByNumber(String phoneNumber);
 //	public Phone findContactPhoneById(int phoneId);
+	
 }

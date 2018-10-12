@@ -5,8 +5,10 @@ import java.util.List;
 import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -53,6 +55,11 @@ public class ViewSecurityObjectController
 		try
 		{
 			contact = contactService.searchContactById(id);
+			try
+			{
+				authService.searchUserByContact(contact);
+				mv.addObject("contactUser", true);
+			} catch (NoResultException e) {}
 		} 
 		catch (NoResultException e)
 		{
@@ -61,6 +68,25 @@ public class ViewSecurityObjectController
 		}
 		mv.addObject("contact", contact);
 		mv.addObject("user", authUser.getUser());
+		return mv;
+	}
+	
+	@RequestMapping(value = "/deleteContact", method = RequestMethod.POST)
+	public ModelAndView deleteContact(String contactId)
+	{
+		ModelAndView mv = new ModelAndView("/contacts");
+		try
+		{
+			contactService.deleteContact(contactId);
+		} 
+		catch (NoResultException e)
+		{
+			mv.addObject("error", "Error: The contact to be deleted could not be found");
+		}
+		catch (DataIntegrityViolationException e)
+		{
+			mv.addObject("error", "Error: There are other items associated to this contact");
+		}
 		return mv;
 	}
 	
@@ -103,6 +129,25 @@ public class ViewSecurityObjectController
 		return mv;
 	}
 	
+	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
+	public ModelAndView deleteUser(int userId)
+	{
+		ModelAndView mv = new ModelAndView("/users");
+		try
+		{
+			authService.deleteUser(userId);
+		} 
+		catch (NoResultException e)
+		{
+			mv.addObject("error", "Error: The user to be deleted could not be found");
+		}
+		catch (DataIntegrityViolationException e)
+		{
+			mv.addObject("error", "Error: There are other items associated to this user");
+		}
+		return mv;
+	}
+	
 	@RequestMapping("/roles")
 	public ModelAndView showRoles()
 	{
@@ -121,8 +166,12 @@ public class ViewSecurityObjectController
 		try
 		{
 			int roleId = Integer.valueOf(id);
-			role = authService.searchRoleById(roleId);
+			role = authService.searchRoleByIdWithMembers(roleId);
 			mv.addObject("role", role);
+			if (role.getMembers().size() > 0)
+			{
+				mv.addObject("userMembers", role.getMembers());
+			}
 		} 
 		catch (NoResultException e)
 		{

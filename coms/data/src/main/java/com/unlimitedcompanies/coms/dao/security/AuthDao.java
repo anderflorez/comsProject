@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.OrCondition;
 import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
@@ -14,19 +15,21 @@ public interface AuthDao
 {
 	public int getNumberOfUsers();
 	public void createUser(User user);
-	public void updateUser(int userId, User user);
 	public List<User> getAllUsers();
 	public User getUserByUserId(int id);
 	public User getUserByUsername(String username);
+	public User getUserByContact(Contact contact);
 	public User getUserByUsernameWithContact(String username);
 	public User getFullUserByUsername(String username);
+	public void updateUser(int userId, User user);
+	public void deleteUser(int userId);
 	
 	public int getNumberOfRoles();
 	public void createRole(Role role);
 	public List<Role> getAllRoles();
 	public Role getRoleById(int id);
 	public Role getRoleByRoleName(String roleName);
-//	public Role getRoleByIdWithMembers(Integer id);
+	public Role getRoleByIdWithMembers(int id);
 	public void updateRole(int roleId, Role role);
 //	
 	public void assignUserToRole(User user, Role role);

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.OrCondition;
 import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
@@ -73,6 +74,14 @@ public class AuthDaoImpl implements AuthDao
 							  .setParameter("username", username)
 							  .getSingleResult();
 	}
+
+	@Override
+	public User getUserByContact(Contact contact)
+	{
+		return em.createQuery("select user from User user where user.contact = :contact", User.class)
+							  .setParameter("contact", contact)
+							  .getSingleResult();
+	}
 	
 	@Override
 	public User getUserByUsernameWithContact(String username)
@@ -95,6 +104,14 @@ public class AuthDaoImpl implements AuthDao
 		User foundUser = em.find(User.class, userId);
 		foundUser.setUsername(user.getUsername());
 		foundUser.setEnabled(user.getEnabled());
+	}
+	
+
+	@Override
+	public void deleteUser(int userId)
+	{
+		User user = this.getUserByUserId(userId);
+		em.remove(user);
 	}
 	
 	@Override
@@ -136,15 +153,15 @@ public class AuthDaoImpl implements AuthDao
 				 .getSingleResult();
 	}
 	
-//	@Override
-//	public Role getRoleByIdWithMembers(Integer id)
-//	{
-//		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
-//				+ "where role.roleId = :roleId", Role.class)
-//				.setParameter("roleId", id)
-//				.getSingleResult();
-//	}
-//
+	@Override
+	public Role getRoleByIdWithMembers(int id)
+	{
+		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
+				+ "where role.roleId = :roleId", Role.class)
+				.setParameter("roleId", id)
+				.getSingleResult();
+	}
+
 	
 	@Override
 	public void updateRole(int roleId, Role role)

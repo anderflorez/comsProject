@@ -36,6 +36,10 @@
 								</a>
 								<div class="dropdown-menu" aria-labelledby="actionMenu">
 									<a href="<c:url value='/manageUser?u=${userForm.userId}'/>" class="dropdown-item">Edit User</a>
+									<form method="POST" action="<c:url value='/deleteUser'/>">
+										<input type="text" name="userId" value="${user.userId}" class="d-none">
+										<input type="submit" name="submit" value="Delete" class="dropdown-item bg-danger text-white">
+									</form>
 								</div>
 							</div>
 						</c:if>

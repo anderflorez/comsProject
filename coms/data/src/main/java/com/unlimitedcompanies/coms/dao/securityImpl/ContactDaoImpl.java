@@ -81,13 +81,13 @@ public class ContactDaoImpl implements ContactDao
 		foundContact.setEmail(contact.getEmail());
 	}
 
-//	@Override
-//	public void removeContact(int id)
-//	{
-//		Contact deleteContact = em.find(Contact.class, id);
-//		em.remove(deleteContact);
-//	}
-//
+	@Override
+	public void deleteContact(String contactId)
+	{
+		Contact contact = this.getContactById(contactId);
+		em.remove(contact);
+	}
+
 //	@Override
 //	public int getNumberOfAddresses()
 //	{

@@ -98,21 +98,17 @@ class SecurityServiceIntegrationTest
 		assertEquals(correctedContact, foundContact, "Service test for updating contact failed");
 	}
 
-	// @Test
-	// public void deleteSingleContactTest()
-	// {
-	// contactService.saveContact(new Contact("John", null, "Doe",
-	// "johnd@example.com"));
-	// contactService.saveContact(new Contact("Jane", null, "Doe",
-	// "janed@example.com"));
-	//
-	// Contact deleteContact =
-	// contactService.searchContactByEmail("johnd@example.com");
-	// contactService.deleteContact(deleteContact);
-	//
-	// assertEquals(1, contactService.findNumberOfContacts(), "Service test for
-	// deleting a single contact failed");
-	// }
+	 @Test
+	 public void deleteSingleContactTest()
+	 {
+		 contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		 contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		
+		 Contact deleteContact = contactService.searchContactByEmail("johnd@example.com");
+		 contactService.deleteContact(deleteContact.getContactId());
+		
+		 assertEquals(1, contactService.findNumberOfContacts(), "Service test for deleting a single contact failed");
+	 }
 
 	// @Test
 	// public void numberOfAddressesTest()
@@ -251,7 +247,7 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void getNumberOfUsersTest()
 	{
-		assertEquals(0, authService.findNumberOfUsers(), "Service test to find the number of users failed");
+		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
 	}
 
 	@Test
@@ -261,33 +257,9 @@ class SecurityServiceIntegrationTest
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 
 		User user = authService.saveUser(new User("username", "mypass", contact));
-		assertEquals(1, authService.findNumberOfUsers(), "Service test to save a new user failed");
+		assertEquals(1, authService.searchNumberOfUsers(), "Service test to save a new user failed");
 		assertNotNull(user.getUserId(), "Service test to save a new user failed");
 	}
-
-	@Test
-	public void updateUsernameTest() throws NonExistingContactException
-	{
-		
-		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
-		user.setUsername("john.doe");
-
-		User updatedUser = authService.updateUser(user.getUserId(), user);
-		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
-	}
-
-	@Test
-	 public void updateUserStatus() throws NonExistingContactException
-	 {
-		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
-		user.setEnabled(0);
-		
-		User updatedUser = authService.updateUser(user.getUserId(), user);
-		assertEquals(UserStatus.INACTIVE, updatedUser.getEnabledStatus(), "Service test for updating user status failed");
-	 }
 	
 	@Test
 	public void findAllUsersTest()
@@ -310,6 +282,17 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
+	public void findUserByUserId() throws NonExistingContactException
+	{
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
+		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		
+		User foundUser = authService.searchUserByUserId(user.getUserId());
+		assertEquals(user, foundUser, "Service test for finding user by userId failed");
+	}
+	
+	@Test
 	public void findUserByUsernameTest() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
@@ -320,6 +303,16 @@ class SecurityServiceIntegrationTest
 		User founduser = authService.searchUserByUsernameWithContact("jdoe");
 
 		assertEquals(user, founduser, "Service test for finding user by username with contact failed");
+	}
+	
+	@Test
+	public void findUserByContact() throws NonExistingContactException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		
+		User foundUser = authService.searchUserByContact(contact);
+		assertEquals(user.getUserId(), foundUser.getUserId(), "Service test for finding user by contact failed");
 	}
 
 	@Test
@@ -335,17 +328,44 @@ class SecurityServiceIntegrationTest
 		assertEquals(user, founduser, "Service test for finding user by username failed");
 		assertEquals(user.getContact(), contact, "Service test for finding user by username with contact failed");
 	}
-
+	
 	@Test
-	public void findUserByUserId() throws NonExistingContactException
+	public void updateUsernameTest() throws NonExistingContactException
+	{
+		
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		user.setUsername("john.doe");
+		
+		User updatedUser = authService.updateUser(user.getUserId(), user);
+		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
+	}
+	
+	@Test
+	public void updateUserStatus() throws NonExistingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = authService.saveUser(new User("jdoe", "mypass", contact));
-
-		User foundUser = authService.searchUserByUserId(user.getUserId());
-		assertEquals(user, foundUser, "Service test for finding user by userId failed");
+		user.setEnabled(0);
+		
+		User updatedUser = authService.updateUser(user.getUserId(), user);
+		assertEquals(UserStatus.INACTIVE, updatedUser.getEnabledStatus(), "Service test for updating user status failed");
 	}
+	
+	 @Test
+	 public void deleteSingleUserTest() throws NonExistingContactException
+	 {
+		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		 
+		 User user = authService.saveUser(new User("johnd", "mypass", contact1));
+		 authService.saveUser(new User("janed", "mypass", contact2));
+		
+		 authService.deleteUser(user.getUserId());
+		
+		 assertEquals(1, authService.searchNumberOfUsers(), "Service test for deleting a single user failed");
+	 }
 
 	@Test
 	public void getNumberOfRolesTest()
@@ -360,6 +380,56 @@ class SecurityServiceIntegrationTest
 		assertEquals(1, authService.findNumberOfRoles(), "Service test for saving new role failed");
 		assertNotNull(role.getRoleId(), "Service test for saving new role failed");
 	}
+	
+	@Test
+	public void findAllRolesTest()
+	{
+		authService.saveRole(new Role("Administrator"));
+		authService.saveRole(new Role("Manager"));
+		authService.saveRole(new Role("Engineer"));
+		
+		assertEquals(3, authService.findNumberOfRoles(), "Service test for finding all roles failed");
+	}
+	
+	@Test
+	public void findRoleByRoleIdTest()
+	{
+		Role initialrole = new Role("Administrator");
+		Role savedRole = authService.saveRole(initialrole);
+		Role foundRole = authService.searchRoleById(savedRole.getRoleId());
+		
+		assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
+	}
+	
+	@Test
+	public void findRoleByRoleNameTest()
+	{
+		Role initialrole = new Role("Administrator");
+		authService.saveRole(initialrole);
+		Role foundrole = authService.findRoleByRoleName("Administrator");
+		
+		assertEquals(initialrole, foundrole, "Service test for finding role by roleName failed");
+	}
+	
+	@Test
+	public void findRoleByIdWithMembers() throws NonExistingContactException
+	{
+		Role role = authService.saveRole(new Role("Administrator"));
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		Contact contact3 = contactService.saveContact(new Contact("Richard", null, "Roe", "richd@example.com"));
+		
+		User user1 = authService.saveUser(new User("johnd", "pass", contact1));
+		User user2 = authService.saveUser(new User("janed", "pass", contact2));
+		User user3 = authService.saveUser(new User("richd", "pass", contact3));
+		
+		authService.assignUserToRole(user1, role);
+		authService.assignUserToRole(user2, role);
+		authService.assignUserToRole(user3, role);
+		
+		Role foundRole = authService.searchRoleByIdWithMembers(role.getRoleId());
+		assertEquals(3, foundRole.getMembers().size(), "Service test for finding a role with its members failed");
+	}
 
 	@Test
 	 public void updateRoleTest()
@@ -371,36 +441,6 @@ class SecurityServiceIntegrationTest
 		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
 		assertEquals(1, authService.findNumberOfRoles(), "Service test for updating role has failed");
 	 }
-
-	 @Test
-	 public void findAllRolesTest()
-	 {
-		 authService.saveRole(new Role("Administrator"));
-		 authService.saveRole(new Role("Manager"));
-		 authService.saveRole(new Role("Engineer"));
-		
-		 assertEquals(3, authService.findNumberOfRoles(), "Service test for finding all roles failed");
-	 }
-	
-	 @Test
-	 public void findRoleByRoleIdTest()
-	 {
-		 Role initialrole = new Role("Administrator");
-		 Role savedRole = authService.saveRole(initialrole);
-		 Role foundRole = authService.searchRoleById(savedRole.getRoleId());
-		
-		 assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
-	 }
-
-	@Test
-	public void findRoleByRoleNameTest()
-	{
-		Role initialrole = new Role("Administrator");
-		authService.saveRole(initialrole);
-		Role foundrole = authService.findRoleByRoleName("Administrator");
-
-		assertEquals(initialrole, foundrole, "Service test for finding role by roleName failed");
-	}
 
 	@Test
 	public void assignUserToRoleTest() throws NonExistingContactException

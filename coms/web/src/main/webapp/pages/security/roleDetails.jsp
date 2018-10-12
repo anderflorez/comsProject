@@ -62,7 +62,7 @@
 					<div class="col-12">
 						<h2>Member users</h2>
 						<hr>
-						<c:if test="${memberContacts != null}">
+						<c:if test="${userMembers != null}">
 							<div class="row">
 								<div class="col-12 table-responsive">
 									<table class="table table-hover">
@@ -72,9 +72,9 @@
 											</tr>
 										</thead>
 										<tbody>
-											<c:forEach items="${memberContacts}" var="memberContact">
+											<c:forEach items="${userMembers}" var="userMember">
 												<tr>
-													<td>${memberContact.firstName} ${memberContact.lastName}</td>
+													<td>${userMember.contact.firstName} ${userMember.contact.lastName}</td>
 												</tr>
 											</c:forEach>
 										</tbody>

@@ -13,8 +13,8 @@ public interface ContactDao
 	public Contact getContactById(String id);
 	public Contact getContactByEmail(String contactEmail);
 	public void updateContact(String id, Contact contact);
-//	public void removeContact(int id);
-//	
+	public void deleteContact(String contactId);
+	
 //	public int getNumberOfAddresses();
 //	public void createContactAddress(Address address, int contactId);
 //	public List<Address> searchContactAddressByZipCode(String zipCode);
@@ -24,4 +24,5 @@ public interface ContactDao
 //	public void createContactPhone(Phone phone, int contactId);
 //	public List<Phone> searchContactPhonesByNumber(String phoneNumber);
 //	public Phone searchContactPhoneById(int id);
+
 }

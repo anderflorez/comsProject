@@ -13,7 +13,8 @@ td > button {
 	cursor: pointer;
 }
 
-.clickable {
+.clickable,
+.dropdown-item {
 	cursor: pointer;
 }
 

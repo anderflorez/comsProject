@@ -69,12 +69,12 @@ public class ContactServiceImpl implements ContactService
 		dao.updateContact(id, updatedContact);
 	}
 
-//	@Override
-//	public void deleteContact(Contact contact)
-//	{
-//		dao.removeContact(contact.getContactId());
-//	}
-//
+	@Override
+	public void deleteContact(String contactId)
+	{
+		dao.deleteContact(contactId);
+	}
+
 //	@Override
 //	public int findNumberOfContactAddresses()
 //	{

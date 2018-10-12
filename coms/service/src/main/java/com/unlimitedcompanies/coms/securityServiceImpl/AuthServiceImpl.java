@@ -30,7 +30,7 @@ public class AuthServiceImpl implements AuthService
 	private ContactDao contactDao;
 
 	@Override
-	public int findNumberOfUsers()
+	public int searchNumberOfUsers()
 	{
 		return authDao.getNumberOfUsers();
 	}
@@ -51,13 +51,6 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public User updateUser(int userId, User user)
-	{
-		authDao.updateUser(userId, user);
-		return this.searchUserByUserId(userId);
-	}
-
-	@Override
 	public List<User> searchAllUsers()
 	{
 		return authDao.getAllUsers();
@@ -74,6 +67,12 @@ public class AuthServiceImpl implements AuthService
 	{
 		return authDao.getUserByUsername(username);
 	}
+	
+	@Override
+	public User searchUserByContact(Contact contact)
+	{
+		return authDao.getUserByContact(contact);
+	}
 
 	@Override
 	public User searchUserByUsernameWithContact(String username)
@@ -86,11 +85,24 @@ public class AuthServiceImpl implements AuthService
 	{
 		return authDao.getFullUserByUsername(username);
 	}
+	
+	@Override
+	public User updateUser(int userId, User user)
+	{
+		authDao.updateUser(userId, user);
+		return this.searchUserByUserId(userId);
+	}
 
 	@Override
 	public int findNumberOfRoles()
 	{
 		return authDao.getNumberOfRoles();
+	}
+
+	@Override
+	public void deleteUser(int userId)
+	{
+		authDao.deleteUser(userId);		
 	}
 
 	@Override
@@ -119,11 +131,11 @@ public class AuthServiceImpl implements AuthService
 		return this.searchRoleById(roleId);
 	}
 
-//	@Override
-//	public Role findRoleByIdWithMembers(Integer id)
-//	{
-//		return authDao.getRoleByIdWithMembers(id);
-//	}
+	@Override
+	public Role searchRoleByIdWithMembers(int id)
+	{
+		return authDao.getRoleByIdWithMembers(id);
+	}
 
 	@Override
 	public Role findRoleByRoleName(String roleName)

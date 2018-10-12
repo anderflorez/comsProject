@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.OrCondition;
 import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
@@ -13,22 +14,23 @@ import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactE
 
 public interface AuthService
 {
-	public int findNumberOfUsers();
+	public int searchNumberOfUsers();
 	public User saveUser(User user) throws NonExistingContactException;
-	public User updateUser(int userId, User user);
-
 	public List<User> searchAllUsers();
 	public User searchUserByUserId(Integer id);
 	public User searchUserByUsername(String string);
+	public User searchUserByContact(Contact contact);
 	public User searchUserByUsernameWithContact(String username);
 	public User searchFullUserByUsername(String username);
+	public User updateUser(int userId, User user);
+	public void deleteUser(int userId);
 	
 	public int findNumberOfRoles();
 	public Role saveRole(Role role);
 	public List<Role> searchAllRoles();
 	public Role searchRoleById(int id);
 	public Role updateRole(int roleId, Role role);
-//	public Role findRoleByIdWithMembers(Integer id);
+	public Role searchRoleByIdWithMembers(int id);
 	public Role findRoleByRoleName(String roleName);
 //	
 	public void assignUserToRole(User user, Role role);
