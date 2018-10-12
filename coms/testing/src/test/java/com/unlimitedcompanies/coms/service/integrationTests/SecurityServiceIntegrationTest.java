@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
@@ -275,20 +277,17 @@ class SecurityServiceIntegrationTest
 		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
 	}
 
-	// @Test
-	// public void updateUserStatus() throws NonExistingContactException
-	// {
-	// contactService.saveContact(new Contact("John", null, "Doe",
-	// "johnd@example.com"));
-	// Contact contact = contactService.findContactByEmail("johnd@example.com");
-	// User user = authService.saveUser(new User("jdoe", "mypass", contact));
-	// user.setEnabled((byte) 0);
-	//
-	// User updatedUser = authService.updateUser(user.getUserId(), user);
-	// assertEquals((byte) 0, updatedUser.getEnabled(), "Service test for updating
-	// user status failed");
-	// }
-	//
+	@Test
+	 public void updateUserStatus() throws NonExistingContactException
+	 {
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact = contactService.searchContactByEmail("johnd@example.com");
+		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		user.setEnabled(0);
+		
+		User updatedUser = authService.updateUser(user.getUserId(), user);
+		assertEquals(UserStatus.INACTIVE, updatedUser.getEnabledStatus(), "Service test for updating user status failed");
+	 }
 	
 	@Test
 	public void findAllUsersTest()
@@ -362,40 +361,36 @@ class SecurityServiceIntegrationTest
 		assertNotNull(role.getRoleId(), "Service test for saving new role failed");
 	}
 
-	// @Test
-	// public void updateRoleTest()
-	// {
-	// Role role = authService.saveRole(new Role("Administrator"));
-	// Role newrole = new Role("Admins");
-	// role = authService.updateRole(role.getRoleId(), newrole);
-	//
-	// assertEquals("Admins", role.getRoleName(), "Service test for updating role
-	// has failed");
-	// assertEquals(1, authService.findNumberOfRoles(), "Service test for updating
-	// role has failed");
-	// }
-	//
-	// @Test
-	// public void findAllRolesTest()
-	// {
-	// authService.saveRole(new Role("Administrator"));
-	// authService.saveRole(new Role("Manager"));
-	// authService.saveRole(new Role("Engineer"));
-	//
-	// assertEquals(3, authService.findNumberOfRoles(), "Service test for finding
-	// all roles failed");
-	// }
-	//
-	// @Test
-	// public void findRoleByRoleIdTest()
-	// {
-	// Role initialrole = new Role("Administrator");
-	// Role savedRole = authService.saveRole(initialrole);
-	// Role foundRole = authService.findRoleById(savedRole.getRoleId());
-	//
-	// assertEquals(initialrole, foundRole, "Service test for finding role by roleId
-	// failed");
-	// }
+	@Test
+	 public void updateRoleTest()
+	 {
+		Role role = authService.saveRole(new Role("Administrator"));
+		Role newrole = new Role("Admins");
+		role = authService.updateRole(role.getRoleId(), newrole);
+		
+		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
+		assertEquals(1, authService.findNumberOfRoles(), "Service test for updating role has failed");
+	 }
+
+	 @Test
+	 public void findAllRolesTest()
+	 {
+		 authService.saveRole(new Role("Administrator"));
+		 authService.saveRole(new Role("Manager"));
+		 authService.saveRole(new Role("Engineer"));
+		
+		 assertEquals(3, authService.findNumberOfRoles(), "Service test for finding all roles failed");
+	 }
+	
+	 @Test
+	 public void findRoleByRoleIdTest()
+	 {
+		 Role initialrole = new Role("Administrator");
+		 Role savedRole = authService.saveRole(initialrole);
+		 Role foundRole = authService.searchRoleById(savedRole.getRoleId());
+		
+		 assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
+	 }
 
 	@Test
 	public void findRoleByRoleNameTest()
