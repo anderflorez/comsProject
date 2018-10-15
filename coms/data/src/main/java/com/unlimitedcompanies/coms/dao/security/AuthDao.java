@@ -20,6 +20,7 @@ public interface AuthDao
 	public User getUserByUsername(String username);
 	public User getUserByContact(Contact contact);
 	public User getUserByUsernameWithContact(String username);
+	public User getFullUserByUserId(int id);
 	public User getFullUserByUsername(String username);
 	public void updateUser(int userId, User user);
 	public void deleteUser(int userId);
@@ -27,11 +28,12 @@ public interface AuthDao
 	public int getNumberOfRoles();
 	public void createRole(Role role);
 	public List<Role> getAllRoles();
-	public Role getRoleById(int id);
+	public Role getRoleById(String id);
 	public Role getRoleByRoleName(String roleName);
-	public Role getRoleByIdWithMembers(int id);
-	public void updateRole(int roleId, Role role);
-//	
+	public Role getRoleByIdWithMembers(String id);
+	public void updateRole(String roleId, Role role);
+	public void deleteRole(String roleId);
+
 	public void assignUserToRole(User user, Role role);
 //	public void removeUserFromRole(Role role, User user);
 	
@@ -49,4 +51,5 @@ public interface AuthDao
 	public void createOrCondition(OrCondition orCondition);
 	public List<AndGroup> getAssociatedAndGroups(OrGroup orGroup);
 	public List<OrGroup> getAssociatedOrGroups(AndGroup andGroup);
+
 }

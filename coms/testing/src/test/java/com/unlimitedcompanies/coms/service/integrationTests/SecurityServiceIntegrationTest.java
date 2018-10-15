@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,7 +100,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	 @Test
-	 public void deleteSingleContactTest()
+	 public void deleteSingleContactTest() throws SQLIntegrityConstraintViolationException
 	 {
 		 contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -330,6 +331,22 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
+	public void findUserRolesTest() throws NonExistingContactException
+	{
+		Role role1 = authService.saveRole(new Role("Administrator"));
+		Role role2 = authService.saveRole(new Role("Manager"));
+		
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("username", "mypass", contact));
+		
+		authService.assignUserToRole(user, role1);
+		authService.assignUserToRole(user, role2);
+		
+		User foundUser = authService.searchFullUserByUsername(user.getUsername());
+		assertEquals(2, foundUser.getRoles().size(), "Service test for finding user role list failed");
+	}
+	
+	@Test
 	public void updateUsernameTest() throws NonExistingContactException
 	{
 		
@@ -354,7 +371,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	 @Test
-	 public void deleteSingleUserTest() throws NonExistingContactException
+	 public void deleteSingleUserTest() throws NonExistingContactException, SQLIntegrityConstraintViolationException
 	 {
 		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -370,14 +387,14 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void getNumberOfRolesTest()
 	{
-		assertEquals(0, authService.findNumberOfRoles(), "Service test for finding number of roles failed");
+		assertEquals(0, authService.searchNumberOfRoles(), "Service test for finding number of roles failed");
 	}
 
 	@Test
 	public void saveNewRoleTest()
 	{
 		Role role = authService.saveRole(new Role("Administrator"));
-		assertEquals(1, authService.findNumberOfRoles(), "Service test for saving new role failed");
+		assertEquals(1, authService.searchNumberOfRoles(), "Service test for saving new role failed");
 		assertNotNull(role.getRoleId(), "Service test for saving new role failed");
 	}
 	
@@ -388,15 +405,18 @@ class SecurityServiceIntegrationTest
 		authService.saveRole(new Role("Manager"));
 		authService.saveRole(new Role("Engineer"));
 		
-		assertEquals(3, authService.findNumberOfRoles(), "Service test for finding all roles failed");
+		assertEquals(3, authService.searchNumberOfRoles(), "Service test for finding all roles failed");
 	}
 	
 	@Test
 	public void findRoleByRoleIdTest()
 	{
 		Role initialrole = new Role("Administrator");
+		System.out.println(initialrole.getRoleId());
 		Role savedRole = authService.saveRole(initialrole);
+		System.out.println("Searching for role with id: " + savedRole.getRoleId());
 		Role foundRole = authService.searchRoleById(savedRole.getRoleId());
+		System.out.println("found Role: " + foundRole.getRoleId());
 		
 		assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
 	}
@@ -406,7 +426,7 @@ class SecurityServiceIntegrationTest
 	{
 		Role initialrole = new Role("Administrator");
 		authService.saveRole(initialrole);
-		Role foundrole = authService.findRoleByRoleName("Administrator");
+		Role foundrole = authService.searchRoleByRoleName("Administrator");
 		
 		assertEquals(initialrole, foundrole, "Service test for finding role by roleName failed");
 	}
@@ -439,7 +459,7 @@ class SecurityServiceIntegrationTest
 		role = authService.updateRole(role.getRoleId(), newrole);
 		
 		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
-		assertEquals(1, authService.findNumberOfRoles(), "Service test for updating role has failed");
+		assertEquals(1, authService.searchNumberOfRoles(), "Service test for updating role has failed");
 	 }
 
 	@Test

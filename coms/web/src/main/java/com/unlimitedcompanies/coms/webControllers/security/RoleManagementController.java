@@ -43,19 +43,13 @@ public class RoleManagementController
 
 			try
 			{
-				Integer id = Integer.valueOf(rId);
-				role = authService.searchRoleById(id);
+				role = authService.searchRoleById(rId);
 				mv.addObject("role", role);
 			}
 			catch (NoResultException e)
 			{
 				mv.setViewName("/roles");
 				mv.addObject("error", "Error: The role provided for updating could not be found");
-			}
-			catch (NumberFormatException e)
-			{
-				mv.setViewName("/roles");
-				mv.addObject("error", "Error: The role provided for updating is invalid");
 			}
 		}
 		

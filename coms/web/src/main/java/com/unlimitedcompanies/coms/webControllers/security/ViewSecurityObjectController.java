@@ -85,7 +85,7 @@ public class ViewSecurityObjectController
 		}
 		catch (DataIntegrityViolationException e)
 		{
-			mv.addObject("error", "Error: There are other items associated to this contact");
+			mv.addObject("error", "Error: The contact cannot be deleted because it has other items associated");
 		}
 		return mv;
 	}
@@ -135,15 +135,21 @@ public class ViewSecurityObjectController
 		ModelAndView mv = new ModelAndView("/users");
 		try
 		{
-			authService.deleteUser(userId);
+			User user = authService.searchUserByUserId(userId);
+			Role adminRole = authService.searchRoleByIdWithMembers("1");
+			if (adminRole.getMembers().size() == 1 && adminRole.getMembers().contains(user))
+			{
+				mv.addObject("error", "Error: The last administrator user cannot be deleted");
+			}
+			else 
+			{
+				authService.deleteUser(userId);				
+			}
+			
 		} 
 		catch (NoResultException e)
 		{
 			mv.addObject("error", "Error: The user to be deleted could not be found");
-		}
-		catch (DataIntegrityViolationException e)
-		{
-			mv.addObject("error", "Error: There are other items associated to this user");
 		}
 		return mv;
 	}
@@ -165,8 +171,7 @@ public class ViewSecurityObjectController
 		Role role;
 		try
 		{
-			int roleId = Integer.valueOf(id);
-			role = authService.searchRoleByIdWithMembers(roleId);
+			role = authService.searchRoleByIdWithMembers(id);
 			mv.addObject("role", role);
 			if (role.getMembers().size() > 0)
 			{
@@ -179,14 +184,33 @@ public class ViewSecurityObjectController
 			mv.addObject("role", role);
 			mv.addObject("error", "Error: The role provided could not be found");
 		}
-		catch (NumberFormatException e)
-		{
-			role = new Role(null);
-			mv.addObject("role", role);
-			mv.addObject("error", "Error: The role information provided is invalid");
-		}
 		
 		mv.addObject("user", authUser.getUser());
 		return mv;
 	}
+	
+	@RequestMapping(value = "/deleteRole", method = RequestMethod.POST)
+	public ModelAndView deleteRole(String roleId)
+	{
+		ModelAndView mv = new ModelAndView("/roles");
+		try
+		{
+			System.out.println("=====> Role id obtained: " + roleId);
+			Role role = authService.searchRoleById(roleId);
+			if (role.getRoleId().equals("1"))
+			{
+				mv.addObject("error", "Error: The administrator role cannot be deleted");
+			}
+			else 
+			{
+				authService.deleteRole(roleId);				
+			}
+		} 
+		catch (NoResultException e)
+		{
+			mv.addObject("error", "Error: The role to be deleted could not be found");
+		}
+		return mv;
+	}
+
 }

@@ -40,8 +40,8 @@
 									<tr class="clickable" data-href="<c:url value='/userDetail?u=${user.userId}'/>">
 										<td>${user.username}</td>
 										<td>${user.getEnabledStatus().toString()}</td>
-										<td>${user.dateAdded}</td>
-										<td>${user.lastAccess}</td>
+										<td>${user.getFormatDateAdded()}</td>
+										<td>${user.getFormatLastAccess()}</td>
 									</tr>
 								</c:forEach>
 							</tbody>

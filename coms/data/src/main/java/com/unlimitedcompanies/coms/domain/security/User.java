@@ -1,9 +1,10 @@
 package com.unlimitedcompanies.coms.domain.security;
 
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -29,8 +30,8 @@ public class User
 	// status 1 - active
 	// status 2 - access denied
 	private UserStatus enabled;
-	private Date dateAdded;
-	private Date lastAccess;
+	private ZonedDateTime dateAdded;
+	private ZonedDateTime lastAccess;
 	
 	@ManyToOne
 	@JoinColumn(name="contact_FK")
@@ -51,8 +52,8 @@ public class User
 		this.password = password;
 		this.contact = contact;
 		this.enabled = UserStatus.ACTIVE;
-		this.dateAdded = new Date();
-		this.lastAccess = this.dateAdded;
+		this.dateAdded = ZonedDateTime.now(ZoneId.of("America/New_York"));
+		this.lastAccess = ZonedDateTime.now(ZoneId.of("America/New_York"));
 	}
 
 	public Integer getUserId()
@@ -80,36 +81,36 @@ public class User
 		return enabled;
 	}
 
-	public String getDateAdded()
+	public String getDBDateAdded()
 	{
-		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy");
-		return sdf.format(this.dateAdded);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+		return this.dateAdded.format(formatter);
 	}
 	
-	public String getDbDateAdded()
+	public String getFormatDateAdded()
 	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd");
-		return dateFormat.format(this.dateAdded);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+		return this.dateAdded.format(formatter);
 	}
 	
-	public Date getFullDateAdded()
+	public ZonedDateTime getFullDateAdded()
 	{
 		return this.dateAdded;
 	}
+	
+	public String getDBLastAccess()
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
+		return this.lastAccess.format(formatter);
+	}
+	
+	public String getFormatLastAccess()
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy hh:mm a");
+		return this.lastAccess.format(formatter);
+	}
 
-	public String getLastAccess()
-	{
-		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy 'at' HH:mm:ss z");
-		return sdf.format(this.lastAccess);
-	}
-	
-	public String getDbLastAccess()
-	{
-		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
-		return dateTimeFormat.format(this.lastAccess);
-	}
-	
-	public Date getFullLastAccessDate()
+	public ZonedDateTime getFullLastAccess()
 	{
 		return this.lastAccess;
 	}
@@ -144,17 +145,7 @@ public class User
 		this.enabled = status;
 	}
 	
-	public void setDateAdded()
-	{
-		// Method Not Allowed
-	}
-
-	public void setLastAccess() 
-	{
-		// Method Not Allowed
-	}
-	
-	public void setLastAccess(Date lastAccess)
+	public void setLastAccess(ZonedDateTime lastAccess)
 	{
 		this.lastAccess = lastAccess;
 	}

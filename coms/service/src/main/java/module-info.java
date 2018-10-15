@@ -2,6 +2,7 @@ module service
 {
 	requires transitive data;
 	requires java.management;
+	requires java.sql;
 	requires spring.security.core;
 	requires spring.beans;
 	requires spring.context;

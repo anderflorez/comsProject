@@ -56,9 +56,12 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		
 		if (users == 0 && roles == 0 && contacts == 0 && permissions == 0)
 		{
-			authDao.createRole(new Role("Administrators"));
-			contactDao.createContact(new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com"));
+			Role role = new Role("Administrators");
+			role.setRoleId("1");
+			authDao.createRole(role);
 			Role adminRole = authDao.getRoleByRoleName("Administrators");
+			
+			contactDao.createContact(new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com"));
 			Contact adminContact = contactDao.getContactByEmail("uec_ops_support@unlimitedcompanies.com");
 			
 			PasswordEncoder pe = new BCryptPasswordEncoder();

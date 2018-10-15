@@ -8,6 +8,7 @@ module data
 	requires java.sql;
 	requires java.management;
 	requires java.validation;
+	
 	requires spring.beans;
 	requires spring.context;
 	requires spring.security.core;

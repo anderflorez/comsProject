@@ -1,5 +1,7 @@
 package com.unlimitedcompanies.coms.webFormObjects;
 
+import java.time.format.DateTimeFormatter;
+
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 
@@ -31,8 +33,8 @@ public class UserForm
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
 		this.enabled = user.getEnabledStatus().toString();
-		this.dateAdded = user.getDateAdded();
-		this.lastAccess = user.getLastAccess();
+		this.dateAdded = user.getFullDateAdded().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+		this.lastAccess = user.getFullLastAccess().format(DateTimeFormatter.RFC_1123_DATE_TIME);
 		this.contactId = user.getContact().getContactId();
 	}
 

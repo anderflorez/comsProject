@@ -21,18 +21,20 @@ public interface AuthService
 	public User searchUserByUsername(String string);
 	public User searchUserByContact(Contact contact);
 	public User searchUserByUsernameWithContact(String username);
+	public User searchFullUserByUserId(int userId);
 	public User searchFullUserByUsername(String username);
 	public User updateUser(int userId, User user);
 	public void deleteUser(int userId);
 	
-	public int findNumberOfRoles();
+	public int searchNumberOfRoles();
 	public Role saveRole(Role role);
 	public List<Role> searchAllRoles();
-	public Role searchRoleById(int id);
-	public Role updateRole(int roleId, Role role);
-	public Role searchRoleByIdWithMembers(int id);
-	public Role findRoleByRoleName(String roleName);
-//	
+	public Role searchRoleById(String string);
+	public Role searchRoleByIdWithMembers(String string);
+	public Role searchRoleByRoleName(String roleName);
+	public Role updateRole(String roleId, Role role);
+	public void deleteRole(String roleId);
+
 	public void assignUserToRole(User user, Role role);
 //	public void removeUserFromRole(Role role, User user);
 	

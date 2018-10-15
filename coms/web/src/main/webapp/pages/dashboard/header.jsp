@@ -10,17 +10,16 @@
 		<button>
 			<i class="fas fa-tasks"></i>
 		</button>
-		<div id="user-menu" class="dropdown">
-			<button type="button" data-toggle="dropdown" class="dropdown-toggle">
+		<div class="dropdown">
+			<a href="" id="user-menu" data-toggle="dropdown" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
 				<span>${user.contact.firstName} ${user.contact.lastName}</span>
-			</button>
-			<ul class="dropdown-menu">
-				<li><a href="#"><i class="ti-settings"></i>Settings</a></li>
-				<li><a href="#"><i class="ti-user"></i>Profile</a></li>
-				<li><a id="management" href="<c:url value='/contacts'/>"><i class="fas fa-users-cog"></i>Management</a></li>
-				<li class="divider"></li>
-				<li><a href="<c:url value='logout'/>"><i class="ti-power-off"></i>Logout</a></li>
-			</ul>					
+			</a>
+			<div class="dropdown-menu" aria-labelledby="user-menu">
+				<a href="#" class="dropdown-item"><i class="ti-settings"></i>Settings</a>
+				<a href="#" class="dropdown-item"><i class="ti-user"></i>Profile</a>
+				<a href="<c:url value='/contacts'/>" class="dropdown-item"><i class="fas fa-users-cog"></i>Management</a>
+				<a href="<c:url value='logout'/>" class="dropdown-item"><i class="ti-power-off"></i>Logout</a>
+			</div>
 		</div>
 	</div>
 </div>

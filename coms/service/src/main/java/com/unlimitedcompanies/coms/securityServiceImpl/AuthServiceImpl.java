@@ -79,6 +79,12 @@ public class AuthServiceImpl implements AuthService
 	{
 		return authDao.getUserByUsernameWithContact(username);
 	}
+	
+	@Override
+	public User searchFullUserByUserId(int id)
+	{
+		return authDao.getFullUserByUserId(id);
+	}
 
 	@Override
 	public User searchFullUserByUsername(String username)
@@ -94,7 +100,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public int findNumberOfRoles()
+	public int searchNumberOfRoles()
 	{
 		return authDao.getNumberOfRoles();
 	}
@@ -109,7 +115,7 @@ public class AuthServiceImpl implements AuthService
 	public Role saveRole(Role role)
 	{
 		authDao.createRole(role);
-		return this.findRoleByRoleName(role.getRoleName());
+		return this.searchRoleByRoleName(role.getRoleName());
 	}
 
 	@Override
@@ -119,28 +125,34 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public Role searchRoleById(int id)
+	public Role searchRoleById(String id)
 	{
 		return authDao.getRoleById(id);
 	}
 
 	@Override
-	public Role updateRole(int roleId, Role role)
-	{
-		authDao.updateRole(roleId, role);
-		return this.searchRoleById(roleId);
-	}
-
-	@Override
-	public Role searchRoleByIdWithMembers(int id)
+	public Role searchRoleByIdWithMembers(String id)
 	{
 		return authDao.getRoleByIdWithMembers(id);
 	}
 
 	@Override
-	public Role findRoleByRoleName(String roleName)
+	public Role searchRoleByRoleName(String roleName)
 	{
 		return authDao.getRoleByRoleName(roleName);
+	}
+	
+	@Override
+	public Role updateRole(String roleId, Role role)
+	{
+		authDao.updateRole(roleId, role);
+		return this.searchRoleById(roleId);
+	}
+	
+	@Override
+	public void deleteRole(String roleId)
+	{
+		authDao.deleteRole(roleId);
 	}
 
 	@Override

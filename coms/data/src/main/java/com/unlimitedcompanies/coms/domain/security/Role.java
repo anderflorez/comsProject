@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -19,7 +20,7 @@ import javax.persistence.Table;
 public class Role
 {
 	@Id
-	private Integer roleId;
+	private String roleId;
 	private String roleName;
 	
 	@ManyToMany(mappedBy = "roles")
@@ -34,14 +35,18 @@ public class Role
 			   inverseJoinColumns = {@JoinColumn(name = "resourceFieldId_FK")})
 	private List<ResourceField> restrictedFields = new ArrayList<>();
 	
-	protected Role() {}
+	protected Role() 
+	{
+		this.roleId = UUID.randomUUID().toString();
+	}
 
 	public Role(String roleName)
-	{	
+	{
+		this.roleId = UUID.randomUUID().toString();
 		this.roleName = roleName;
 	}
 	
-	public Integer getRoleId()
+	public String getRoleId()
 	{
 		return this.roleId;
 	}
@@ -56,7 +61,7 @@ public class Role
 		return Collections.unmodifiableList(this.users);
 	}
 	
-	public void setRoleId(Integer roleId)
+	public void setRoleId(String roleId)
 	{
 		this.roleId = roleId;
 	}

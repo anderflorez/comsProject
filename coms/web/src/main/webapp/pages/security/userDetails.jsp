@@ -36,10 +36,9 @@
 								</a>
 								<div class="dropdown-menu" aria-labelledby="actionMenu">
 									<a href="<c:url value='/manageUser?u=${userForm.userId}'/>" class="dropdown-item">Edit User</a>
-									<form method="POST" action="<c:url value='/deleteUser'/>">
-										<input type="text" name="userId" value="${user.userId}" class="d-none">
-										<input type="submit" name="submit" value="Delete" class="dropdown-item bg-danger text-white">
-									</form>
+									<button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteUserConfirmation">
+										Delete
+									</button>
 								</div>
 							</div>
 						</c:if>
@@ -90,6 +89,30 @@
 		</button>
 	</div>
 </c:if>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteUserConfirmation" tabindex="-1" role="dialog" aria-labelledby="deleteUserLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteUserLabel">Delete Confirmation</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to delete this user?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<form method="POST" action="<c:url value='/deleteUser'/>">
+					<input type="text" name="userId" value="${userForm.userId}" class="d-none">
+					<input type="submit" name="submit" value="Delete" class="btn btn-danger">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 
 <c:import url="../dashboard/scriptDefinitions.jsp"/>
 

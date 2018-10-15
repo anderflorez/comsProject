@@ -43,8 +43,8 @@ public class AuthDaoImpl implements AuthDao
 				.setParameter("username", user.getUsername())
 				.setParameter("password", user.getPassword())
 				.setParameter("enabled", user.getEnabled())
-				.setParameter("dateAdded", user.getDbDateAdded())
-				.setParameter("lastAccess", user.getDbLastAccess())
+				.setParameter("dateAdded", user.getDBDateAdded())
+				.setParameter("lastAccess", user.getDBLastAccess())
 				.setParameter("contact", user.getContact())
 				.executeUpdate();
 	}
@@ -100,6 +100,14 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
+	public User getFullUserByUserId(int userId)
+	{
+		return em.createQuery("select user from User user left join fetch user.contact left join fetch user.roles where user.userId = :id", User.class)
+							  .setParameter("id", userId)
+							  .getSingleResult();
+	}
+	
+	@Override
 	public void updateUser(int userId, User user) {
 		User foundUser = em.find(User.class, userId);
 		foundUser.setUsername(user.getUsername());
@@ -124,8 +132,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void createRole(Role role)
 	{
-		em.createNativeQuery("INSERT INTO role (roleName) VALUES (:roleName)")
-				.setParameter("roleName", role.getRoleName()).executeUpdate();
+		em.persist(role);
 	}
 	
 	@Override
@@ -135,9 +142,10 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public Role getRoleById(int id)
+	public Role getRoleById(String id)
 	{
 		Role role = em.find(Role.class, id);
+		System.out.println("=====> Role: " + role);
 		if (role == null)
 		{
 			throw new NoResultException();
@@ -154,7 +162,7 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public Role getRoleByIdWithMembers(int id)
+	public Role getRoleByIdWithMembers(String id)
 	{
 		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
 				+ "where role.roleId = :roleId", Role.class)
@@ -164,7 +172,7 @@ public class AuthDaoImpl implements AuthDao
 
 	
 	@Override
-	public void updateRole(int roleId, Role role)
+	public void updateRole(String roleId, Role role)
 	{
 		Role foundRole = em.find(Role.class, roleId);
 		if (foundRole == null)
@@ -172,7 +180,14 @@ public class AuthDaoImpl implements AuthDao
 			throw new NoResultException();
 		}
 		foundRole.setRoleName(role.getRoleName());
-	}	
+	}
+
+	@Override
+	public void deleteRole(String roleId)
+	{
+		Role role = this.getRoleById(roleId);
+		em.remove(role);
+	}
 
 	@Override
 	public void assignUserToRole(User user, Role role)
@@ -273,5 +288,6 @@ public class AuthDaoImpl implements AuthDao
 							  .setParameter("andGroup", andGroup)
 							  .getResultList();
 	}
+
 
 }

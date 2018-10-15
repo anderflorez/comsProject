@@ -95,6 +95,12 @@ class DomainSecurityUnitTest
 	@Test
 	public void datesForUsersFormatingTesting()
 	{
+		Contact contact = new Contact("John", null, "Doe", "john@example.com");
+		User user = new User("admin", "pass", contact);
+		
+		System.out.println("=====> Date Added: " + user.getDBDateAdded());
+		System.out.println("=====> Last Access: " + user.getDBLastAccess());
+		
 		// TODO: Create some good checking for date and date time
 		// TODO: Create some good translating between MySQL dates and times and Java dates and times		
 	}

@@ -39,13 +39,9 @@
 									<c:if test="${contactUser == null}">
 										<a href="<c:url value='/manageUser?c=${contact.contactId}'/>" class="dropdown-item">Create User</a>
 									</c:if>
-										<button type="button" class="dropdown-item bg-danger text-white" data-toggle="modal" data-target="#deleteContactConfirmation">
-											Delete
-										</button>
-<!-- 									<form method="POST" action="<c:url value='/deleteContact'/>">
-										<input type="text" name="contactId" value="${contact.contactId}" class="d-none">
-										<input type="submit" name="submit" value="Delete" class="dropdown-item bg-danger text-white">
-									</form> -->
+									<button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteContactConfirmation">
+										Delete
+									</button>
 								</div>
 							</div>
 						</c:if>

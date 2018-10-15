@@ -36,6 +36,9 @@
 								</a>
 								<div class="dropdown-menu" aria-labelledby="actionMenu">
 									<a href="<c:url value='/manageRole?r=${role.roleId}'/>" class="dropdown-item">Edit Role</a>
+									<button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteRoleConfirmation">
+										Delete
+									</button>
 								</div>
 							</div>
 						</c:if>
@@ -100,6 +103,31 @@
 		</button>
 	</div>
 </c:if>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteRoleConfirmation" tabindex="-1" role="dialog" aria-labelledby="deleteRoleLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteRoleLabel">Delete Confirmation</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div>Are you sure you want to delete the role ${role.roleName}?</div><br>
+				<div>Warning: This action will also remove any permissions for users that belong to this role</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<form method="POST" action="<c:url value='/deleteRole'/>">
+					<input type="text" name="roleId" value="${role.roleId}" class="d-none">
+					<input type="submit" name="submit" value="Delete" class="btn btn-danger">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 
 <!-- Scripts -->
 <script src="<c:url value='/js/securityManagement.js'/>" type="text/javascript" charset="utf-8" async defer></script>
