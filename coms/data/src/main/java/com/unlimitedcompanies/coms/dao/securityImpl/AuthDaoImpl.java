@@ -43,8 +43,8 @@ public class AuthDaoImpl implements AuthDao
 				.setParameter("username", user.getUsername())
 				.setParameter("password", user.getPassword())
 				.setParameter("enabled", user.getEnabled())
-				.setParameter("dateAdded", user.getDBDateAdded())
-				.setParameter("lastAccess", user.getDBLastAccess())
+				.setParameter("dateAdded", user.getDateAdded())
+				.setParameter("lastAccess", user.getLastAccess())
 				.setParameter("contact", user.getContact())
 				.executeUpdate();
 	}

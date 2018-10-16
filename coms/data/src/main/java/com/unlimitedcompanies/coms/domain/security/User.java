@@ -52,8 +52,8 @@ public class User
 		this.password = password;
 		this.contact = contact;
 		this.enabled = UserStatus.ACTIVE;
-		this.dateAdded = ZonedDateTime.now(ZoneId.of("America/New_York"));
-		this.lastAccess = ZonedDateTime.now(ZoneId.of("America/New_York"));
+		this.dateAdded = ZonedDateTime.now(ZoneId.of("UTC"));
+		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
 
 	public Integer getUserId()
@@ -81,16 +81,16 @@ public class User
 		return enabled;
 	}
 
-	public String getDBDateAdded()
+	public String getDateAdded()
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
 		return this.dateAdded.format(formatter);
 	}
 	
-	public String getFormatDateAdded()
+	public String getClientLocalDateAdded()
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-		return this.dateAdded.format(formatter);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");		
+		return this.dateAdded.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
 	
 	public ZonedDateTime getFullDateAdded()
@@ -98,16 +98,16 @@ public class User
 		return this.dateAdded;
 	}
 	
-	public String getDBLastAccess()
+	public String getLastAccess()
 	{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
 		return this.lastAccess.format(formatter);
 	}
 	
-	public String getFormatLastAccess()
+	public String getClientLocalLastAccess()
 	{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy hh:mm a");
-		return this.lastAccess.format(formatter);
+		return this.lastAccess.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
 
 	public ZonedDateTime getFullLastAccess()
@@ -143,6 +143,20 @@ public class User
 	public void setEnabled(UserStatus status)
 	{
 		this.enabled = status;
+	}
+	
+	public void setdateAdded(String dateTime)
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+		this.lastAccess = accessTime;
+	}
+	
+	public void setLastAccess(String dateTime)
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
+		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+		this.lastAccess = accessTime;
 	}
 	
 	public void setLastAccess(ZonedDateTime lastAccess)

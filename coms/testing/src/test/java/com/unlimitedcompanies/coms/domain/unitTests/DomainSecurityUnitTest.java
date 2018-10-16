@@ -98,8 +98,11 @@ class DomainSecurityUnitTest
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
 		User user = new User("admin", "pass", contact);
 		
-		System.out.println("=====> Date Added: " + user.getDBDateAdded());
-		System.out.println("=====> Last Access: " + user.getDBLastAccess());
+		System.out.println("=====> Date Added: " + user.getDateAdded());
+		System.out.println("=====> Last Access: " + user.getLastAccess());
+		
+		System.out.println("=====> Date Added: " + user.getClientLocalDateAdded());
+		System.out.println("=====> Last Access: " + user.getClientLocalLastAccess());
 		
 		// TODO: Create some good checking for date and date time
 		// TODO: Create some good translating between MySQL dates and times and Java dates and times		

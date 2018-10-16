@@ -57,6 +57,7 @@ public class ContactManagementController
 	{	
 		if (!contact.getContactId().isEmpty() && contact.getContactId() != null && !contact.getFirstName().isEmpty())
 		{
+			// This is a request to update an existing contact information
 			try
 			{
 				contactService.updateContact(contact.getContactId(), contact);
@@ -74,10 +75,11 @@ public class ContactManagementController
 			mv.addObject("user", authUser.getUser());
 			return mv;
 		} 
-		else if (!contact.getFirstName().isEmpty() && contact.getFirstName() != null)
+		else if ((contact.getContactId().isEmpty() || contact.getContactId() == null) && !contact.getFirstName().isEmpty())
 		{
+			// This is a request to create a new contact
 			Contact savedContact = contactService.saveContact(new Contact(contact));
-			ModelAndView mv = new ModelAndView("redirect:/manageContact");
+			ModelAndView mv = new ModelAndView("redirect:/contactDetail");
 			mv.addObject("c", savedContact.getContactId());
 			mv.addObject("user", authUser.getUser());
 			return mv;

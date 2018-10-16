@@ -117,8 +117,7 @@ public class UserManagementController
 				
 				//Create and store the new user
 				User newUser = authService.saveUser(new User(userForm.getUsername(), password, contact));
-				mv.setViewName("/userDetail");
-				mv.addObject("u", newUser.getUserId());
+				mv.setViewName("/userDetail?u=" + newUser.getUserId());
 				
 			} 
 			catch (NoResultException e)
