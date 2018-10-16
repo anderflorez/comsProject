@@ -61,20 +61,25 @@ public class RoleManagementController
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView processRole(Role role)
 	{	
+		System.out.println("=====> role id received: " + role.getRoleId());
 		ModelAndView mv = new ModelAndView("redirect:/roleDetail");
 		if (role.getRoleId() == null || role.getRoleId().isEmpty())
 		{
+			System.out.println("=====> role name received: " + role.getRoleName());
 			// This is a request to create a new role
 			// TODO: Create some validation for the role name
-			if (role.getRoleName() != null || !role.getRoleName().isEmpty())
+			if (role.getRoleName() != null && !role.getRoleName().isEmpty())
 			{
 				role = authService.saveRole(role);
 				mv.addObject("r", role.getRoleId());
 			}
 			else 
 			{
-				mv.setViewName("/manageRole");
-				mv.addObject("error", "Error: Invalid username");
+				mv.setViewName("/pages/security/roleManagement.jsp");
+				Role emptyRole = new Role(null);
+				emptyRole.setRoleId(null);
+				mv.addObject("role", role);
+				mv.addObject("error", "Error: Invalid role name");
 			}
 		} 
 		else

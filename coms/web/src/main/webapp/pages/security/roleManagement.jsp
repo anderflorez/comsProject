@@ -12,7 +12,6 @@
 	<!-- Styles -->
 	<link rel="stylesheet" type="text/css" href="<c:url value='/css/securityManagement.css'/>">
 	<c:import url="../dashboard/header.jsp" />
-
 	
 	<div class="page-content">
 
@@ -25,7 +24,7 @@
 		<div id="roleManagement">
 			<div class="jumbotron">
 				<c:if test="${role.roleId != null}">
-					<h2 id="manageEditTitle">Edit Role</h2>
+					<h2>Edit Role</h2>
 				</c:if>
 				
 				<c:if test="${role.roleId == null}">
@@ -55,40 +54,19 @@
 						</div>
 					</div>
 				</form:form>
-				
 			</div>
-			<div class="jumbotron">
-				<div class="row mb25">
-					<div class="col-12">
-						<h2>Member users</h2>
-						<hr>
-						<c:if test="${memberContacts != null}">
-							<div class="row">
-								<div class="col-12 table-responsive">
-									<table class="table table-hover">
-										<thead>
-											<tr class="table-success">
-												<th scope="col">User</th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach items="${memberContacts}" var="memberContact">
-												<tr>
-													<td>${memberContact.firstName} ${memberContact.lastName}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</c:if>
-					</div>
-				</div>				
-			</div>			
-
 		</div>
 	</div>	
 </div>
+
+<c:if test="${error != null}">
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		${error}
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+</c:if>
 
 <c:import url="../dashboard/scriptDefinitions.jsp"/>
 
