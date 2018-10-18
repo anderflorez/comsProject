@@ -8,6 +8,8 @@ module data
 	requires java.sql;
 	requires java.management;
 	requires java.validation;
+	requires java.xml.bind;
+	requires com.sun.xml.bind;
 	
 	requires spring.beans;
 	requires spring.context;

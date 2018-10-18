@@ -8,7 +8,7 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>web</artifactId>
-	<name>uiweb</name>
+	<name>web</name>
 	<packaging>war</packaging>
 
 	<build>
