@@ -10,12 +10,12 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
 
 public interface AuthService
 {
 	public int searchNumberOfUsers();
-	public User saveUser(User user) throws NonExistingContactException;
+	public User saveUser(User user) throws MissingContactException;
 	public List<User> searchAllUsers();
 	public User searchUserByUserId(Integer id);
 	public User searchUserByUsername(String string);

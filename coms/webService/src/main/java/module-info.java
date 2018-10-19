@@ -8,4 +8,5 @@ module webService
 	requires spring.context;
 	requires spring.web;
 	requires spring.webmvc;
+	requires java.xml.bind;
 }

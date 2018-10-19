@@ -17,6 +17,7 @@ import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -61,7 +62,7 @@ public class ViewSecurityObjectController
 				mv.addObject("contactUser", true);
 			} catch (NoResultException e) {}
 		} 
-		catch (NoResultException e)
+		catch (ContactNotFoundException e)
 		{
 			contact = new Contact(null, null, null, null);
 			mv.addObject("error", "The contact could not be found");

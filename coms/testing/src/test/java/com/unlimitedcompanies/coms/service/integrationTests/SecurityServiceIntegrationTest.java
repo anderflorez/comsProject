@@ -35,7 +35,8 @@ import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ApplicationConfig.class })
@@ -77,7 +78,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void findContactByIdTest()
+	public void findContactByIdTest() throws ContactNotFoundException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		Contact initialContact = contactService.searchContactByEmail("john@example.com");
@@ -88,7 +89,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void updateContactTest()
+	public void updateContactTest() throws ContactNotFoundException
 	{
 		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		Contact correctedContact = new Contact("Jane", null, "Roe", "jane@example.com");
@@ -252,7 +253,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void saveNewUserTest() throws NonExistingContactException
+	public void saveNewUserTest() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -274,7 +275,7 @@ class SecurityServiceIntegrationTest
 			authService.saveUser(new User("username1", "mypass", contact1));
 			authService.saveUser(new User("username2", "mypass", contact2));
 			authService.saveUser(new User("username3", "mypass", contact3));
-		} catch (NonExistingContactException e)
+		} catch (MissingContactException e)
 		{
 			e.printStackTrace();
 		}
@@ -283,7 +284,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByUserId() throws NonExistingContactException
+	public void findUserByUserId() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -294,7 +295,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByUsernameTest() throws NonExistingContactException
+	public void findUserByUsernameTest() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -307,7 +308,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByContact() throws NonExistingContactException
+	public void findUserByContact() throws MissingContactException
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass", contact));
@@ -317,7 +318,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void findUserByUsernameWithContactTest() throws NonExistingContactException
+	public void findUserByUsernameWithContactTest() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -331,7 +332,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserRolesTest() throws NonExistingContactException
+	public void findUserRolesTest() throws MissingContactException
 	{
 		Role role1 = authService.saveRole(new Role("Administrator"));
 		Role role2 = authService.saveRole(new Role("Manager"));
@@ -347,7 +348,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void updateUsernameTest() throws NonExistingContactException
+	public void updateUsernameTest() throws MissingContactException
 	{
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
@@ -359,7 +360,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void updateUserStatus() throws NonExistingContactException
+	public void updateUserStatus() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -371,7 +372,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	 @Test
-	 public void deleteSingleUserTest() throws NonExistingContactException, SQLIntegrityConstraintViolationException
+	 public void deleteSingleUserTest() throws MissingContactException, SQLIntegrityConstraintViolationException
 	 {
 		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -432,7 +433,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findRoleByIdWithMembers() throws NonExistingContactException
+	public void findRoleByIdWithMembers() throws MissingContactException
 	{
 		Role role = authService.saveRole(new Role("Administrator"));
 		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
@@ -463,7 +464,7 @@ class SecurityServiceIntegrationTest
 	 }
 
 	@Test
-	public void assignUserToRoleTest() throws NonExistingContactException
+	public void assignUserToRoleTest() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 
@@ -499,7 +500,7 @@ class SecurityServiceIntegrationTest
 	// }
 
 	@Test
-	public void findUserWithContactAndRoles() throws NonExistingContactException
+	public void findUserWithContactAndRoles() throws MissingContactException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");

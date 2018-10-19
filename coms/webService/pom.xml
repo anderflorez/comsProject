@@ -10,7 +10,7 @@
 	<artifactId>webService</artifactId>
 	<name>REST Web Service</name>
 	<packaging>war</packaging>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -18,13 +18,13 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.2.2</version>
 				<configuration>
-				<outputDirectory>${basedir}/../../../Resources/tomcat9/webapps/</outputDirectory>
+					<outputDirectory>${basedir}/../../../Resources/tomcat9/webapps/</outputDirectory>
 					<warName>comsWS</warName>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<dependencies>
 
 		<!-- Project Dependencies -->
@@ -39,8 +39,8 @@
 			<artifactId>service</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-				
-		
+
+
 		<!-- Spring Framework -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -64,6 +64,26 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Jackson Libraries -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.9.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.9.7</version>
+		</dependency>
+
+
 	</dependencies>
-	
+
 </project>

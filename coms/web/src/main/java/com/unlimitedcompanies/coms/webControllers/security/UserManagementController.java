@@ -15,7 +15,8 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
 import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -57,7 +58,7 @@ public class UserManagementController
 					userForm = new UserForm();
 					userForm.setContactId(contact.getContactId());
 					mv.addObject("userForm", userForm);
-				} catch (NoResultException e)
+				} catch (ContactNotFoundException e)
 				{
 					mv.setViewName("/contacts");
 					mv.addObject("error", "Error: The contact being used to create the new user could not be found");
@@ -120,12 +121,12 @@ public class UserManagementController
 				mv.setViewName("/userDetail?u=" + newUser.getUserId());
 				
 			} 
-			catch (NoResultException e)
+			catch (ContactNotFoundException e)
 			{
 				mv.setViewName("/contacts");
 				mv.addObject("error", "Error: The contact provided could not be found");
 			} 
-			catch (NonExistingContactException e)
+			catch (MissingContactException e)
 			{
 				mv.setViewName("/contacts");
 				mv.addObject("error", "Error: The contact provided could not be found");

@@ -11,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
@@ -39,7 +40,7 @@ public class ContactManagementController
 			try
 			{
 				contact = contactService.searchContactById(cId);
-			} catch (NoResultException e)
+			} catch (ContactNotFoundException e)
 			{
 				error = "The contact couldn't be found";
 			}

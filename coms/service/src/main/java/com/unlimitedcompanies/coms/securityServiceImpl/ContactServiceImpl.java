@@ -3,17 +3,15 @@ package com.unlimitedcompanies.coms.securityServiceImpl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 
 @Service
 @Transactional
@@ -29,7 +27,16 @@ public class ContactServiceImpl implements ContactService
 	public Contact saveContact(Contact contact)
 	{
 		dao.createContact(contact);
-		return dao.getContactById(contact.getContactId());
+		Contact createdContact = null;
+		try
+		{
+			createdContact = dao.getContactById(contact.getContactId());
+		} catch (RecordNotFoundException e)
+		{
+			// TODO throw a new more specific exception
+			e.printStackTrace();
+		}
+		return createdContact;
 	}
 
 	@Override
@@ -41,20 +48,36 @@ public class ContactServiceImpl implements ContactService
 	@Override
 	public List<Contact> searchAllContacts()
 	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User loggedUser = null;
-		if (!(authentication instanceof AnonymousAuthenticationToken))
-		{
-			String currentUserName = authentication.getName();
-			loggedUser = authenticationDao.getUserByUsernameWithContact(currentUserName);
-		}
-		return dao.getAllContacts(loggedUser);
+		return dao.getAllContacts();
 	}
 	
+	
+	// TODO check this method functionality
+//	@Override
+//	public List<Contact> searchAllContacts()
+//	{
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		User loggedUser = null;
+//		if (!(authentication instanceof AnonymousAuthenticationToken))
+//		{
+//			String currentUserName = authentication.getName();
+//			loggedUser = authenticationDao.getUserByUsernameWithContact(currentUserName);
+//		}
+//		return dao.getAllContacts(loggedUser);
+//	}
+	
 	@Override
-	public Contact searchContactById(String id)
+	public Contact searchContactById(String id) throws ContactNotFoundException
 	{
-		return dao.getContactById(id);
+		Contact contact = null;
+		try
+		{
+			contact = dao.getContactById(id);
+		} catch (RecordNotFoundException e)
+		{
+			throw new ContactNotFoundException();
+		}
+		return contact;
 	}
 
 	@Override
@@ -66,13 +89,27 @@ public class ContactServiceImpl implements ContactService
 	@Override
 	public void updateContact(String id, Contact updatedContact)
 	{
-		dao.updateContact(id, updatedContact);
+		try
+		{
+			dao.updateContact(id, updatedContact);
+		} catch (RecordNotFoundException e)
+		{
+			// TODO throw a new more specific exception
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void deleteContact(String contactId)
 	{
-		dao.deleteContact(contactId);
+		try
+		{
+			dao.deleteContact(contactId);
+		} catch (RecordNotFoundException e)
+		{
+			// TODO throw a new more specific exception
+			e.printStackTrace();
+		}
 	}
 
 //	@Override

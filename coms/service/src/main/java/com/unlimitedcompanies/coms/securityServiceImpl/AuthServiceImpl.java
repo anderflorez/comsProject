@@ -16,8 +16,9 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 import com.unlimitedcompanies.coms.securityService.AuthService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.NonExistingContactException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
 
 @Service
 @Transactional
@@ -36,14 +37,22 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public User saveUser(User user) throws NonExistingContactException
+	public User saveUser(User user) throws MissingContactException
 	{
 		if (user.getContact() == null)
 		{
-			throw new NonExistingContactException();
+			throw new MissingContactException();
 		}
 
-		Contact contact = contactDao.getContactById(user.getContact().getContactId());
+		Contact contact = null;
+		try
+		{
+			contact = contactDao.getContactById(user.getContact().getContactId());
+		} catch (RecordNotFoundException e)
+		{
+			// TODO Throw a new specific exception
+			e.printStackTrace();
+		}
 		user.setContact(contact);
 
 		authDao.createUser(user);

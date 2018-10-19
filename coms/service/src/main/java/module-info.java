@@ -7,6 +7,7 @@ module service
 	requires spring.beans;
 	requires spring.context;
 	requires spring.tx;
+	requires java.base;
 	
 	exports com.unlimitedcompanies.coms.securityService;
 	exports com.unlimitedcompanies.coms.securityServiceExceptions;
