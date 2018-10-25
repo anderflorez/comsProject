@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.webservice.security;
+package com.unlimitedcompanies.coms.ws.security.controllers;
 
 import java.util.List;
 
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionRepresentation;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactNotFoundErrorInformation;
 
 @RestController
 public class ContactRestController
@@ -30,18 +32,18 @@ public class ContactRestController
 		return new ResponseEntity<ContactNotFoundErrorInformation>(error, HttpStatus.NOT_FOUND);
 	}
 	
-	@RequestMapping(value = "/contact/{id}")
-	public Contact findCustomerById(@PathVariable String id) throws ContactNotFoundException
-	{
-		return contactService.searchContactById(id);
-	}
-	
 	// This method only returns contacts
 	@RequestMapping(value="/contacts")
 	public ContactCollectionRepresentation returnAllContacts()
 	{
 		List<Contact> allContacts = contactService.searchAllContacts();
 		return new ContactCollectionRepresentation(allContacts);
+	}
+
+	@RequestMapping(value = "/contact/{id}")
+	public Contact findCustomerById(@PathVariable String id) throws ContactNotFoundException
+	{
+		return contactService.searchContactById(id);
 	}
 	
 	@RequestMapping(value = "/contacts", method = RequestMethod.POST)

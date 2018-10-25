@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.webservice.security;
+package com.unlimitedcompanies.coms.ws.security.reps;
 
 import java.util.List;
 

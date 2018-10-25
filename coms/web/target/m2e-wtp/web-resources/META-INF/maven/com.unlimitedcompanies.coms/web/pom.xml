@@ -19,7 +19,7 @@
 				<version>3.2.2</version>
 				<configuration>
 				<outputDirectory>${basedir}/../../../Resources/tomcat9/webapps/</outputDirectory>
-					<warName>coms</warName>
+					<warName>comsprovider</warName>
 				</configuration>
 			</plugin>
 		</plugins>
