@@ -66,17 +66,13 @@ public class WebServiceSecurityConfig extends WebSecurityConfigurerAdapter
 //							.permitAll();
 //	}
 	
-	@Configuration
-	@EnableResourceServer
-	public static class ResourceServerConfig extends ResourceServerConfigurerAdapter
+	public void configure(HttpSecurity http) throws Exception
 	{
-		public void configure(HttpSecurity http) throws Exception
-		{
-			http.antMatcher("/**").authorizeRequests()
-					.antMatchers("/**").authenticated()
-					//.access("#oauth2.hasScope('write') or #oauth2.hasScope('read') or #oauth2.hasScope('trusted')")
-				.and().csrf().disable();
-		}
+		http.antMatcher("/**").authorizeRequests()
+		.antMatchers("/**").anonymous()
+		//.access("#oauth2.hasScope('write') or #oauth2.hasScope('read') or #oauth2.hasScope('trusted')")
+//		.and().httpBasic()
+		.and().csrf().disable();
 	}
 
 }
