@@ -13,8 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 
@@ -63,16 +61,19 @@ public class WebServiceSecurityConfig extends WebSecurityConfigurerAdapter
 //				.and().formLogin()
 //							.loginProcessingUrl("/login")
 //							.loginPage("/init/login.jsp")
-//							.permitAll();
+//							.permitAll()
+//		
+//				.and().csrf().disable();
 //	}
 	
 	public void configure(HttpSecurity http) throws Exception
 	{
 		http.antMatcher("/**").authorizeRequests()
-		.antMatchers("/**").anonymous()
+									.antMatchers("/**").authenticated()
+			.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		//.access("#oauth2.hasScope('write') or #oauth2.hasScope('read') or #oauth2.hasScope('trusted')")
-//		.and().httpBasic()
-		.and().csrf().disable();
+			.and().httpBasic()
+			.and().csrf().disable();
 	}
 
 }

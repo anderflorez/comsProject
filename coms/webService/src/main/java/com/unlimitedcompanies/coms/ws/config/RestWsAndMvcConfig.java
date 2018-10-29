@@ -21,7 +21,7 @@ public class RestWsAndMvcConfig implements WebMvcConfigurer
 	{
 		WebMvcConfigurer.super.addResourceHandlers(registry);
 		
-//		registry.addResourceHandler("init/css/**").addResourceLocations("init/css/");
+		registry.addResourceHandler("init/css/**").addResourceLocations("init/css/");
 	}
 	
 	@Override
@@ -35,6 +35,8 @@ public class RestWsAndMvcConfig implements WebMvcConfigurer
 		map.put("json", MediaType.APPLICATION_JSON);
 		configurer.parameterName("mediaType").mediaTypes(map);
 	
+		configurer.ignoreAcceptHeader(false);
+		configurer.mediaTypes(map);
 	}
 	
 }

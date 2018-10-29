@@ -1,10 +1,13 @@
 package com.unlimitedcompanies.coms.ws.security.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +32,12 @@ public class ContactRestController
 	public ResponseEntity<ContactNotFoundErrorInformation> rulesForContactNotFound() 
 	{
 		ContactNotFoundErrorInformation error = new ContactNotFoundErrorInformation("The contact wasn't found.");
-		return new ResponseEntity<ContactNotFoundErrorInformation>(error, HttpStatus.NOT_FOUND);
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.put("message", new ArrayList<String>());
+		map.get("message").add(error.getMessage());
+		
+		return new ResponseEntity<>(error, map, HttpStatus.NOT_FOUND);
+
 	}
 	
 	// This method only returns contacts
