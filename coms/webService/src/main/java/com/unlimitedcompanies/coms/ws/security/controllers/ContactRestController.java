@@ -41,20 +41,20 @@ public class ContactRestController
 	}
 	
 	// This method only returns contacts
-	@RequestMapping(value="/contacts")
+	@RequestMapping(value="/rest/contacts")
 	public ContactCollectionRepresentation returnAllContacts()
 	{
 		List<Contact> allContacts = contactService.searchAllContacts();
 		return new ContactCollectionRepresentation(allContacts);
 	}
 
-	@RequestMapping(value = "/contact/{id}")
+	@RequestMapping(value = "/rest/contact/{id}")
 	public Contact findCustomerById(@PathVariable String id) throws ContactNotFoundException
 	{
 		return contactService.searchContactById(id);
 	}
 	
-	@RequestMapping(value = "/contacts", method = RequestMethod.POST)
+	@RequestMapping(value = "/rest/contacts", method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public Contact saveNewContact(@RequestBody Contact newContact)
 	{

@@ -12,16 +12,26 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger level="INFO" name="org.hibernate">
+		<Logger level="ERROR" name="org.hibernate">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="INFO" name="org.springframework.security">
+		<Logger level="ERROR" name="org.springframework.core">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="INFO" name="org.springframework.web.servlet.mvc">
+		<Logger level="ERROR" name="org.springframework.security.web">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Root level="INFO">
+		<Logger level="TRACE" name="org.springframework.security.oauth2">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
+		<Logger level="TRACE"
+			name="org.springframework.web.servlet.mvc">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
+		<Logger level="TRACE" name="org.springframework.web">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
+		<Root level="ERROR">
 			<AppenderRef ref="STDOUT" />
 		</Root>
 	</Loggers>

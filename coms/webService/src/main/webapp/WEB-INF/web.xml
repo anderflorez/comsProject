@@ -40,8 +40,11 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
+			<!-- /webService/src/main/java/configuration.xml, -->
 			com.unlimitedcompanies.coms.data.config.ApplicationConfig,
-			com.unlimitedcompanies.coms.ws.config.WebServiceSecurityConfig
+			com.unlimitedcompanies.coms.ws.config.WebSecurityConfig,
+			com.unlimitedcompanies.coms.ws.config.AuthorizationServerConfig,
+			com.unlimitedcompanies.coms.ws.config.ResourceServerConfig
 		</param-value>
 	</context-param>
 	

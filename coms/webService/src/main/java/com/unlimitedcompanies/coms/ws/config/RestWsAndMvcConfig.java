@@ -21,7 +21,7 @@ public class RestWsAndMvcConfig implements WebMvcConfigurer
 	{
 		WebMvcConfigurer.super.addResourceHandlers(registry);
 		
-		registry.addResourceHandler("init/css/**").addResourceLocations("init/css/");
+		registry.addResourceHandler("/css/**").addResourceLocations("/css/");
 	}
 	
 	@Override
