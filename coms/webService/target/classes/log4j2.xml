@@ -18,17 +18,16 @@
 		<Logger level="ERROR" name="org.springframework.core">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="ERROR" name="org.springframework.security.web">
+		<Logger level="TRACE" name="org.springframework.security.web">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="TRACE" name="org.springframework.security.oauth2">
+		<Logger level="ERROR" name="org.springframework.security.oauth2">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="TRACE"
-			name="org.springframework.web.servlet.mvc">
+		<Logger level="ERROR" name="org.springframework.web.servlet.mvc">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
-		<Logger level="TRACE" name="org.springframework.web">
+		<Logger level="ERROR" name="org.springframework.web">
 			<AppenderRef ref="STDOUT" />
 		</Logger>
 		<Root level="ERROR">

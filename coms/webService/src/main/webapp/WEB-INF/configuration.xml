@@ -17,17 +17,49 @@
         http://www.springframework.org/schema/security/oauth2 
         http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
         
-	<http pattern="/rest/**">
-		<intercept-url pattern="/rest/**" access="hasRole('TRUSTED_CLIENT')"/>
-		<http-basic/>
-	</http>
-	
-	<http pattern="/**">
-		<intercept-url pattern="/**" access="permitAll()" />
-		<form-login/>	
-	</http>
-	
 	<tx:annotation-driven/>
-	<context:component-scan base-package="com.unlimitedcompanies.coms.dao"/>
+	<context:component-scan base-package="com.unlimitedcompanies.coms"/>
+	<beans:bean class="com.unlimitedcompanies.coms.data.config.ApplicationConfig"/>
+	
+<!-- 
+	<oauth2:client-details-service id="clientDetailsService">
+		<oauth2:client client-id="comsClient"
+					   authorized-grant-types="authorization_code"
+					   authorities="ROLE_LIMITED"
+					   secret="somesecret"/>
+	</oauth2:client-details-service>
         
+	<oauth2:authorization-server client-details-service-ref="clientDetailsService">
+		<oauth2:authorization-code/>
+	</oauth2:authorization-server>
+        
+	<http pattern="/rest/**" authentication-manager-ref="authManager">
+		<intercept-url pattern="rest/**" access="hasRole('ROLE_LIMITED')"/>
+		<http-basic/>
+		<csrf disabled="true"/>
+	</http>
+ -->
+ 	<http pattern="/css/**" security="none"/>
+ 	
+ 	<beans:bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+ 
+ 	<authentication-manager>
+ 		<authentication-provider>
+ 			<jdbc-user-service data-source-ref="productionDataSource"
+ 							   users-by-username-query="select username, password, enabled from user where username = ?"
+ 							   authorities-by-username-query="select * from role INNER JOIN user_role ON user_role.role_FK = role.roleId INNER JOIN user ON user.username = ?"/>
+			<password-encoder ref="bcryptEncoder"/>
+ 		</authentication-provider>
+ 	</authentication-manager>
+ 
+ 	<http pattern="/**">
+ 		<intercept-url pattern="/pages/login.jsp" access="permitAll()"/>
+ 		<intercept-url pattern="/login" access="permitAll()"/>
+ 		<intercept-url pattern="/rest/**" />
+ 		<intercept-url pattern="/**" access="isAuthenticated()"/>
+ 		
+ 		<form-login login-page="/pages/login.jsp" login-processing-url="/login"/>
+ 					
+		<csrf disabled="true"/>
+ 	</http>
 </beans:beans>

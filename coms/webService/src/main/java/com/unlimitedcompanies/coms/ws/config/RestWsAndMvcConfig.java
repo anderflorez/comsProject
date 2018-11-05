@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+//@Configuration
 @ComponentScan(basePackages = {"com.unlimitedcompanies.coms"})
 @EnableWebMvc
 public class RestWsAndMvcConfig implements WebMvcConfigurer

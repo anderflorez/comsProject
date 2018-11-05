@@ -16,7 +16,8 @@
  
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>com.unlimitedcompanies.coms.ws.config.RestWsAndMvcConfig</param-value>
+			<!-- <param-value>com.unlimitedcompanies.coms.ws.config.RestWsAndMvcConfig</param-value> -->
+			<param-value>com.unlimitedcompanies.coms.data.config.ApplicationConfig</param-value>
 		</init-param>
 
 		<load-on-startup>1</load-on-startup>
@@ -40,11 +41,9 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			<!-- /webService/src/main/java/configuration.xml, -->
+			<!-- com.unlimitedcompanies.coms.ws.config.RestWsAndMvcConfig, -->
 			com.unlimitedcompanies.coms.data.config.ApplicationConfig,
-			com.unlimitedcompanies.coms.ws.config.WebSecurityConfig,
-			com.unlimitedcompanies.coms.ws.config.AuthorizationServerConfig,
-			com.unlimitedcompanies.coms.ws.config.ResourceServerConfig
+			/WEB-INF/configuration.xml
 		</param-value>
 	</context-param>
 	
