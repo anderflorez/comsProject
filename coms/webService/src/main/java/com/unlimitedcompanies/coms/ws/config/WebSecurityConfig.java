@@ -2,11 +2,9 @@ package com.unlimitedcompanies.coms.ws.config;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -17,11 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 
-//@Configuration
+@Configuration
 @EnableWebSecurity
 @ComponentScan(basePackages = { "com.unlimitedcompanies.coms" })
 @Import(ApplicationConfig.class)
-@ImportResource("/WEB-INF/configuration.xml")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 {
 	@Autowired
