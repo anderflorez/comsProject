@@ -47,7 +47,8 @@ public class OAuth2ServerConfiguration
 						.scopes("read", "write", "trusted")
 						.secret("{noop}somesecret")
 						.resourceIds(SERVER_RESOURCE_ID)
-						.redirectUris("http://localhost:8080/coms/contacts");
+						.autoApprove(true)
+						.redirectUris("http://localhost:8080/coms/tokenmanager");
 		}
 
 	}

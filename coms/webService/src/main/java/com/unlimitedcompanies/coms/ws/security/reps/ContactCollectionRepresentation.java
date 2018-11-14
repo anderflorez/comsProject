@@ -16,7 +16,6 @@ public class ContactCollectionRepresentation
 
 	public ContactCollectionRepresentation(List<Contact> contacts)
 	{
-		super();
 		this.contacts = contacts;
 	}
 
