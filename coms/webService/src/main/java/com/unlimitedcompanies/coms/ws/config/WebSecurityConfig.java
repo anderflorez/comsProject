@@ -63,7 +63,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 			.authorizeRequests().anyRequest().authenticated()
 
 			// Form authentication configuration
-			.and().formLogin().loginProcessingUrl("/login").loginPage("/pages/login.jsp").permitAll()
+			.and().formLogin()
+						.loginProcessingUrl("/login")
+						.loginPage("/pages/login.jsp")
+						.permitAll()
+						
+			// Logout configuration
+			.and().logout()
+						.deleteCookies("JSESSIONID")
+						.clearAuthentication(true)
+						.invalidateHttpSession(true)
+						.logoutSuccessUrl("http://localhost:8080/coms/logout")
+						.permitAll()
 				
 			.and().csrf().disable();
 	}
