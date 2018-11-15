@@ -1,22 +1,30 @@
 package com.unlimitedcompanies.coms.ws.security.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDetailsRep;
 
 @RestController
-public class UserInformationController
+public class LoggedUserInformationController
 {
-	@RequestMapping("/rest/userInfo")
+	@Autowired
+	AuthService authService;
+	
+	@RequestMapping("/rest/loggedUserInfo")
 	public UserDetailsRep getUserInfo()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		UserDetailsRep user = new UserDetailsRep(userDetails.getUsername());
-		return user;
+		User user = authService.searchUserByUsernameWithContact(userDetails.getUsername());
+		UserDetailsRep loggedUser = new UserDetailsRep(user.getUsername(), user.getContact().getFirstName(), user.getContact().getLastName());
+		
+		return loggedUser;
 	}
 }

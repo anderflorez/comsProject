@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashSet;
@@ -325,10 +324,10 @@ class SecurityServiceIntegrationTest
 		User user = new User("jdoe", "mypass", contact);
 		authService.saveUser(user);
 
-		User founduser = authService.searchUserByUsername("jdoe");
+		User founduser = authService.searchUserByUsernameWithContact("jdoe");
 
 		assertEquals(user, founduser, "Service test for finding user by username failed");
-		assertEquals(user.getContact(), contact, "Service test for finding user by username with contact failed");
+		assertEquals(user.getContact(), founduser.getContact(), "Service test for finding user by username with contact failed");
 	}
 	
 	@Test
