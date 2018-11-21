@@ -145,7 +145,6 @@ public class AuthDaoImpl implements AuthDao
 	public Role getRoleById(String id)
 	{
 		Role role = em.find(Role.class, id);
-		System.out.println("=====> Role: " + role);
 		if (role == null)
 		{
 			throw new NoResultException();

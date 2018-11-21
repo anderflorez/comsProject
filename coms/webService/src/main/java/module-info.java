@@ -12,6 +12,7 @@ module webService
 	requires spring.security.web;
 	requires spring.security.config;
 	requires spring.security.oauth2;
+	requires spring.hateoas;
 	
 	requires java.xml.bind;
 	requires javax.servlet.api;

@@ -19,8 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
-import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionRepresentation;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionRep;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactNotFoundErrorInformation;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactRep;
 
 @RestController
 public class ContactRestController
@@ -41,17 +42,21 @@ public class ContactRestController
 	}
 	
 	// This method only returns contacts
-	@RequestMapping(value="/rest/contacts")
-	public ContactCollectionRepresentation returnAllContacts()
-	{		
-		List<Contact> allContacts = contactService.searchAllContacts();
-		return new ContactCollectionRepresentation(allContacts);
+	@RequestMapping(value="/rest/contacts", method = RequestMethod.GET)
+	public ContactCollectionRep returnAllContacts()
+	{
+		// TODO: Need to support results by pages, eg. return 100 customers max per page
+		
+		List<Contact> foundContacts = contactService.searchAllContacts();
+		return new ContactCollectionRep(foundContacts);
 	}
 
-	@RequestMapping(value = "/rest/contact/{id}")
-	public Contact findCustomerById(@PathVariable String id) throws ContactNotFoundException
+	@RequestMapping(value = "/rest/contact/{id}", method = RequestMethod.GET)
+	public ContactRep findContactById(@PathVariable String id) throws ContactNotFoundException
 	{
-		return contactService.searchContactById(id);
+		Contact foundContact = contactService.searchContactById(id);
+		ContactRep contact = new ContactRep(foundContact);
+		return contact;
 	}
 	
 	@RequestMapping(value = "/rest/contacts", method = RequestMethod.POST)

@@ -11,7 +11,6 @@ public class ContactNotFoundErrorInformation
 
 	public ContactNotFoundErrorInformation(String message)
 	{
-		super();
 		this.message = message;
 	}
 
