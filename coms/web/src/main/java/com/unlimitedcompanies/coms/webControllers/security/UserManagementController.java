@@ -35,7 +35,7 @@ public class UserManagementController
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView showUserDetails(@RequestParam(value = "u", required = false) String uId, 
-										@RequestParam(value = "c", required = false) String cId)
+										@RequestParam(value = "c", required = false) Integer cId)
 	{
 		ModelAndView mv = new ModelAndView("/pages/security/userManagement.jsp");
 		UserForm userForm = null;

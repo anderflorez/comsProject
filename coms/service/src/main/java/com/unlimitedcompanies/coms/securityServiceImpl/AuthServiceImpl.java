@@ -180,9 +180,9 @@ public class AuthServiceImpl implements AuthService
 	public ResourcePermissions savePermission(ResourcePermissions permission)
 	{
 		authDao.createResourcePermission(permission);
-		if (permission.getAndGroup() != null && permission.getAndGroup().getOrGroups().size() > 0)
+		if (permission.getViewCondtitions() != null && permission.getViewCondtitions().getOrGroups().size() > 0)
 		{
-			for (OrGroup o : permission.getAndGroup().getOrGroups())
+			for (OrGroup o : permission.getViewCondtitions().getOrGroups())
 			{
 				this.saveFullOrGroup(o);
 			}

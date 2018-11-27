@@ -567,7 +567,8 @@ class SecurityServiceIntegrationTest
 		andGroup.addAndConditionBidirectional(condition1);
 		andGroup.addAndConditionBidirectional(condition2);
 
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(andGroup);
 		authService.savePermission(permission);
 
 		List<ResourcePermissions> foundPermissions = authService.searchAllRolePermissions(role);
@@ -577,7 +578,7 @@ class SecurityServiceIntegrationTest
 		{
 			assertEquals(resource.getResourceName(), rp.getResource().getResourceName(),
 					"Save permission with contact integration test failed");
-			assertTrue(rp.getAndGroup().getConditions().contains(condition2),
+			assertTrue(rp.getViewCondtitions().getConditions().contains(condition2),
 					"Save permission with contact integration test failed");
 		}
 
@@ -612,11 +613,12 @@ class SecurityServiceIntegrationTest
 		andGroup1.addOrGroup(orGroup3);
 		orGroup2.addAndGroup(andGroup4);
 
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(andGroup1);
 		permission = authService.savePermission(permission);
 
-		assertEquals(permission.getAndGroup().getAndGroupId(),
-				authService.searchPermissionById(permission.getPermissionId()).getAndGroup().getAndGroupId(),
+		assertEquals(permission.getViewCondtitions().getAndGroupId(),
+				authService.searchPermissionById(permission.getPermissionId()).getViewCondtitions().getAndGroupId(),
 				"Save permission with chained conditions integration test failed");
 
 		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getConditions().size() > 0);
@@ -654,11 +656,12 @@ class SecurityServiceIntegrationTest
 		andGroup1.addOrGroup(orGroup3);
 		orGroup2.addAndGroup(andGroup4);
 
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(andGroup1);
 		permission = authService.savePermission(permission);
 
-		assertEquals(permission.getAndGroup().getAndGroupId(),
-				authService.searchPermissionById(permission.getPermissionId()).getAndGroup().getAndGroupId(),
+		assertEquals(permission.getViewCondtitions().getAndGroupId(),
+				authService.searchPermissionById(permission.getPermissionId()).getViewCondtitions().getAndGroupId(),
 				"Save permission with chained conditions integration test failed");
 
 		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getConditions().size() > 0,
@@ -692,18 +695,19 @@ class SecurityServiceIntegrationTest
 		andGroup1.addOrGroup(orGroup2);
 		andGroup1.addOrGroup(orGroup3);
 		orGroup2.addAndGroup(andGroup4);
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(andGroup1);
 		authService.savePermission(permission);
 
 		ResourcePermissions foundPermission = authService.searchPermissionById(permission.getPermissionId());
-		assertEquals(permission.getAndGroup(), foundPermission.getAndGroup());
-		assertEquals(permission.getAndGroup().getOrGroups(), foundPermission.getAndGroup().getOrGroups());
-		if (foundPermission.getAndGroup().getOrGroups().get(0) == orGroup2)
+		assertEquals(permission.getViewCondtitions(), foundPermission.getViewCondtitions());
+		assertEquals(permission.getViewCondtitions().getOrGroups(), foundPermission.getViewCondtitions().getOrGroups());
+		if (foundPermission.getViewCondtitions().getOrGroups().get(0) == orGroup2)
 		{
-			assertTrue(foundPermission.getAndGroup().getOrGroups().get(0).getAndGroups().contains(andGroup4));
+			assertTrue(foundPermission.getViewCondtitions().getOrGroups().get(0).getAndGroups().contains(andGroup4));
 		} else
 		{
-			assertTrue(foundPermission.getAndGroup().getOrGroups().get(1).getAndGroups().contains(andGroup4));
+			assertTrue(foundPermission.getViewCondtitions().getOrGroups().get(1).getAndGroups().contains(andGroup4));
 		}
 	}
 

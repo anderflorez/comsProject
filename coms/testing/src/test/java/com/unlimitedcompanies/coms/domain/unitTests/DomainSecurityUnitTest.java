@@ -214,9 +214,10 @@ class DomainSecurityUnitTest
 		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
 		conditionGroup.addAndConditionBidirectional(condition1);
 		conditionGroup.addAndConditionBidirectional(condition2);
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, conditionGroup);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(conditionGroup);
 		
-		List<AndCondition> conditions = permission.getAndGroup().getConditions();
+		List<AndCondition> conditions = permission.getViewCondtitions().getConditions();
 		for (AndCondition condition : conditions)
 		{
 			assertTrue(condition.getAndGroup().equals(conditionGroup), "Resource permissions with conditions unit test failed");
@@ -272,10 +273,11 @@ class DomainSecurityUnitTest
 		andGroup1.addOrGroup(orGroup3);
 		orGroup2.addAndGroup(andGroup4);
 		
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false, andGroup1);
+		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
+		permission.setViewCondtitions(andGroup1);
 		
 		List<AndGroup> foundAndGroup = null;
-		for (OrGroup o : permission.getAndGroup().getOrGroups())
+		for (OrGroup o : permission.getViewCondtitions().getOrGroups())
 		{
 			assertTrue(o.equals(orGroup2) || o.equals(orGroup3));
 			if (o.getAndGroups().size() > 0)

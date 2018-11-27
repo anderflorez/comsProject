@@ -30,18 +30,16 @@ public class ContactDaoImpl implements ContactDao
 
 	@Override
 	public void createContact(Contact contact)
-	{
-		em.persist(contact);
-		
+	{	
 		// TODO: Delete after it's been tested
-//		em.createNativeQuery(
-//				"INSERT INTO contact (contactId, firstName, middleName, lastName, email) VALUES (:id, :fname, :mname, :lname, :email)")
-//				.setParameter("id", contact.getContactId())
-//				.setParameter("fname", contact.getFirstName())
-//				.setParameter("mname", contact.getMiddleName())
-//				.setParameter("lname", contact.getLastName())
-//				.setParameter("email", contact.getEmail())
-//				.executeUpdate();
+		em.createNativeQuery(
+				"INSERT INTO contact (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
+				.setParameter("charId", contact.getContactCharId())
+				.setParameter("fname", contact.getFirstName())
+				.setParameter("mname", contact.getMiddleName())
+				.setParameter("lname", contact.getLastName())
+				.setParameter("email", contact.getEmail())
+				.executeUpdate();
 	}
 	
 	@Override
@@ -52,7 +50,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public Contact getContactById(String Id) throws RecordNotFoundException
+	public Contact getContactById(int Id) throws RecordNotFoundException
 	{
 		Contact contact = em.find(Contact.class, Id);
 		if (contact == null)
@@ -60,6 +58,14 @@ public class ContactDaoImpl implements ContactDao
 			throw new RecordNotFoundException();
 		}
 		return contact;
+	}
+	
+	@Override
+	public Contact getContactByCharId(String contactCharId)
+	{
+		return em.createQuery("select contact from Contact as contact where contact.contactCharId = :charId", Contact.class)
+							  .setParameter("charId", contactCharId)
+							  .getSingleResult();
 	}
 
 	@Override
@@ -71,7 +77,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void updateContact(String id, Contact contact) throws RecordNotFoundException
+	public void updateContact(int id, Contact contact) throws RecordNotFoundException
 	{
 		Contact foundContact = this.getContactById(id);
 		foundContact.setFirstName(contact.getFirstName());
@@ -81,7 +87,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void deleteContact(String contactId) throws RecordNotFoundException
+	public void deleteContact(int contactId) throws RecordNotFoundException
 	{
 		Contact contact = this.getContactById(contactId);
 		em.remove(contact);

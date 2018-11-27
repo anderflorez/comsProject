@@ -21,8 +21,11 @@ public class AndGroup
 	@Id
 	private String andGroupId;
 
-	@OneToOne(mappedBy = "andGroup")
-	private ResourcePermissions resourcePermission;
+	@OneToOne(mappedBy = "viewCondtitions")
+	private ResourcePermissions resourceViewPermission;
+	
+	@OneToOne(mappedBy = "editConditions")
+	private ResourcePermissions resourceEditPermission;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "orGroupId_FK")
@@ -59,14 +62,16 @@ public class AndGroup
 		return Collections.unmodifiableList(this.andConditions);
 	}
 
-	public void assignToPermission(ResourcePermissions resourcePermission)
+	public void assignToViewPermission(ResourcePermissions resourcePermission)
 	{
-		if (!this.resourcePermission.equals(resourcePermission))
+		if (!this.resourceViewPermission.equals(resourcePermission))
 		{
-			this.resourcePermission = resourcePermission;
-			resourcePermission.assignConditionGroup(this);
+			this.resourceViewPermission = resourcePermission;
+			resourcePermission.assignViewConditionGroup(this);
 		}
 	}
+	
+	// TODO: Add method to assignToEditPermission
 
 	public void addAndCondition(AndCondition andCondition)
 	{

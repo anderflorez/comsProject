@@ -25,26 +25,18 @@ public class ContactManagementController
 	ContactService contactService;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showContactDetails(@RequestParam("c") String cId)
+	public ModelAndView showContactDetails(@RequestParam("c") Integer cId)
 	{	
 		ModelAndView mv = new ModelAndView("/pages/security/contactManagement.jsp");
 		Contact contact = new Contact(null, null, null, null);
 		String error = null;
 		
-		if (cId.equals("0"))
+		try
 		{
-			contact.removeContactId();
-		}
-		else
+			contact = contactService.searchContactById(cId);
+		} catch (ContactNotFoundException e)
 		{
-			try
-			{
-				contact = contactService.searchContactById(cId);
-			} catch (ContactNotFoundException e)
-			{
-				error = "The contact couldn't be found";
-			}
-			
+			error = "The contact couldn't be found";
 		}
 		
 		mv.addObject("contact", contact);
@@ -56,7 +48,7 @@ public class ContactManagementController
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView processContact(Contact contact)
 	{	
-		if (!contact.getContactId().isEmpty() && contact.getContactId() != null && !contact.getFirstName().isEmpty())
+		if (contact.getContactId() != 0 && contact.getContactId() != null && !contact.getFirstName().isEmpty())
 		{
 			// This is a request to update an existing contact information
 			try
@@ -76,7 +68,7 @@ public class ContactManagementController
 			mv.addObject("user", authUser.getUser());
 			return mv;
 		} 
-		else if ((contact.getContactId().isEmpty() || contact.getContactId() == null) && !contact.getFirstName().isEmpty())
+		else if ((contact.getContactId() != 0 || contact.getContactId() == null) && !contact.getFirstName().isEmpty())
 		{
 			// This is a request to create a new contact
 			Contact savedContact = contactService.saveContact(new Contact(contact));

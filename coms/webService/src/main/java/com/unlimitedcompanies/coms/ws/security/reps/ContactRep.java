@@ -1,13 +1,12 @@
 package com.unlimitedcompanies.coms.ws.security.reps;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.springframework.hateoas.ResourceSupport;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 
-@XmlRootElement(name = "contact")
-public class ContactRep
+public class ContactRep extends ResourceSupport
 {
-	private String contactId;
+	private Integer contactId;
 	private String firstName;
 	private String middleName;
 	private String lastName;
@@ -15,7 +14,7 @@ public class ContactRep
 	
 	public ContactRep() {}
 	
-	public ContactRep(Contact contact)
+	public ContactRep(Contact contact) 
 	{
 		this.contactId = contact.getContactId();
 		this.firstName = contact.getFirstName();
@@ -24,12 +23,12 @@ public class ContactRep
 		this.email = contact.getEmail();
 	}
 
-	public String getContactId()
+	public Integer getContactId()
 	{
 		return contactId;
 	}
 
-	public void setContactId(String contactId)
+	public void setContactId(Integer contactId)
 	{
 		this.contactId = contactId;
 	}
@@ -73,5 +72,5 @@ public class ContactRep
 	{
 		this.email = email;
 	}
-		
+	
 }

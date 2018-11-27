@@ -11,10 +11,11 @@ public interface ContactDao
 	public void createContact(Contact contact);
 	public List<Contact> getAllContacts();
 //	public List<Contact> getAllContacts(User loggedUser);
-	public Contact getContactById(String id) throws RecordNotFoundException;
+	public Contact getContactById(int id) throws RecordNotFoundException;
+	public Contact getContactByCharId(String contactCharId);
 	public Contact getContactByEmail(String contactEmail);
-	public void updateContact(String id, Contact contact) throws RecordNotFoundException;
-	public void deleteContact(String contactId) throws RecordNotFoundException;
+	public void updateContact(int id, Contact contact) throws RecordNotFoundException;
+	public void deleteContact(int contactId) throws RecordNotFoundException;
 	
 //	public int getNumberOfAddresses();
 //	public void createContactAddress(Address address, int contactId);

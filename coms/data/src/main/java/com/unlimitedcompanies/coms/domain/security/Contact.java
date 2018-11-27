@@ -12,22 +12,23 @@ import javax.validation.constraints.NotEmpty;
 public class Contact
 {
 	@Id
-	private String contactId;
+	private Integer contactId;
 	
 	@NotEmpty
 	private String firstName;
 	private String middleName;
 	private String lastName;
 	private String email;
+	private String contactCharId;
 	
 	protected Contact()
 	{
-		this.contactId = UUID.randomUUID().toString();
+		this.contactCharId = UUID.randomUUID().toString();
 	}
 	
 	public Contact(String firstName, String middleName, String lastName, String email)
 	{
-		this.contactId = UUID.randomUUID().toString();
+		this.contactCharId = UUID.randomUUID().toString();
 		this.firstName = firstName;
 		this.middleName = middleName;
 		this.lastName = lastName;
@@ -36,46 +37,16 @@ public class Contact
 	
 	public Contact(Contact contact)
 	{
-		this.contactId = UUID.randomUUID().toString();
+		this.contactCharId = UUID.randomUUID().toString();
 		this.firstName = contact.firstName;
 		this.middleName = contact.middleName;
 		this.lastName = contact.lastName;
 		this.email = contact.email;
 	}
 	
-	public String getContactId()
-	{
-		return this.contactId;
-	}
-
 	public String getFirstName()
 	{
 		return firstName;
-	}
-
-	public String getMiddleName()
-	{
-		return middleName;
-	}
-
-	public String getLastName()
-	{
-		return lastName;
-	}
-
-	public String getEmail()
-	{
-		return email;
-	}
-	
-	public void setContactId(String contactId)
-	{
-		this.contactId = contactId;
-	}
-
-	public void removeContactId()
-	{
-		this.contactId = null;
 	}
 
 	public void setFirstName(String firstName)
@@ -83,9 +54,19 @@ public class Contact
 		this.firstName = firstName;
 	}
 
+	public String getMiddleName()
+	{
+		return middleName;
+	}
+
 	public void setMiddleName(String middleName)
 	{
 		this.middleName = middleName;
+	}
+
+	public String getLastName()
+	{
+		return lastName;
 	}
 
 	public void setLastName(String lastName)
@@ -93,17 +74,37 @@ public class Contact
 		this.lastName = lastName;
 	}
 
+	public String getEmail()
+	{
+		return email;
+	}
+
 	public void setEmail(String email)
 	{
 		this.email = email;
 	}
-	
+
+	public String getContactCharId()
+	{
+		return contactCharId;
+	}
+
+	public void setContactCharId(String contactCharId)
+	{
+		this.contactCharId = contactCharId;
+	}
+
+	public Integer getContactId()
+	{
+		return contactId;
+	}
+
 	public void copyContact(Contact contact)
 	{
-		this.firstName = contact.firstName;
-		this.middleName = contact.middleName;
-		this.lastName = contact.lastName;
-		this.email = contact.email;
+		this.firstName = contact.getFirstName();
+		this.middleName = contact.getMiddleName();
+		this.lastName = contact.getLastName();
+		this.email = contact.getEmail();
 	}
 
 	@Override

@@ -12,11 +12,11 @@ public class UserForm
 	private String enabled;
 	private String dateAdded;
 	private String lastAccess;
-	private String contactId;
+	private Integer contactId;
 
 	public UserForm() {}
 
-	public UserForm(Integer userId, String username, String enabled, String dateAdded, String lastAccess, String contactId)
+	public UserForm(Integer userId, String username, String enabled, String dateAdded, String lastAccess, Integer contactId)
 	{
 		this.userId = userId;
 		this.username = username;
@@ -143,12 +143,12 @@ public class UserForm
 		this.lastAccess = lastAccess;
 	}
 
-	public String getContactId()
+	public Integer getContactId()
 	{
 		return contactId;
 	}
 
-	public void setContactId(String contactId)
+	public void setContactId(Integer contactId)
 	{
 		this.contactId = contactId;
 	}

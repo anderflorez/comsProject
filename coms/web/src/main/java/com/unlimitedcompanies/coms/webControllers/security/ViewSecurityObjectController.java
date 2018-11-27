@@ -49,7 +49,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping("/contactDetail")
-	public ModelAndView showContactDetails(@RequestParam(name = "c") String id)
+	public ModelAndView showContactDetails(@RequestParam(name = "c") Integer id)
 	{
 		Contact contact;
 		ModelAndView mv = new ModelAndView("/pages/security/contactDetails.jsp");
@@ -73,7 +73,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping(value = "/deleteContact", method = RequestMethod.POST)
-	public ModelAndView deleteContact(String contactId)
+	public ModelAndView deleteContact(int contactId)
 	{
 		ModelAndView mv = new ModelAndView("/contacts");
 		try

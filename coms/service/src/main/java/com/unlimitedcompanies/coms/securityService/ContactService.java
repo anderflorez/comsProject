@@ -10,10 +10,10 @@ public interface ContactService
 	public Contact saveContact(Contact Contact);
 	public int findNumberOfContacts();
 	public List<Contact> searchAllContacts();
-	public Contact searchContactById(String id) throws ContactNotFoundException;
+	public Contact searchContactById(int id) throws ContactNotFoundException;
 	public Contact searchContactByEmail(String email);
-	public void updateContact(String id, Contact updatedContact);
-	public void deleteContact(String contactId);
+	public void updateContact(int id, Contact updatedContact);
+	public void deleteContact(int contactId);
 //	
 //	public int findNumberOfContactAddresses();
 //	public void saveContactAddress(Address address);

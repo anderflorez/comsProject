@@ -27,16 +27,7 @@ public class ContactServiceImpl implements ContactService
 	public Contact saveContact(Contact contact)
 	{
 		dao.createContact(contact);
-		Contact createdContact = null;
-		try
-		{
-			createdContact = dao.getContactById(contact.getContactId());
-		} catch (RecordNotFoundException e)
-		{
-			// TODO throw a new more specific exception
-			e.printStackTrace();
-		}
-		return createdContact;
+		return dao.getContactByCharId(contact.getContactCharId());
 	}
 
 	@Override
@@ -67,7 +58,7 @@ public class ContactServiceImpl implements ContactService
 //	}
 	
 	@Override
-	public Contact searchContactById(String id) throws ContactNotFoundException
+	public Contact searchContactById(int id) throws ContactNotFoundException
 	{
 		Contact contact = null;
 		try
@@ -87,7 +78,7 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public void updateContact(String id, Contact updatedContact)
+	public void updateContact(int id, Contact updatedContact)
 	{
 		try
 		{
@@ -100,7 +91,7 @@ public class ContactServiceImpl implements ContactService
 	}
 
 	@Override
-	public void deleteContact(String contactId)
+	public void deleteContact(int contactId)
 	{
 		try
 		{

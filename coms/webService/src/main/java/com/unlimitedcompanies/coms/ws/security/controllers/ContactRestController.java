@@ -1,13 +1,13 @@
 package com.unlimitedcompanies.coms.ws.security.controllers;
 
-import java.util.ArrayList;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
-import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionRep;
-import com.unlimitedcompanies.coms.ws.security.reps.ContactNotFoundErrorInformation;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactRep;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactSingleResponse;
 
 @RestController
 public class ContactRestController
@@ -30,32 +30,44 @@ public class ContactRestController
 	ContactService contactService;
 	
 	@ExceptionHandler(ContactNotFoundException.class)
-	public ResponseEntity<ContactNotFoundErrorInformation> rulesForContactNotFound() 
+	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "The contact could not be found")
+	public ContactSingleResponse contactNotFoundExceptionHandler() 
 	{
-		ContactNotFoundErrorInformation error = new ContactNotFoundErrorInformation("The contact wasn't found.");
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.put("message", new ArrayList<String>());
-		map.get("message").add(error.getMessage());
+//		ContactSingleResponse contactNotFoundError = new ContactSingleResponse();
+//		contactNotFoundError.setErrorCode(HttpStatus.NOT_FOUND.value());
+//		contactNotFoundError.setErrorMessage("The contact could not be found");
+//		return new ResponseEntity<>(contactNotFoundError, HttpStatus.OK);
 		
-		return new ResponseEntity<>(error, map, HttpStatus.NOT_FOUND);
-
+		ContactSingleResponse singleContact = new ContactSingleResponse();
+		singleContact.setErrorCode(HttpStatus.NOT_FOUND.value());
+		singleContact.setErrorMessage("The contact could not be found");
+		return singleContact;
 	}
 	
-	// This method only returns contacts
 	@RequestMapping(value="/rest/contacts", method = RequestMethod.GET)
-	public ContactCollectionRep returnAllContacts()
+	public ContactCollectionResponse returnAllContacts() throws ContactNotFoundException
 	{
 		// TODO: Need to support results by pages, eg. return 100 customers max per page
 		
 		List<Contact> foundContacts = contactService.searchAllContacts();
-		return new ContactCollectionRep(foundContacts);
+		ContactCollectionResponse allContacts = new ContactCollectionResponse(foundContacts);
+		
+		for (ContactRep next : allContacts.getContactCollection())
+		{
+			Link link = linkTo(methodOn(ContactRestController.class).findContactById(next.getContactId())).withSelfRel();
+			next.add(link);
+		}
+		
+		return allContacts;
 	}
 
 	@RequestMapping(value = "/rest/contact/{id}", method = RequestMethod.GET)
-	public ContactRep findContactById(@PathVariable String id) throws ContactNotFoundException
+	public ContactSingleResponse findContactById(@PathVariable Integer id) throws ContactNotFoundException
 	{
 		Contact foundContact = contactService.searchContactById(id);
-		ContactRep contact = new ContactRep(foundContact);
+		ContactSingleResponse contact = new ContactSingleResponse(foundContact);
+		Link link = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
+		contact.getSingleContact().add(link);
 		return contact;
 	}
 	

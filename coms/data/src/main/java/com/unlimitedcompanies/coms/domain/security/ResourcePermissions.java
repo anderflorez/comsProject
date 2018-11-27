@@ -25,8 +25,12 @@ public class ResourcePermissions
 	private Resource resource;
 
 	@OneToOne
-	@JoinColumn(name = "andGroupId_FK")
-	private AndGroup andGroup;
+	@JoinColumn(name = "viewConditions_FK")
+	private AndGroup viewCondtitions;
+	
+	@OneToOne
+	@JoinColumn(name = "editConditions_FK")
+	private AndGroup editConditions;
 
 	private byte createRec;
 	private byte readRec;
@@ -50,19 +54,6 @@ public class ResourcePermissions
 		this.deleteRec = (byte) (deleteRec == true ? 1 : 0);
 	}
 
-	public ResourcePermissions(Role role, Resource resource, boolean createRec, boolean readRec, boolean updateRec,
-			boolean deleteRec, AndGroup conditions)
-	{
-		this.roleResourceIdentifier = UUID.randomUUID().toString();
-		this.role = role;
-		this.resource = resource;
-		this.createRec = (byte) (createRec == true ? 1 : 0);
-		this.readRec = (byte) (readRec == true ? 1 : 0);
-		this.updateRec = (byte) (updateRec == true ? 1 : 0);
-		this.deleteRec = (byte) (deleteRec == true ? 1 : 0);
-		this.andGroup = conditions;
-	}
-
 	public String getPermissionId()
 	{
 		return roleResourceIdentifier;
@@ -78,9 +69,14 @@ public class ResourcePermissions
 		return resource;
 	}
 
-	public AndGroup getAndGroup()
+	public AndGroup getViewCondtitions()
 	{
-		return andGroup;
+		return viewCondtitions;
+	}
+
+	public AndGroup getEditConditions()
+	{
+		return editConditions;
 	}
 
 	public byte getCreateRec()
@@ -113,9 +109,14 @@ public class ResourcePermissions
 		this.resource = resource;
 	}
 
-	public void setAndGroup(AndGroup andGroup)
+	public void setViewCondtitions(AndGroup viewCondtitions)
 	{
-		this.andGroup = andGroup;
+		this.viewCondtitions = viewCondtitions;
+	}
+
+	public void setEditConditions(AndGroup editConditions)
+	{
+		this.editConditions = editConditions;
 	}
 
 	public void setCreateRec(boolean createRec)
@@ -156,12 +157,12 @@ public class ResourcePermissions
 		}
 	}
 	
-	public void assignConditionGroup(AndGroup andGroup)
+	public void assignViewConditionGroup(AndGroup andGroup)
 	{
-		if (!this.andGroup.equals(andGroup))
+		if (!this.viewCondtitions.equals(andGroup))
 		{
-			this.andGroup = andGroup;
-			andGroup.assignToPermission(this);
+			this.viewCondtitions = andGroup;
+			andGroup.assignToViewPermission(this);
 		}
 	}
 
