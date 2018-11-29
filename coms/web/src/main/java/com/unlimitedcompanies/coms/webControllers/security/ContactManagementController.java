@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
@@ -46,14 +47,14 @@ public class ContactManagementController
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processContact(Contact contact)
+	public ModelAndView processContact(Contact contact) throws DuplicateContactEntryException, ContactNotFoundException
 	{	
 		if (contact.getContactId() != 0 && contact.getContactId() != null && !contact.getFirstName().isEmpty())
 		{
 			// This is a request to update an existing contact information
 			try
 			{
-				contactService.updateContact(contact.getContactId(), contact);
+				contactService.updateContact(contact);
 			} 
 			catch (NoResultException e)
 			{

@@ -10,7 +10,10 @@ public class RepFacade extends ResourceSupport
 	private int error_code;
 	private String error_message;
 	
-	public RepFacade() {}
+	public RepFacade() 
+	{
+		this.error_code = 200;
+	}
 
 	public int getErrorCode()
 	{

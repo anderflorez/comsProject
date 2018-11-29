@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +31,26 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void createContact(Contact contact)
+	public void createContact(Contact contact) throws ConstraintViolationException
 	{	
-		// TODO: Delete after it's been tested
-		em.createNativeQuery(
-				"INSERT INTO contact (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
-				.setParameter("charId", contact.getContactCharId())
-				.setParameter("fname", contact.getFirstName())
-				.setParameter("mname", contact.getMiddleName())
-				.setParameter("lname", contact.getLastName())
-				.setParameter("email", contact.getEmail())
-				.executeUpdate();
+		try
+		{
+			em.createNativeQuery(
+					"INSERT INTO contact (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
+					.setParameter("charId", contact.getContactCharId())
+					.setParameter("fname", contact.getFirstName())
+					.setParameter("mname", contact.getMiddleName())
+					.setParameter("lname", contact.getLastName())
+					.setParameter("email", contact.getEmail())
+					.executeUpdate();
+		} 
+		catch (PersistenceException e)
+		{
+			if (e.getCause() instanceof ConstraintViolationException)
+			{
+				throw (ConstraintViolationException)e.getCause();
+			}
+		}
 	}
 	
 	@Override
@@ -77,13 +88,13 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void updateContact(int id, Contact contact) throws RecordNotFoundException
+	public void updateContact(Contact updatedContact) throws RecordNotFoundException
 	{
-		Contact foundContact = this.getContactById(id);
-		foundContact.setFirstName(contact.getFirstName());
-		foundContact.setMiddleName(contact.getMiddleName());
-		foundContact.setLastName(contact.getLastName());
-		foundContact.setEmail(contact.getEmail());
+		Contact foundContact = this.getContactById(updatedContact.getContactId());
+		foundContact.setFirstName(updatedContact.getFirstName());
+		foundContact.setMiddleName(updatedContact.getMiddleName());
+		foundContact.setLastName(updatedContact.getLastName());
+		foundContact.setEmail(updatedContact.getEmail());
 	}
 
 	@Override

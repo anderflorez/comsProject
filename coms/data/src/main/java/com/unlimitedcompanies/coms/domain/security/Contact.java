@@ -37,6 +37,7 @@ public class Contact
 	
 	public Contact(Contact contact)
 	{
+		this.contactId = contact.getContactId();
 		this.contactCharId = UUID.randomUUID().toString();
 		this.firstName = contact.firstName;
 		this.middleName = contact.middleName;

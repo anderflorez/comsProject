@@ -9,6 +9,7 @@ module data
 	requires java.management;
 	requires java.validation;
 	requires com.sun.xml.bind;
+	requires org.hibernate.orm.core;
 	
 	requires spring.beans;
 	requires spring.context;

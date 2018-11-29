@@ -14,7 +14,7 @@ public interface ContactDao
 	public Contact getContactById(int id) throws RecordNotFoundException;
 	public Contact getContactByCharId(String contactCharId);
 	public Contact getContactByEmail(String contactEmail);
-	public void updateContact(int id, Contact contact) throws RecordNotFoundException;
+	public void updateContact(Contact updatedContact) throws RecordNotFoundException;
 	public void deleteContact(int contactId) throws RecordNotFoundException;
 	
 //	public int getNumberOfAddresses();

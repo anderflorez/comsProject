@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.service.integrationTests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -35,6 +36,7 @@ import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
 
 @ExtendWith(SpringExtension.class)
@@ -59,16 +61,25 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void saveANewSimpleContactTest()
+	public void saveANewSimpleContactTest() throws DuplicateContactEntryException
 	{
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
 		contactService.saveContact(contact);
 		assertEquals(1, contactService.findNumberOfContacts(),
 				"Test for Saving a new contact from contact service failed");
 	}
+	
+	@Test
+	public void saveContactWithRepeatedEmailNotAllowedTest() throws DuplicateContactEntryException
+	{
+		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
+		Contact contact2 = new Contact("Johnny", "J", "Roe", "john@example.com");
+		contactService.saveContact(contact1);
+		assertThrows(DuplicateContactEntryException.class, () -> contactService.saveContact(contact2));
+	}
 
 	@Test
-	public void findContactByEmailTest()
+	public void findContactByEmailTest() throws DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 
@@ -77,7 +88,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void findContactByIdTest() throws ContactNotFoundException
+	public void findContactByIdTest() throws ContactNotFoundException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		Contact initialContact = contactService.searchContactByEmail("john@example.com");
@@ -88,19 +99,22 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void updateContactTest() throws ContactNotFoundException
+	public void updateContactTest() throws ContactNotFoundException, DuplicateContactEntryException
 	{
 		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
-		Contact correctedContact = new Contact("Jane", null, "Roe", "jane@example.com");
+		Contact correctedContact = new Contact(initialContact);
+		correctedContact.setFirstName("Jane");
+		correctedContact.setEmail("jane@example.com");
 
-		contactService.updateContact(initialContact.getContactId(), correctedContact);
-		Contact foundContact = contactService.searchContactById(initialContact.getContactId());
+		Contact foundContact = contactService.updateContact(correctedContact);
 
 		assertEquals(correctedContact, foundContact, "Service test for updating contact failed");
 	}
 
 	 @Test
-	 public void deleteSingleContactTest() throws SQLIntegrityConstraintViolationException
+	 public void deleteSingleContactTest() throws SQLIntegrityConstraintViolationException, 
+	 											  DuplicateContactEntryException, 
+	 											  ContactNotFoundException
 	 {
 		 contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -252,7 +266,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void saveNewUserTest() throws MissingContactException
+	public void saveNewUserTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -263,7 +277,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findAllUsersTest()
+	public void findAllUsersTest() throws DuplicateContactEntryException
 	{
 		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -283,7 +297,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByUserId() throws MissingContactException
+	public void findUserByUserId() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -294,7 +308,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByUsernameTest() throws MissingContactException
+	public void findUserByUsernameTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -307,7 +321,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserByContact() throws MissingContactException
+	public void findUserByContact() throws MissingContactException, DuplicateContactEntryException
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass", contact));
@@ -317,7 +331,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void findUserByUsernameWithContactTest() throws MissingContactException
+	public void findUserByUsernameWithContactTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -331,7 +345,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findUserRolesTest() throws MissingContactException
+	public void findUserRolesTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		Role role1 = authService.saveRole(new Role("Administrator"));
 		Role role2 = authService.saveRole(new Role("Manager"));
@@ -347,7 +361,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void updateUsernameTest() throws MissingContactException
+	public void updateUsernameTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
@@ -359,7 +373,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void updateUserStatus() throws MissingContactException
+	public void updateUserStatus() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
@@ -371,7 +385,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	 @Test
-	 public void deleteSingleUserTest() throws MissingContactException, SQLIntegrityConstraintViolationException
+	 public void deleteSingleUserTest() throws MissingContactException, SQLIntegrityConstraintViolationException, DuplicateContactEntryException
 	 {
 		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
@@ -432,7 +446,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findRoleByIdWithMembers() throws MissingContactException
+	public void findRoleByIdWithMembers() throws MissingContactException, DuplicateContactEntryException
 	{
 		Role role = authService.saveRole(new Role("Administrator"));
 		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
@@ -463,7 +477,7 @@ class SecurityServiceIntegrationTest
 	 }
 
 	@Test
-	public void assignUserToRoleTest() throws MissingContactException
+	public void assignUserToRoleTest() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 
@@ -499,7 +513,7 @@ class SecurityServiceIntegrationTest
 	// }
 
 	@Test
-	public void findUserWithContactAndRoles() throws MissingContactException
+	public void findUserWithContactAndRoles() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");

@@ -4,16 +4,17 @@ import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 
 public interface ContactService
 {
-	public Contact saveContact(Contact Contact);
+	public Contact saveContact(Contact Contact) throws DuplicateContactEntryException;
 	public int findNumberOfContacts();
 	public List<Contact> searchAllContacts();
 	public Contact searchContactById(int id) throws ContactNotFoundException;
 	public Contact searchContactByEmail(String email);
-	public void updateContact(int id, Contact updatedContact);
-	public void deleteContact(int contactId);
+	public Contact updateContact(Contact updatedContact) throws ContactNotFoundException;
+	public void deleteContact(int contactId) throws ContactNotFoundException;
 //	
 //	public int findNumberOfContactAddresses();
 //	public void saveContactAddress(Address address);

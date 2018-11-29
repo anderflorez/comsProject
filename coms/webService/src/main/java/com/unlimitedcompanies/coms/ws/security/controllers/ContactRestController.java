@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactRep;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactSingleResponse;
@@ -29,28 +31,21 @@ public class ContactRestController
 	@Autowired
 	ContactService contactService;
 	
-	@ExceptionHandler(ContactNotFoundException.class)
-	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "The contact could not be found")
-	public ContactSingleResponse contactNotFoundExceptionHandler() 
-	{
-//		ContactSingleResponse contactNotFoundError = new ContactSingleResponse();
-//		contactNotFoundError.setErrorCode(HttpStatus.NOT_FOUND.value());
-//		contactNotFoundError.setErrorMessage("The contact could not be found");
-//		return new ResponseEntity<>(contactNotFoundError, HttpStatus.OK);
-		
-		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setErrorCode(HttpStatus.NOT_FOUND.value());
-		singleContact.setErrorMessage("The contact could not be found");
-		return singleContact;
-	}
+	private final String baseURL = "http://localhost:8080/comsws/rest/contact/";
+	private final String baseURI = "/rest/contact";
+	private final String allContacts = baseURI + "s";
+	private final String contactDetails = baseURI + "/{id}";
 	
-	@RequestMapping(value="/rest/contacts", method = RequestMethod.GET)
+	@RequestMapping(value = allContacts, method = RequestMethod.GET)
 	public ContactCollectionResponse returnAllContacts() throws ContactNotFoundException
 	{
 		// TODO: Need to support results by pages, eg. return 100 customers max per page
 		
 		List<Contact> foundContacts = contactService.searchAllContacts();
 		ContactCollectionResponse allContacts = new ContactCollectionResponse(foundContacts);
+		
+		Link baseLink = new Link(baseURL).withRel("base_url");
+		allContacts.add(baseLink);
 		
 		for (ContactRep next : allContacts.getContactCollection())
 		{
@@ -61,7 +56,7 @@ public class ContactRestController
 		return allContacts;
 	}
 
-	@RequestMapping(value = "/rest/contact/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = contactDetails, method = RequestMethod.GET)
 	public ContactSingleResponse findContactById(@PathVariable Integer id) throws ContactNotFoundException
 	{
 		Contact foundContact = contactService.searchContactById(id);
@@ -71,11 +66,58 @@ public class ContactRestController
 		return contact;
 	}
 	
-	@RequestMapping(value = "/rest/contacts", method = RequestMethod.POST)
+	@RequestMapping(value = baseURI, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
-	public Contact saveNewContact(@RequestBody Contact newContact)
+	public ContactSingleResponse saveNewContact(@RequestBody Contact newContact) 
+			throws ContactNotFoundException, DuplicateContactEntryException
 	{
-		return contactService.saveContact(newContact);
+		Contact contact = contactService.saveContact(newContact);
+		ContactSingleResponse contactResponse = new ContactSingleResponse(contact);
+		Link link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
+		contactResponse.getSingleContact().add(link);
+		return contactResponse;
 	}
-
+	
+	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.OK)
+	public ContactSingleResponse updateContact(@RequestBody Contact editedContact) throws ContactNotFoundException
+	{
+		Contact updatedContact = contactService.updateContact(editedContact);
+		ContactSingleResponse contactResponse = new ContactSingleResponse(updatedContact);
+		Link link = linkTo(methodOn(ContactRestController.class).findContactById(updatedContact.getContactId())).withSelfRel();
+		contactResponse.getSingleContact().add(link);
+		return contactResponse;
+	}
+	
+	@RequestMapping(value = contactDetails, method = RequestMethod.DELETE)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public ContactSingleResponse deleteContact(@PathVariable Integer id) throws ContactNotFoundException
+	{		
+		// TODO: improve method to respond with a better message - possibly an object of type message
+		contactService.deleteContact(id);
+		ContactSingleResponse contactResponse = new ContactSingleResponse();
+		
+		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
+		//		 a contact that has other elements associated with it like a user
+		
+		return contactResponse;
+	}
+	
+	@ExceptionHandler(ContactNotFoundException.class)
+	public ResponseEntity<ContactSingleResponse> contactNotFoundExceptionHandler() 
+	{
+		ContactSingleResponse singleContact = new ContactSingleResponse();
+		singleContact.setErrorCode(HttpStatus.NOT_FOUND.value());
+		singleContact.setErrorMessage("The contact could not be found");
+		return new ResponseEntity<>(singleContact, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(DuplicateContactEntryException.class)
+	public ResponseEntity<ContactSingleResponse> contactUniqueConstraintViolationHandler()
+	{
+		ContactSingleResponse singleContact = new ContactSingleResponse();
+		singleContact.setErrorCode(HttpStatus.BAD_REQUEST.value());
+		singleContact.setErrorMessage("The contact to be created or some of its information already exists");
+		return new ResponseEntity<>(singleContact, HttpStatus.BAD_REQUEST);
+	}
 }

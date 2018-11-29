@@ -2,6 +2,7 @@ package com.unlimitedcompanies.coms.securityServiceImpl;
 
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
+import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 
 @Service
 @Transactional
@@ -24,10 +26,22 @@ public class ContactServiceImpl implements ContactService
 	AuthDao authenticationDao;
 
 	@Override
-	public Contact saveContact(Contact contact)
+	@Transactional(rollbackFor = {DuplicateContactEntryException.class})
+	public Contact saveContact(Contact contact) throws DuplicateContactEntryException
 	{
-		dao.createContact(contact);
-		return dao.getContactByCharId(contact.getContactCharId());
+		try
+		{
+			dao.createContact(contact);
+			return dao.getContactByCharId(contact.getContactCharId());
+		} 
+		catch (ConstraintViolationException e)
+		{
+			if (e.getConstraintName().endsWith("_UNIQUE"))
+			{
+				throw new DuplicateContactEntryException();
+			}
+			return null;
+		}
 	}
 
 	@Override
@@ -78,28 +92,29 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public void updateContact(int id, Contact updatedContact)
+	public Contact updateContact(Contact updatedContact) throws ContactNotFoundException
 	{
 		try
 		{
-			dao.updateContact(id, updatedContact);
-		} catch (RecordNotFoundException e)
+			dao.updateContact(updatedContact);
+			return this.searchContactById(updatedContact.getContactId());
+		} 
+		catch (RecordNotFoundException e)
 		{
-			// TODO throw a new more specific exception
-			e.printStackTrace();
+			throw new ContactNotFoundException();
 		}
 	}
 
 	@Override
-	public void deleteContact(int contactId)
+	public void deleteContact(int contactId) throws ContactNotFoundException
 	{
 		try
 		{
 			dao.deleteContact(contactId);
-		} catch (RecordNotFoundException e)
+		} 
+		catch (RecordNotFoundException e)
 		{
-			// TODO throw a new more specific exception
-			e.printStackTrace();
+			throw new ContactNotFoundException();
 		}
 	}
 

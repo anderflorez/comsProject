@@ -80,7 +80,7 @@ public class ViewSecurityObjectController
 		{
 			contactService.deleteContact(contactId);
 		} 
-		catch (NoResultException e)
+		catch (ContactNotFoundException e)
 		{
 			mv.addObject("error", "Error: The contact to be deleted could not be found");
 		}

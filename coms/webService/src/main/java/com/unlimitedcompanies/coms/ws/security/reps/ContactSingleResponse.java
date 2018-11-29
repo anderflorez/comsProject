@@ -14,7 +14,10 @@ public class ContactSingleResponse extends RepFacade
 {	
 	private List<ContactRep> contact;
 	
-	public ContactSingleResponse() {}
+	public ContactSingleResponse() 
+	{
+		this.contact = new ArrayList<>();
+	}
 
 	public ContactSingleResponse(Contact contact)
 	{
