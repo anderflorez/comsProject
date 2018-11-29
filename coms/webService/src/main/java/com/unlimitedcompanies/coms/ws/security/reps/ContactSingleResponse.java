@@ -7,10 +7,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.ws.appMgmt.RepFacade;
+import com.unlimitedcompanies.coms.ws.appMgmt.RepresentationFacade;
 
 @XmlRootElement(name = "response")
-public class ContactSingleResponse extends RepFacade
+public class ContactSingleResponse extends RepresentationFacade
 {	
 	private List<ContactRep> contact;
 	

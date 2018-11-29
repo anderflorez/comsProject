@@ -5,19 +5,16 @@ import java.util.List;
 import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -32,64 +29,6 @@ public class ViewSecurityObjectController
 	
 	@Autowired
 	AuthService authService;
-	
-	@RequestMapping("/contacts")
-	public ModelAndView showContacts(@RequestParam(name = "error", required = false) String error)
-	{
-		List<Contact> allContacts = contactService.searchAllContacts();
-		ModelAndView mv = new ModelAndView("/pages/security/contactView.jsp");
-		mv.addObject("contacts", allContacts);
-		mv.addObject("user", authUser.getUser());
-		if (error != null)
-		{
-			mv.addObject("error", error);
-		}
-		
-		return mv;
-	}
-	
-	@RequestMapping("/contactDetail")
-	public ModelAndView showContactDetails(@RequestParam(name = "c") Integer id)
-	{
-		Contact contact;
-		ModelAndView mv = new ModelAndView("/pages/security/contactDetails.jsp");
-		try
-		{
-			contact = contactService.searchContactById(id);
-			try
-			{
-				authService.searchUserByContact(contact);
-				mv.addObject("contactUser", true);
-			} catch (NoResultException e) {}
-		} 
-		catch (ContactNotFoundException e)
-		{
-			contact = new Contact(null, null, null, null);
-			mv.addObject("error", "The contact could not be found");
-		}
-		mv.addObject("contact", contact);
-		mv.addObject("user", authUser.getUser());
-		return mv;
-	}
-	
-	@RequestMapping(value = "/deleteContact", method = RequestMethod.POST)
-	public ModelAndView deleteContact(int contactId)
-	{
-		ModelAndView mv = new ModelAndView("/contacts");
-		try
-		{
-			contactService.deleteContact(contactId);
-		} 
-		catch (ContactNotFoundException e)
-		{
-			mv.addObject("error", "Error: The contact to be deleted could not be found");
-		}
-		catch (DataIntegrityViolationException e)
-		{
-			mv.addObject("error", "Error: The contact cannot be deleted because it has other items associated");
-		}
-		return mv;
-	}
 	
 	@RequestMapping("/users")
 	public ModelAndView showUsers(@RequestParam(name = "error", required = false) String error)

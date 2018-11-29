@@ -107,8 +107,12 @@ public class ContactRestController
 	public ResponseEntity<ContactSingleResponse> contactNotFoundExceptionHandler() 
 	{
 		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setErrorCode(HttpStatus.NOT_FOUND.value());
-		singleContact.setErrorMessage("The contact could not be found");
+		singleContact.setStatusCode(HttpStatus.NOT_FOUND.value());
+		singleContact.addError("The contact could not be found");
+		for (String next : singleContact.getErrors())
+		{
+			System.out.println("==============================> " + next);
+		}
 		return new ResponseEntity<>(singleContact, HttpStatus.NOT_FOUND);
 	}
 	
@@ -116,8 +120,8 @@ public class ContactRestController
 	public ResponseEntity<ContactSingleResponse> contactUniqueConstraintViolationHandler()
 	{
 		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setErrorCode(HttpStatus.BAD_REQUEST.value());
-		singleContact.setErrorMessage("The contact to be created or some of its information already exists");
+		singleContact.setStatusCode(HttpStatus.BAD_REQUEST.value());
+		singleContact.addError("The contact to be created or some of its information already exists");
 		return new ResponseEntity<>(singleContact, HttpStatus.BAD_REQUEST);
 	}
 }
