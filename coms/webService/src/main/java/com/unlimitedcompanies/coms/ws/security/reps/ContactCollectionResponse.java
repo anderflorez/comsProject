@@ -1,7 +1,6 @@
 package com.unlimitedcompanies.coms.ws.security.reps;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -29,7 +28,7 @@ public class ContactCollectionResponse extends RepresentationFacade
 
 	public List<ContactRep> getContactCollection()
 	{
-		return Collections.unmodifiableList(this.contactCollection);
+		return this.contactCollection;
 	}
 
 	public void setContactCollection(List<Contact> domainContacts)

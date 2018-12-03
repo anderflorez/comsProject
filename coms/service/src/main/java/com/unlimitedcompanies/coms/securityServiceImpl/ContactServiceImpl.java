@@ -12,6 +12,7 @@ import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 
@@ -106,7 +107,7 @@ public class ContactServiceImpl implements ContactService
 	}
 
 	@Override
-	public void deleteContact(int contactId) throws ContactNotFoundException
+	public void deleteContact(int contactId) throws ContactNotFoundException, ContactNotDeletedException
 	{
 		try
 		{
@@ -116,6 +117,13 @@ public class ContactServiceImpl implements ContactService
 		{
 			throw new ContactNotFoundException();
 		}
+		
+		try
+		{
+			dao.getContactById(contactId);
+			throw new ContactNotDeletedException();
+		} 
+		catch (RecordNotFoundException e) {}
 	}
 
 //	@Override

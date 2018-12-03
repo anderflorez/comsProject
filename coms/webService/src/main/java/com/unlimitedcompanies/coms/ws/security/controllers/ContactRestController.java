@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
@@ -37,7 +38,7 @@ public class ContactRestController
 	private final String contactDetails = baseURI + "/{id}";
 	
 	@RequestMapping(value = allContacts, method = RequestMethod.GET)
-	public ContactCollectionResponse returnAllContacts() throws ContactNotFoundException
+	public ContactCollectionResponse allContacts() throws ContactNotFoundException
 	{
 		// TODO: Need to support results by pages, eg. return 100 customers max per page
 		
@@ -75,6 +76,7 @@ public class ContactRestController
 		ContactSingleResponse contactResponse = new ContactSingleResponse(contact);
 		Link link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
 		contactResponse.getSingleContact().add(link);
+		contactResponse.setSuccess("The contact has been created successfully");
 		return contactResponse;
 	}
 	
@@ -86,21 +88,25 @@ public class ContactRestController
 		ContactSingleResponse contactResponse = new ContactSingleResponse(updatedContact);
 		Link link = linkTo(methodOn(ContactRestController.class).findContactById(updatedContact.getContactId())).withSelfRel();
 		contactResponse.getSingleContact().add(link);
+		contactResponse.setSuccess("The contact has been updated successfully");
 		return contactResponse;
 	}
 	
 	@RequestMapping(value = contactDetails, method = RequestMethod.DELETE)
-	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public ContactSingleResponse deleteContact(@PathVariable Integer id) throws ContactNotFoundException
+	@ResponseStatus(value = HttpStatus.OK)
+	public ContactSingleResponse deleteContact(@PathVariable Integer id) 
+			throws ContactNotFoundException, ContactNotDeletedException
 	{		
-		// TODO: improve method to respond with a better message - possibly an object of type message
-		contactService.deleteContact(id);
-		ContactSingleResponse contactResponse = new ContactSingleResponse();
-		
 		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
 		//		 a contact that has other elements associated with it like a user
 		
-		return contactResponse;
+		contactService.deleteContact(id);
+		
+		ContactSingleResponse response = new ContactSingleResponse();
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setSuccess("The contact has been deleted successfully");
+		
+		return response;
 	}
 	
 	@ExceptionHandler(ContactNotFoundException.class)
@@ -109,10 +115,6 @@ public class ContactRestController
 		ContactSingleResponse singleContact = new ContactSingleResponse();
 		singleContact.setStatusCode(HttpStatus.NOT_FOUND.value());
 		singleContact.addError("The contact could not be found");
-		for (String next : singleContact.getErrors())
-		{
-			System.out.println("==============================> " + next);
-		}
 		return new ResponseEntity<>(singleContact, HttpStatus.NOT_FOUND);
 	}
 	
@@ -123,5 +125,15 @@ public class ContactRestController
 		singleContact.setStatusCode(HttpStatus.BAD_REQUEST.value());
 		singleContact.addError("The contact to be created or some of its information already exists");
 		return new ResponseEntity<>(singleContact, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ContactNotDeletedException.class)
+	public ResponseEntity<ContactSingleResponse> contactNotDeletedExceptionHandler()
+	{
+		ContactSingleResponse singleContact = new ContactSingleResponse();
+		singleContact.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		singleContact.addError("The contact could not be deleted - Unknown error");
+		singleContact.addMessage("Please try again or contact your system administrator");
+		return new ResponseEntity<>(singleContact, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

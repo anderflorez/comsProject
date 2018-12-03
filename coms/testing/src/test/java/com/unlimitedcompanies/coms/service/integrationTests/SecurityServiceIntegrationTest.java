@@ -35,6 +35,7 @@ import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
@@ -114,7 +115,7 @@ class SecurityServiceIntegrationTest
 	 @Test
 	 public void deleteSingleContactTest() throws SQLIntegrityConstraintViolationException, 
 	 											  DuplicateContactEntryException, 
-	 											  ContactNotFoundException
+	 											  ContactNotFoundException, ContactNotDeletedException
 	 {
 		 contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));

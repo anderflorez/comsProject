@@ -3,16 +3,19 @@ package com.unlimitedcompanies.coms.ws.appMgmt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.hateoas.ResourceSupport;
 
-@XmlRootElement
 public class RepresentationFacade extends ResourceSupport
 {	
 	private int statusCode;
 	private String success;
+	
+	@XmlElement
 	private List<String> errors;
+	
+	@XmlElement
 	private List<String> messages;
 	
 	public RepresentationFacade()

@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.securityService;
 import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 
@@ -14,7 +15,7 @@ public interface ContactService
 	public Contact searchContactById(int id) throws ContactNotFoundException;
 	public Contact searchContactByEmail(String email);
 	public Contact updateContact(Contact updatedContact) throws ContactNotFoundException;
-	public void deleteContact(int contactId) throws ContactNotFoundException;
+	public void deleteContact(int contactId) throws ContactNotFoundException, ContactNotDeletedException;
 //	
 //	public int findNumberOfContactAddresses();
 //	public void saveContactAddress(Address address);
