@@ -11,6 +11,7 @@ public interface ContactDao
 	public void createContact(Contact contact);
 	public List<Contact> getAllContacts();
 //	public List<Contact> getAllContacts(User loggedUser);
+	public List<Contact> getContactsByRange(int page, int elements);
 	public Contact getContactById(int id) throws RecordNotFoundException;
 	public Contact getContactByCharId(String contactCharId);
 	public Contact getContactByEmail(String contactEmail);

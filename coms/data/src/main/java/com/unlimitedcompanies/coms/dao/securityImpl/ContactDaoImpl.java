@@ -56,7 +56,16 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public List<Contact> getAllContacts()
 	{
-		return em.createQuery("select contact from Contact as contact", Contact.class)
+		return em.createQuery("select contact from Contact as contact order by contact.firstName", Contact.class)
+							  .getResultList();
+	}
+	
+	@Override
+	public List<Contact> getContactsByRange(int page, int elements)
+	{
+		return em.createQuery("select contact from Contact contact order by contact.firstName", Contact.class)
+							  .setFirstResult(page * elements)
+							  .setMaxResults(elements)
 							  .getResultList();
 	}
 	

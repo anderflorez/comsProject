@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,20 +39,33 @@ public class ContactRestController
 	private final String contactDetails = baseURI + "/{id}";
 	
 	@RequestMapping(value = allContacts, method = RequestMethod.GET)
-	public ContactCollectionResponse allContacts() throws ContactNotFoundException
+	public ContactCollectionResponse allContacts(@RequestParam(name = "pag", required = false) Integer pag,
+												 @RequestParam(name = "epp", required = false) Integer epp) 
+			throws ContactNotFoundException
 	{
 		// TODO: Need to support results by pages, eg. return 100 customers max per page
+		if (pag == null || epp == null)
+		{
+			pag = 1;
+			epp = 2;
+		}
 		
-		List<Contact> foundContacts = contactService.searchAllContacts();
+		List<Contact> foundContacts = contactService.searchContactsByRange(pag, epp);
 		ContactCollectionResponse allContacts = new ContactCollectionResponse(foundContacts);
 		
 		Link baseLink = new Link(baseURL).withRel("base_url");
+		int prev = pag - 1;
+		int next = pag + 1;
+		Link prevLink = new Link(baseURL + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+		Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");
 		allContacts.add(baseLink);
+		allContacts.add(prevLink);
+		allContacts.add(nextLink);
 		
-		for (ContactRep next : allContacts.getContactCollection())
+		for (ContactRep nextContact : allContacts.getContactCollection())
 		{
-			Link link = linkTo(methodOn(ContactRestController.class).findContactById(next.getContactId())).withSelfRel();
-			next.add(link);
+			Link link = linkTo(methodOn(ContactRestController.class).findContactById(nextContact.getContactId())).withSelfRel();
+			nextContact.add(link);
 		}
 		
 		return allContacts;

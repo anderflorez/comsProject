@@ -57,6 +57,12 @@ public class ContactServiceImpl implements ContactService
 		return dao.getAllContacts();
 	}
 	
+	@Override
+	public List<Contact> searchContactsByRange(int page, int elements)
+	{
+		return dao.getContactsByRange(page - 1, elements);
+	}
+	
 	
 	// TODO check this method functionality
 //	@Override

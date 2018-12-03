@@ -78,6 +78,24 @@ class SecurityServiceIntegrationTest
 		contactService.saveContact(contact1);
 		assertThrows(DuplicateContactEntryException.class, () -> contactService.saveContact(contact2));
 	}
+	
+	@Test
+	public void findAllContactsByPagesTest() throws DuplicateContactEntryException
+	{
+		
+		contactService.saveContact(new Contact("fernando", null, null, "fernando@example.com"));
+		Contact diane = contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
+		contactService.saveContact(new Contact("Bella", null, null, "bella@example.com"));
+		Contact ann = contactService.saveContact(new Contact("Ann", null, null, "ann@example.com"));
+		Contact ella = contactService.saveContact(new Contact("Ella", null, null, "ella@example.com"));
+		contactService.saveContact(new Contact("Catherine", null, null, "catherine@example.com"));
+		contactService.saveContact(new Contact("marcela", null, null, "marcela@example.com"));
+
+		assertEquals(ann.getContactCharId(), contactService.searchContactsByRange(1, 2).get(0).getContactCharId());
+		assertEquals(ella.getContactCharId(), contactService.searchContactsByRange(3, 2).get(0).getContactCharId());
+		assertEquals(diane.getContactCharId(), contactService.searchContactsByRange(2, 3).get(0).getContactCharId());
+		assertEquals(ella.getContactCharId(), contactService.searchContactsByRange(2, 3).get(1).getContactCharId());
+	}
 
 	@Test
 	public void findContactByEmailTest() throws DuplicateContactEntryException
