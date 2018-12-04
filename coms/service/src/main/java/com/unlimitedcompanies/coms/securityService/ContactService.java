@@ -11,6 +11,7 @@ public interface ContactService
 {
 	public Contact saveContact(Contact Contact) throws DuplicateContactEntryException;
 	public int findNumberOfContacts();
+	public boolean hasNextContact(int page, int elements);
 	public List<Contact> searchAllContacts();
 	public List<Contact> searchContactsByRange(int page, int elements);
 	public Contact searchContactById(int id) throws ContactNotFoundException;

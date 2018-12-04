@@ -52,6 +52,20 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
+	public boolean hasNextContact(int page, int elements)
+	{
+		List<Contact> foundContacts = dao.getContactsByRange((page - 1) * elements, 1);
+		if (foundContacts.isEmpty()) 
+		{
+			return false;
+		}
+		else 
+		{
+			return true;
+		}		
+	}
+	
+	@Override
 	public List<Contact> searchAllContacts()
 	{
 		return dao.getAllContacts();

@@ -60,6 +60,21 @@ class SecurityServiceIntegrationTest
 	{
 		assertEquals(0, contactService.findNumberOfContacts(), "Number of contacts service test has failed");
 	}
+	
+	@Test
+	public void numberOfContactsInARangeTest() throws DuplicateContactEntryException
+	{
+		contactService.saveContact(new Contact("fernando", null, null, "fernando@example.com"));
+		contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
+		contactService.saveContact(new Contact("Bella", null, null, "bella@example.com"));
+		contactService.saveContact(new Contact("Ann", null, null, "ann@example.com"));
+		contactService.saveContact(new Contact("Ella", null, null, "ella@example.com"));
+		contactService.saveContact(new Contact("Catherine", null, null, "catherine@example.com"));
+		
+		assertTrue(contactService.hasNextContact(3, 2));
+		assertFalse(contactService.hasNextContact(4, 2));
+		assertFalse(contactService.hasNextContact(3, 3));
+	}
 
 	@Test
 	public void saveANewSimpleContactTest() throws DuplicateContactEntryException

@@ -43,25 +43,31 @@ public class ContactRestController
 												 @RequestParam(name = "epp", required = false) Integer epp) 
 			throws ContactNotFoundException
 	{
-		// TODO: Need to support results by pages, eg. return 100 customers max per page
-		if (pag == null || epp == null)
-		{
-			pag = 1;
-			epp = 2;
-		}
+		if (pag == null) pag = 1;
+		if (epp == null) epp = 10;
 		
 		List<Contact> foundContacts = contactService.searchContactsByRange(pag, epp);
 		ContactCollectionResponse allContacts = new ContactCollectionResponse(foundContacts);
 		
 		Link baseLink = new Link(baseURL).withRel("base_url");
-		int prev = pag - 1;
-		int next = pag + 1;
-		Link prevLink = new Link(baseURL + "?pag=" + prev + "&epp=" + epp).withRel("previous");
-		Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");
 		allContacts.add(baseLink);
-		allContacts.add(prevLink);
-		allContacts.add(nextLink);
 		
+		if (pag > 1)
+		{
+			int prev = pag - 1;
+			allContacts.setPrevPage(prev);
+			Link prevLink = new Link(baseURL + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+			allContacts.add(prevLink);
+		}
+		
+		if (contactService.hasNextContact(pag + 1, epp))
+		{
+			int next = pag + 1;
+			allContacts.setNextPage(next);
+			Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");			
+			allContacts.add(nextLink);
+		}		
+				
 		for (ContactRep nextContact : allContacts.getContactCollection())
 		{
 			Link link = linkTo(methodOn(ContactRestController.class).findContactById(nextContact.getContactId())).withSelfRel();

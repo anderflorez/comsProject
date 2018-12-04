@@ -14,8 +14,15 @@ public class ContactCollectionResponse extends RepresentationFacade
 {
 	@XmlElement(name = "contact")
 	private List<ContactRep> contactCollection;
+	private Integer prevPage;
+	private Integer nextPage;
 	
-	public ContactCollectionResponse() {}
+	public ContactCollectionResponse() 
+	{
+		this.contactCollection = new ArrayList<>();
+		this.prevPage = null;
+		this.nextPage = null;
+	}
 	
 	public ContactCollectionResponse(List<Contact> domainContacts)
 	{
@@ -40,4 +47,24 @@ public class ContactCollectionResponse extends RepresentationFacade
 		}
 	}
 
+	public Integer getPrevPage()
+	{
+		return prevPage;
+	}
+
+	public void setPrevPage(Integer prevPage)
+	{
+		this.prevPage = prevPage;
+	}
+
+	public Integer getNextPage()
+	{
+		return nextPage;
+	}
+
+	public void setNextPage(Integer nextPage)
+	{
+		this.nextPage = nextPage;
+	}
+	
 }
