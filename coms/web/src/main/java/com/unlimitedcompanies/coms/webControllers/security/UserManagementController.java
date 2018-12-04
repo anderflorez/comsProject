@@ -105,10 +105,10 @@ public class UserManagementController
 				//Get the needed info
 				Contact contact = contactService.searchContactById(userForm.getContactId());
 				
-				String password = null;
+				char[] password;
 				if (userForm.getPassword1().equals(userForm.getPassword2())) {
 					PasswordEncoder pe = new BCryptPasswordEncoder();
-					password = pe.encode(userForm.getPassword1());
+					password = pe.encode(userForm.getPassword1()).toCharArray();
 				}
 				else 
 				{
@@ -117,7 +117,9 @@ public class UserManagementController
 				}
 				
 				//Create and store the new user
-				User newUser = authService.saveUser(new User(userForm.getUsername(), password, contact));
+				User newUser = authService.saveUser(new User(userForm.getUsername(), "mypass".toCharArray(), contact));
+				newUser.setPassword(password);
+				// TODO: Clear the password from the char password
 				mv.setViewName("/userDetail?u=" + newUser.getUserId());
 				
 			} 
@@ -138,8 +140,8 @@ public class UserManagementController
 			// This is a request to update an existing user
 			if (userForm.getUsername() != null)
 			{
-				User user = new User(userForm.getUsername(), null, null);
-				user.setEnabled(userForm.getEnabledStatus());
+				User user = new User(userForm.getUsername(), "mypass".toCharArray(), null);
+				user.setUserStatus(userForm.getEnabledStatus());
 				user = authService.updateUser(userForm.getUserId(), user);
 				mv.setViewName("/userDetail");
 				mv.addObject("u", user.getUserId());

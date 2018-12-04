@@ -65,7 +65,7 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 			Contact adminContact = contactDao.getContactByEmail("uec_ops_support@unlimitedcompanies.com");
 			
 			PasswordEncoder pe = new BCryptPasswordEncoder();
-			authDao.createUser(new User("administrator", pe.encode("uec123"), adminContact));
+			authDao.createUser(new User("administrator", pe.encode("uec123").toCharArray(), adminContact));
 			User adminUser = authDao.getUserByUsername("administrator");
 			
 			authDao.assignUserToRole(adminUser, adminRole);

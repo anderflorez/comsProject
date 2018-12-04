@@ -14,9 +14,11 @@ import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactExcep
 
 public interface AuthService
 {
-	public int searchNumberOfUsers();
 	public User saveUser(User user) throws MissingContactException;
+	public int searchNumberOfUsers();
+	public boolean hasNextUser(int page, int elements);
 	public List<User> searchAllUsers();
+	public List<User> searchUsersByRange(int page, int elements);
 	public User searchUserByUserId(Integer id);
 	public User searchUserByUsername(String string);
 	public User searchUserByContact(Contact contact);

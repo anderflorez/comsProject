@@ -62,7 +62,7 @@ public class ContactServiceImpl implements ContactService
 		else 
 		{
 			return true;
-		}		
+		}
 	}
 	
 	@Override

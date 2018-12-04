@@ -96,7 +96,7 @@ class DomainSecurityUnitTest
 	public void datesForUsersFormatingTesting()
 	{
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		User user = new User("admin", "pass", contact);
+		User user = new User("admin", "mypass".toCharArray(), contact);
 		
 		System.out.println("=====> Date Added: " + user.getDateAdded());
 		System.out.println("=====> Last Access: " + user.getLastAccess());
@@ -112,10 +112,10 @@ class DomainSecurityUnitTest
 	public void equalUserTest()
 	{
 		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
-		User user1 = new User("John", "pass", contact1);
+		User user1 = new User("John", "mypass".toCharArray(), contact1);
 		
 		Contact contact2 = new Contact("Jane", null, "Doe", "jane@example.com");
-		User user2 = new User("John", "pass", contact2);
+		User user2 = new User("John", "mypass".toCharArray(), contact2);
 		
 		assertEquals(user1, user2, "Domain unit test for equal users failed");
 	}

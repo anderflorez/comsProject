@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -24,12 +25,13 @@ public class User
 	@Id
 	private Integer userId;
 	private String username;
-	private String password;
+	private char[] password;
 	
 	// status 0 - inactive
 	// status 1 - active
 	// status 2 - access denied
-	private UserStatus enabled;
+	@Column(name = "enabled")
+	private UserStatus userStatus;
 	private ZonedDateTime dateAdded;
 	private ZonedDateTime lastAccess;
 	
@@ -45,13 +47,13 @@ public class User
 	
 	public User() {}
 
-	public User(String username, String password, Contact contact)
+	public User(String username, char[] password, Contact contact)
 	{
 		this.userId = null;
 		this.username = username;
 		this.password = password;
 		this.contact = contact;
-		this.enabled = UserStatus.ACTIVE;
+		this.userStatus = UserStatus.ACTIVE;
 		this.dateAdded = ZonedDateTime.now(ZoneId.of("UTC"));
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
@@ -61,24 +63,49 @@ public class User
 		return userId;
 	}
 
+	public void setUserId(Integer userId)
+	{
+		this.userId = userId;
+	}
+
 	public String getUsername()
 	{
 		return username;
 	}
 
-	public String getPassword()
+	public void setUsername(String username)
+	{
+		this.username = username;
+	}	
+
+	public char[] getPassword()
 	{
 		return password;
 	}
 
-	public Integer getEnabled()
+	public void setPassword(char[] password)
 	{
-		return enabled.getStatusCode();
+		this.password = password;
 	}
 	
-	public UserStatus getEnabledStatus()
+	public UserStatus getUserStatus()
 	{
-		return enabled;
+		return userStatus;
+	}
+	
+	public Integer getUserStatusCode()
+	{
+		return userStatus.getStatusCode();
+	}
+
+	public void setUserStatus(UserStatus userStatus)
+	{
+		this.userStatus = userStatus;
+	}
+	
+	public void setUserStatus(Integer userStatusCode)
+	{
+		this.userStatus = UserStatus.getNewUserStatus(userStatusCode);
 	}
 
 	public String getDateAdded()
@@ -98,6 +125,13 @@ public class User
 		return this.dateAdded;
 	}
 	
+	public void setdateAdded(String dateTime)
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+		this.lastAccess = accessTime;
+	}
+	
 	public String getLastAccess()
 	{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
@@ -109,47 +143,10 @@ public class User
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy hh:mm a");
 		return this.lastAccess.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
-
+	
 	public ZonedDateTime getFullLastAccess()
 	{
 		return this.lastAccess;
-	}
-
-	public Contact getContact()
-	{
-		return contact;
-	}
-	
-	public List<Role> getRoles()
-	{
-		return Collections.unmodifiableList(this.roles);
-	}
-	
-	public void setUserId(Integer userId)
-	{
-		this.userId = userId;
-	}
-
-	public void setUsername(String username)
-	{
-		this.username = username;
-	}
-
-	public void setEnabled(Integer status)
-	{
-		this.enabled = UserStatus.getNewUserStatus(status);
-	}
-	
-	public void setEnabled(UserStatus status)
-	{
-		this.enabled = status;
-	}
-	
-	public void setdateAdded(String dateTime)
-	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
-		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-		this.lastAccess = accessTime;
 	}
 	
 	public void setLastAccess(String dateTime)
@@ -164,11 +161,21 @@ public class User
 		this.lastAccess = lastAccess;
 	}
 	
+	public Contact getContact()
+	{
+		return contact;
+	}
+	
 	public void setContact(Contact contact)
 	{
 		this.contact = contact;
 	}
-
+	
+	public List<Role> getRoles()
+	{
+		return Collections.unmodifiableList(this.roles);
+	}
+	
 	public void addRole(Role role)
 	{
 		if (!roles.contains(role))

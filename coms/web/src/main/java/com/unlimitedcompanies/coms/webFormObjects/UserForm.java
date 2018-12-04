@@ -30,7 +30,7 @@ public class UserForm
 	{
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.enabled = user.getEnabledStatus().toString();
+		this.enabled = user.getUserStatus().toString();
 		this.dateAdded = user.getClientLocalDateAdded();
 		this.lastAccess = user.getClientLocalLastAccess();
 		this.contactId = user.getContact().getContactId();

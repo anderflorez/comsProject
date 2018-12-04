@@ -305,7 +305,7 @@ class SecurityServiceIntegrationTest
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 
-		User user = authService.saveUser(new User("username", "mypass", contact));
+		User user = authService.saveUser(new User("username", "mypass".toCharArray(), contact));
 		assertEquals(1, authService.searchNumberOfUsers(), "Service test to save a new user failed");
 		assertNotNull(user.getUserId(), "Service test to save a new user failed");
 	}
@@ -319,9 +319,9 @@ class SecurityServiceIntegrationTest
 
 		try
 		{
-			authService.saveUser(new User("username1", "mypass", contact1));
-			authService.saveUser(new User("username2", "mypass", contact2));
-			authService.saveUser(new User("username3", "mypass", contact3));
+			authService.saveUser(new User("username1", "mypass".toCharArray(), contact1));
+			authService.saveUser(new User("username2", "mypass".toCharArray(), contact2));
+			authService.saveUser(new User("username3", "mypass".toCharArray(), contact3));
 		} catch (MissingContactException e)
 		{
 			e.printStackTrace();
@@ -331,11 +331,36 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
+	public void findUsersByPagesTest() throws DuplicateContactEntryException, MissingContactException
+	{
+		
+		Contact fernando = contactService.saveContact(new Contact("fernando", null, null, "fernando@example.com"));
+		Contact diane = contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
+		Contact bella = contactService.saveContact(new Contact("Bella", null, null, "bella@example.com"));
+		Contact ann = contactService.saveContact(new Contact("Ann", null, null, "ann@example.com"));
+		Contact ella = contactService.saveContact(new Contact("Ella", null, null, "ella@example.com"));
+		Contact catherine = contactService.saveContact(new Contact("Catherine", null, null, "catherine@example.com"));
+		Contact marcela = contactService.saveContact(new Contact("marcela", null, null, "marcela@example.com"));
+		
+		authService.saveUser(new User("username1", "mypass".toCharArray(), fernando));
+		authService.saveUser(new User("username2", "mypass".toCharArray(), diane));
+		User user3 = authService.saveUser(new User("username3", "mypass".toCharArray(), bella));
+		User user4 = authService.saveUser(new User("username4", "mypass".toCharArray(), ann));
+		authService.saveUser(new User("username5", "mypass".toCharArray(), ella));
+		authService.saveUser(new User("username6", "mypass".toCharArray(), catherine));
+		User user7 = authService.saveUser(new User("username7", "mypass".toCharArray(), marcela));
+
+		assertEquals(user4.getUsername(), authService.searchUsersByRange(2, 3).get(0).getUsername());
+		assertEquals(user3.getUsername(), authService.searchUsersByRange(1, 3).get(2).getUsername());
+		assertEquals(user7.getUsername(), authService.searchUsersByRange(4, 2).get(0).getUsername());
+	}
+	
+	@Test
 	public void findUserByUserId() throws MissingContactException, DuplicateContactEntryException
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 		
 		User foundUser = authService.searchUserByUserId(user.getUserId());
 		assertEquals(user, foundUser, "Service test for finding user by userId failed");
@@ -346,7 +371,7 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = new User("jdoe", "mypass", contact);
+		User user = new User("jdoe", "mypass".toCharArray(), contact);
 		authService.saveUser(user);
 
 		User founduser = authService.searchUserByUsernameWithContact("jdoe");
@@ -358,7 +383,7 @@ class SecurityServiceIntegrationTest
 	public void findUserByContact() throws MissingContactException, DuplicateContactEntryException
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 		
 		User foundUser = authService.searchUserByContact(contact);
 		assertEquals(user.getUserId(), foundUser.getUserId(), "Service test for finding user by contact failed");
@@ -369,7 +394,7 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = new User("jdoe", "mypass", contact);
+		User user = new User("jdoe", "mypass".toCharArray(), contact);
 		authService.saveUser(user);
 
 		User founduser = authService.searchUserByUsernameWithContact("jdoe");
@@ -385,7 +410,7 @@ class SecurityServiceIntegrationTest
 		Role role2 = authService.saveRole(new Role("Manager"));
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		User user = authService.saveUser(new User("username", "mypass", contact));
+		User user = authService.saveUser(new User("username", "mypass".toCharArray(), contact));
 		
 		authService.assignUserToRole(user, role1);
 		authService.assignUserToRole(user, role2);
@@ -399,10 +424,9 @@ class SecurityServiceIntegrationTest
 	{
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 		user.setUsername("john.doe");
-		
-		User updatedUser = authService.updateUser(user.getUserId(), user);
+		User updatedUser = authService.updateUser(user.getUserId(), user);		
 		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
 	}
 	
@@ -411,11 +435,11 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
-		user.setEnabled(0);
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		user.setUserStatus(0);
 		
 		User updatedUser = authService.updateUser(user.getUserId(), user);
-		assertEquals(UserStatus.INACTIVE, updatedUser.getEnabledStatus(), "Service test for updating user status failed");
+		assertEquals(UserStatus.INACTIVE, updatedUser.getUserStatus(), "Service test for updating user status failed");
 	}
 	
 	 @Test
@@ -424,8 +448,8 @@ class SecurityServiceIntegrationTest
 		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
 		 
-		 User user = authService.saveUser(new User("johnd", "mypass", contact1));
-		 authService.saveUser(new User("janed", "mypass", contact2));
+		 User user = authService.saveUser(new User("johnd", "mypass".toCharArray(), contact1));
+		 authService.saveUser(new User("janed", "mypass".toCharArray(), contact2));
 		
 		 authService.deleteUser(user.getUserId());
 		
@@ -487,9 +511,9 @@ class SecurityServiceIntegrationTest
 		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
 		Contact contact3 = contactService.saveContact(new Contact("Richard", null, "Roe", "richd@example.com"));
 		
-		User user1 = authService.saveUser(new User("johnd", "pass", contact1));
-		User user2 = authService.saveUser(new User("janed", "pass", contact2));
-		User user3 = authService.saveUser(new User("richd", "pass", contact3));
+		User user1 = authService.saveUser(new User("johnd", "pass".toCharArray(), contact1));
+		User user2 = authService.saveUser(new User("janed", "pass".toCharArray(), contact2));
+		User user3 = authService.saveUser(new User("richd", "pass".toCharArray(), contact3));
 		
 		authService.assignUserToRole(user1, role);
 		authService.assignUserToRole(user2, role);
@@ -516,7 +540,7 @@ class SecurityServiceIntegrationTest
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = authService.saveUser(new User("jdoe", "mypass", contact));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 		Role role = authService.saveRole(new Role("Administrator"));
 
 		assertFalse(user.getRoles().contains(role), "Service test for assigning a user to a role failed");
@@ -551,7 +575,7 @@ class SecurityServiceIntegrationTest
 	{
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = new User("jdoe", "mypass", contact);
+		User user = new User("jdoe", "mypass".toCharArray(), contact);
 		authService.saveUser(user);
 		Role role1 = authService.saveRole(new Role("Administrator"));
 		Role role2 = authService.saveRole(new Role("Manager"));

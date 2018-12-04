@@ -31,12 +31,6 @@ public class AuthServiceImpl implements AuthService
 	private ContactDao contactDao;
 
 	@Override
-	public int searchNumberOfUsers()
-	{
-		return authDao.getNumberOfUsers();
-	}
-
-	@Override
 	public User saveUser(User user) throws MissingContactException
 	{
 		if (user.getContact() == null)
@@ -58,11 +52,37 @@ public class AuthServiceImpl implements AuthService
 		authDao.createUser(user);
 		return this.searchUserByUsername(user.getUsername());
 	}
+	
+	@Override
+	public int searchNumberOfUsers()
+	{
+		return authDao.getNumberOfUsers();
+	}
+	
+	@Override
+	public boolean hasNextUser(int page, int elements)
+	{
+		List<User> foundUsers = authDao.getUsersByRange((page - 1) * elements, 1);
+		if (foundUsers.isEmpty()) 
+		{
+			return false;
+		}
+		else 
+		{
+			return true;
+		}
+	}
 
 	@Override
 	public List<User> searchAllUsers()
 	{
 		return authDao.getAllUsers();
+	}
+	
+	@Override
+	public List<User> searchUsersByRange(int page, int elements)
+	{
+		return authDao.getUsersByRange(page - 1, elements);
 	}
 
 	@Override

@@ -3,15 +3,15 @@ package com.unlimitedcompanies.coms.ws.security.reps;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class UserDetailsRep
+public class UserRep
 {
-	String username;
-	String userFirstName;
-	String userLastName;
+	private String username;
+	private String userFirstName;
+	private String userLastName;
 	
-	public UserDetailsRep()	{}
+	public UserRep()	{}
 
-	public UserDetailsRep(String username, String userFirstName, String userLastName)
+	public UserRep(String username, String userFirstName, String userLastName)
 	{
 		this.username = username;
 		this.userFirstName = userFirstName;

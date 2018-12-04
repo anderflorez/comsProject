@@ -16,6 +16,7 @@ public interface AuthDao
 	public int getNumberOfUsers();
 	public void createUser(User user);
 	public List<User> getAllUsers();
+	public List<User> getUsersByRange(int page, int elements);
 	public User getUserByUserId(int id);
 	public User getUserByUsername(String username);
 	public User getUserByContact(Contact contact);

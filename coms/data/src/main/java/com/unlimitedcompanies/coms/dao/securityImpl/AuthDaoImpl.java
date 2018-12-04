@@ -42,7 +42,7 @@ public class AuthDaoImpl implements AuthDao
 				"INSERT INTO user (username, password, enabled, dateAdded, lastAccess, contact_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
 				.setParameter("username", user.getUsername())
 				.setParameter("password", user.getPassword())
-				.setParameter("enabled", user.getEnabled())
+				.setParameter("enabled", user.getUserStatusCode())
 				.setParameter("dateAdded", user.getDateAdded())
 				.setParameter("lastAccess", user.getLastAccess())
 				.setParameter("contact", user.getContact())
@@ -53,6 +53,15 @@ public class AuthDaoImpl implements AuthDao
 	public List<User> getAllUsers()
 	{
 		return em.createQuery("select user from User as user", User.class).getResultList();
+	}
+	
+	@Override
+	public List<User> getUsersByRange(int page, int elements)
+	{
+		return em.createQuery("select user from User user order by user.username", User.class)
+				  .setFirstResult(page * elements)
+				  .setMaxResults(elements)
+				  .getResultList();
 	}
 	
 	@Override
@@ -110,10 +119,9 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void updateUser(int userId, User user) {
 		User foundUser = em.find(User.class, userId);
-		foundUser.setUsername(user.getUsername());
-		foundUser.setEnabled(user.getEnabled());
-	}
-	
+		foundUser.setUsername(user.getUsername());		
+		foundUser.setUserStatus(user.getUserStatus());
+	}	
 
 	@Override
 	public void deleteUser(int userId)
