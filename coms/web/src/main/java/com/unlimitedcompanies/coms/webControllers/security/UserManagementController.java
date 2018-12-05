@@ -141,7 +141,7 @@ public class UserManagementController
 			if (userForm.getUsername() != null)
 			{
 				User user = new User(userForm.getUsername(), "mypass".toCharArray(), null);
-				user.setUserStatus(userForm.getEnabledStatus());
+				user.setEnabled(userForm.getEnabled());
 				user = authService.updateUser(userForm.getUserId(), user);
 				mv.setViewName("/userDetail");
 				mv.addObject("u", user.getUserId());

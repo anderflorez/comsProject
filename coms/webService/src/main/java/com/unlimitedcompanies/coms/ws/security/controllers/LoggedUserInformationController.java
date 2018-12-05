@@ -22,8 +22,8 @@ public class LoggedUserInformationController
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		User user = authService.searchUserByUsernameWithContact(userDetails.getUsername());
-		UserRep loggedUser = new UserRep(user.getUsername(), user.getContact().getFirstName(), user.getContact().getLastName());
+		User user = authService.searchUserByUsername(userDetails.getUsername());
+		UserRep loggedUser = new UserRep(user);		
 		
 		return loggedUser;
 	}

@@ -1,6 +1,8 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -42,17 +44,33 @@ public class AuthDaoImpl implements AuthDao
 				"INSERT INTO user (username, password, enabled, dateAdded, lastAccess, contact_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
 				.setParameter("username", user.getUsername())
 				.setParameter("password", user.getPassword())
-				.setParameter("enabled", user.getUserStatusCode())
+				.setParameter("enabled", user.isEnabled())
 				.setParameter("dateAdded", user.getDateAdded())
 				.setParameter("lastAccess", user.getLastAccess())
 				.setParameter("contact", user.getContact())
 				.executeUpdate();
 	}
 	
+//	Method ready to be discontinued - deleted
+//	@Override
+//	public List<User> getAllUsers()
+//	{
+//		return em.createQuery("select user from User as user", User.class).getResultList();
+//	}
+	
 	@Override
 	public List<User> getAllUsers()
 	{
-		return em.createQuery("select user from User as user", User.class).getResultList();
+		List<Object[]> foundUsers = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess from User u", Object[].class)
+								 .getResultList();
+		
+		List<User> allUsers = new ArrayList<>();
+		for (Object[] next : foundUsers)
+		{
+			allUsers.add(new User((int)next[0], (String)next[1], (boolean)next[2], (ZonedDateTime)next[3], (ZonedDateTime)next[4]));
+		}
+		
+		return allUsers;
 	}
 	
 	@Override
@@ -120,7 +138,7 @@ public class AuthDaoImpl implements AuthDao
 	public void updateUser(int userId, User user) {
 		User foundUser = em.find(User.class, userId);
 		foundUser.setUsername(user.getUsername());		
-		foundUser.setUserStatus(user.getUserStatus());
+		foundUser.setEnabled(user.isEnabled());
 	}	
 
 	@Override

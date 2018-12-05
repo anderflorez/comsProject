@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -15,8 +14,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 
 @Entity
 @Table(name="user")
@@ -26,12 +23,8 @@ public class User
 	private Integer userId;
 	private String username;
 	private char[] password;
-	
-	// status 0 - inactive
-	// status 1 - active
-	// status 2 - access denied
-	@Column(name = "enabled")
-	private UserStatus userStatus;
+	private boolean enabled;
+	// TODO: Test the methods related to the ZonedDateTime attributes
 	private ZonedDateTime dateAdded;
 	private ZonedDateTime lastAccess;
 	
@@ -53,9 +46,19 @@ public class User
 		this.username = username;
 		this.password = password;
 		this.contact = contact;
-		this.userStatus = UserStatus.ACTIVE;
+		this.enabled = true;
 		this.dateAdded = ZonedDateTime.now(ZoneId.of("UTC"));
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
+	}
+	
+	public User(Integer userId, String username, boolean enabled, ZonedDateTime dateAdded, ZonedDateTime lastAccess)
+	{
+		this.userId = userId;
+		this.username = username;
+		this.password = null;
+		this.enabled = enabled;
+		this.dateAdded = dateAdded;
+		this.lastAccess = lastAccess;
 	}
 
 	public Integer getUserId()
@@ -87,31 +90,20 @@ public class User
 	{
 		this.password = password;
 	}
-	
-	public UserStatus getUserStatus()
+
+	public boolean isEnabled()
 	{
-		return userStatus;
-	}
-	
-	public Integer getUserStatusCode()
-	{
-		return userStatus.getStatusCode();
+		return enabled;
 	}
 
-	public void setUserStatus(UserStatus userStatus)
+	public void setEnabled(boolean enabled)
 	{
-		this.userStatus = userStatus;
-	}
-	
-	public void setUserStatus(Integer userStatusCode)
-	{
-		this.userStatus = UserStatus.getNewUserStatus(userStatusCode);
+		this.enabled = enabled;
 	}
 
-	public String getDateAdded()
+	public ZonedDateTime getDateAdded()
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
-		return this.dateAdded.format(formatter);
+		return this.dateAdded;
 	}
 	
 	public String getClientLocalDateAdded()
@@ -120,19 +112,24 @@ public class User
 		return this.dateAdded.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
 	
-	public ZonedDateTime getFullDateAdded()
+	public void setDateAdded(ZonedDateTime dateAdded)
 	{
-		return this.dateAdded;
+		this.dateAdded = dateAdded;
 	}
 	
-	public void setdateAdded(String dateTime)
+	public void setDateAdded(String dateTime)
 	{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
 		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-		this.lastAccess = accessTime;
+		this.dateAdded = accessTime;
 	}
 	
-	public String getLastAccess()
+	public ZonedDateTime getLastAccess()
+	{
+		return this.lastAccess;
+	}
+
+	public String getDBFormatedLastAccess()
 	{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
 		return this.lastAccess.format(formatter);
@@ -144,9 +141,9 @@ public class User
 		return this.lastAccess.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
 	
-	public ZonedDateTime getFullLastAccess()
+	public void setLastAccess(ZonedDateTime lastAccess)
 	{
-		return this.lastAccess;
+		this.lastAccess = lastAccess;
 	}
 	
 	public void setLastAccess(String dateTime)
@@ -154,11 +151,6 @@ public class User
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
 		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
 		this.lastAccess = accessTime;
-	}
-	
-	public void setLastAccess(ZonedDateTime lastAccess)
-	{
-		this.lastAccess = lastAccess;
 	}
 	
 	public Contact getContact()

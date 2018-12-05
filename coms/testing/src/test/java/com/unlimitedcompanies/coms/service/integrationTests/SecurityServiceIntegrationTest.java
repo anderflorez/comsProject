@@ -31,7 +31,6 @@ import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 import com.unlimitedcompanies.coms.securityService.AuthService;
 import com.unlimitedcompanies.coms.securityService.ContactService;
 import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
@@ -320,7 +319,9 @@ class SecurityServiceIntegrationTest
 		try
 		{
 			authService.saveUser(new User("username1", "mypass".toCharArray(), contact1));
-			authService.saveUser(new User("username2", "mypass".toCharArray(), contact2));
+			User user = new User("username2", "mypass".toCharArray(), contact2);
+			user.setEnabled(false);
+			authService.saveUser(user);
 			authService.saveUser(new User("username3", "mypass".toCharArray(), contact3));
 		} catch (MissingContactException e)
 		{
@@ -436,10 +437,10 @@ class SecurityServiceIntegrationTest
 		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		Contact contact = contactService.searchContactByEmail("johnd@example.com");
 		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
-		user.setUserStatus(0);
+		user.setEnabled(false);
 		
 		User updatedUser = authService.updateUser(user.getUserId(), user);
-		assertEquals(UserStatus.INACTIVE, updatedUser.getUserStatus(), "Service test for updating user status failed");
+		assertFalse(updatedUser.isEnabled(), "Service test for updating user status failed");
 	}
 	
 	 @Test

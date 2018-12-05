@@ -1,7 +1,6 @@
 package com.unlimitedcompanies.coms.webFormObjects;
 
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.domain.security.exen.UserStatus;
 
 public class UserForm
 {
@@ -9,14 +8,14 @@ public class UserForm
 	private String username;
 	private String password1;
 	private String password2;
-	private String enabled;
+	private boolean enabled;
 	private String dateAdded;
 	private String lastAccess;
 	private Integer contactId;
 
 	public UserForm() {}
 
-	public UserForm(Integer userId, String username, String enabled, String dateAdded, String lastAccess, Integer contactId)
+	public UserForm(Integer userId, String username, boolean enabled, String dateAdded, String lastAccess, Integer contactId)
 	{
 		this.userId = userId;
 		this.username = username;
@@ -30,7 +29,7 @@ public class UserForm
 	{
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.enabled = user.getUserStatus().toString();
+		this.enabled = user.isEnabled();
 		this.dateAdded = user.getClientLocalDateAdded();
 		this.lastAccess = user.getClientLocalLastAccess();
 		this.contactId = user.getContact().getContactId();
@@ -76,51 +75,14 @@ public class UserForm
 		this.password2 = password2;
 	}
 	
-	public String getEnabled()
+	public boolean getEnabled()
 	{
 		return enabled;
 	}
 
-	public Integer getEnabledCode()
+	public void setEnabled(boolean status)
 	{
-		Integer code;
-		if (this.enabled == null || this.enabled.isEmpty())
-		{
-			code = null;
-		}
-		else {
-			if (this.enabled.equals("Inactive")) code = 0;
-			else if (this.enabled.equals("Active")) code = 1;
-			else if (this.enabled.equals("Denied")) code = 2;
-			else code = null;
-		}
-		return code;
-	}
-	
-	public UserStatus getEnabledStatus()
-	{
-		UserStatus status;
-		if (this.enabled == null || this.enabled.isEmpty())
-		{
-			status = null;
-		}
-		else {
-			if (this.enabled.equals("Inactive")) status = UserStatus.INACTIVE;
-			else if (this.enabled.equals("Active")) status = UserStatus.ACTIVE;
-			else if (this.enabled.equals("Denied")) status = UserStatus.DENIED;
-			else status = null;
-		}
-		return status;
-	}
-
-	public void setEnabled(String status)
-	{
-		this.enabled = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
-	}
-	
-	public void setEnabled(UserStatus status)
-	{
-		this.enabled = status.toString();
+		this.enabled = status;
 	}
 
 	public String getDateAdded()
