@@ -68,7 +68,7 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 			authDao.createUser(new User("administrator", pe.encode("uec123").toCharArray(), adminContact));
 			User adminUser = authDao.getUserByUsername("administrator");
 			
-			authDao.assignUserToRole(adminUser, adminRole);
+			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());
 			
 			System.out.println("Created Administrator contact, user and role");
 		}

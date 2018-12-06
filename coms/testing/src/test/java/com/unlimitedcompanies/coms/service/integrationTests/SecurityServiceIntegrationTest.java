@@ -538,19 +538,21 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void assignUserToRoleTest() throws MissingContactException, DuplicateContactEntryException
 	{
-		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-
-		Contact contact = contactService.searchContactByEmail("johnd@example.com");
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+
 		Role role = authService.saveRole(new Role("Administrator"));
 
 		assertFalse(user.getRoles().contains(role), "Service test for assigning a user to a role failed");
 		assertFalse(role.getMembers().contains(user), "Service test for assigning a user to a role failed");
 
 		authService.assignUserToRole(user, role);
+		
+		User checkUser = authService.searchFullUserByUserId(user.getUserId());
+		Role checkRole = authService.searchRoleById(role.getRoleId());
 
-		assertTrue(user.getRoles().contains(role), "Service test for assigning a user to a role failed");
-		assertTrue(role.getMembers().contains(user), "Service test for assigning a user to a role failed");
+		assertTrue(checkUser.getRoles().contains(role), "Service test for assigning a user to a role failed");
+		assertTrue(checkRole.getMembers().contains(user), "Service test for assigning a user to a role failed");
 	}
 
 	// @Test

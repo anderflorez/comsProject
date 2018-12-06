@@ -109,6 +109,12 @@ public class AuthServiceImpl implements AuthService
 		return authDao.getUserByUsernameWithContact(username);
 	}
 	
+//	@Override
+//	public User searchAUserByIdWithRoles(int userId)
+//	{
+//		return authDao.getAUserByIdWithRoles(userId);
+//	}
+	
 	@Override
 	public User searchFullUserByUserId(int id)
 	{
@@ -187,7 +193,7 @@ public class AuthServiceImpl implements AuthService
 	@Override
 	public void assignUserToRole(User user, Role role)
 	{
-		authDao.assignUserToRole(user, role);
+		authDao.assignUserToRole(user.getUserId().intValue(), role.getRoleId());
 	}
 	
 //	@Override

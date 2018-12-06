@@ -6,14 +6,15 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.ws.appMgmt.RepresentationFacade;
+import org.springframework.hateoas.ResourceSupport;
 
-@XmlRootElement(name = "response")
-public class ContactCollectionResponse extends RepresentationFacade
+import com.unlimitedcompanies.coms.domain.security.Contact;
+
+@XmlRootElement(name = "contacts")
+public class ContactCollectionResponse extends ResourceSupport
 {
 	@XmlElement(name = "contact")
-	private List<ContactRep> contactCollection;
+	private List<ContactDTO> contactCollection;
 	private Integer prevPage;
 	private Integer nextPage;
 	
@@ -29,11 +30,11 @@ public class ContactCollectionResponse extends RepresentationFacade
 		this.contactCollection = new ArrayList<>();
 		for (Contact contact : domainContacts)
 		{
-			this.contactCollection.add(new ContactRep(contact));
+			this.contactCollection.add(new ContactDTO(contact));
 		}
 	}
 
-	public List<ContactRep> getContactCollection()
+	public List<ContactDTO> getContactCollection()
 	{
 		return this.contactCollection;
 	}
@@ -43,7 +44,7 @@ public class ContactCollectionResponse extends RepresentationFacade
 		this.contactCollection.clear();
 		for (Contact contact : domainContacts)
 		{
-			this.contactCollection.add(new ContactRep(contact));
+			this.contactCollection.add(new ContactDTO(contact));
 		}
 	}
 

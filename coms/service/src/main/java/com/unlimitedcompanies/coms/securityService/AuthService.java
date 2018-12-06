@@ -23,6 +23,7 @@ public interface AuthService
 	public User searchUserByUsername(String string);
 	public User searchUserByContact(Contact contact);
 	public User searchUserByUsernameWithContact(String username);
+//	public User searchAUserByIdWithRoles(int userId);
 	public User searchFullUserByUserId(int userId);
 	public User searchFullUserByUsername(String username);
 	public User updateUser(int userId, User user);
@@ -51,4 +52,5 @@ public interface AuthService
 	public OrGroup searchOrGroupById(String orGroupId);
 	public void saveOrCondition(OrCondition orCondition);
 	public AndGroup fullAndGroupSearch(AndGroup andGroup);
+	
 }

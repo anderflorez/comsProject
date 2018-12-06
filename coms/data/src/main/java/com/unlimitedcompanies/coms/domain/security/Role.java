@@ -51,19 +51,14 @@ public class Role
 		return this.roleId;
 	}
 	
-	public String getRoleName()
-	{
-		return this.roleName;
-	}
-	
-	public List<User> getMembers()
-	{
-		return Collections.unmodifiableList(this.users);
-	}
-	
 	public void setRoleId(String roleId)
 	{
 		this.roleId = roleId;
+	}
+		
+	public String getRoleName()
+	{
+		return this.roleName;
 	}
 	
 	public void setRoleName(String roleName)
@@ -71,12 +66,23 @@ public class Role
 		this.roleName = roleName;
 	}
 	
+	public List<User> getMembers()
+	{
+		return Collections.unmodifiableList(this.users);
+	}
+	
 	public void addUser(User user)
 	{
+		System.out.println("==========> In Role addUser() - role: " + this + " - user: " + user);
+		System.out.println("==========> user contained in role: " + users.contains(user));
 		if (!users.contains(user))
 		{
 			this.users.add(user);
+			System.out.println("==========> added user ");
 			user.addRole(this);	
+		}
+		else {
+			System.out.println("=========> user contained: " + this.getMembers().get(0) + " " + this.getMembers().get(0).getUsername());
 		}
 	}
 	

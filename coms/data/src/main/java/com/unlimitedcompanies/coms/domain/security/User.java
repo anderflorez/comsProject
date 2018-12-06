@@ -45,8 +45,8 @@ public class User
 		this.userId = null;
 		this.username = username;
 		this.password = password;
-		this.contact = contact;
 		this.enabled = true;
+		this.contact = contact;
 		this.dateAdded = ZonedDateTime.now(ZoneId.of("UTC"));
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
@@ -173,7 +173,7 @@ public class User
 		if (!roles.contains(role))
 		{
 			this.roles.add(role);
-			role.addUser(this);			
+			role.addUser(this);
 		}
 	}
 	

@@ -24,8 +24,8 @@ import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedEx
 import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
 import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
-import com.unlimitedcompanies.coms.ws.security.reps.ContactRep;
-import com.unlimitedcompanies.coms.ws.security.reps.ContactSingleResponse;
+import com.unlimitedcompanies.coms.ws.security.reps.ContactDTO;
+import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 
 @RestController
 public class ContactRestController
@@ -68,7 +68,7 @@ public class ContactRestController
 			allContacts.add(nextLink);
 		}		
 				
-		for (ContactRep nextContact : allContacts.getContactCollection())
+		for (ContactDTO nextContact : allContacts.getContactCollection())
 		{
 			Link link = linkTo(methodOn(ContactRestController.class).findContactById(nextContact.getContactId())).withSelfRel();
 			nextContact.add(link);
@@ -78,82 +78,75 @@ public class ContactRestController
 	}
 
 	@RequestMapping(value = contactDetails, method = RequestMethod.GET)
-	public ContactSingleResponse findContactById(@PathVariable Integer id) throws ContactNotFoundException
+	public ContactDTO findContactById(@PathVariable Integer id) throws ContactNotFoundException
 	{
 		Contact foundContact = contactService.searchContactById(id);
-		ContactSingleResponse contact = new ContactSingleResponse(foundContact);
+		ContactDTO contact = new ContactDTO(foundContact);
 		Link link = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
-		contact.getSingleContact().add(link);
+		contact.add(link);
 		return contact;
 	}
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
-	public ContactSingleResponse saveNewContact(@RequestBody Contact newContact) 
+	public ContactDTO saveNewContact(@RequestBody Contact newContact) 
 			throws ContactNotFoundException, DuplicateContactEntryException
 	{
 		Contact contact = contactService.saveContact(newContact);
-		ContactSingleResponse contactResponse = new ContactSingleResponse(contact);
+		ContactDTO contactResponse = new ContactDTO(contact);
 		Link link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
-		contactResponse.getSingleContact().add(link);
-		contactResponse.setSuccess("The contact has been created successfully");
+		contactResponse.add(link);
+
 		return contactResponse;
 	}
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
-	public ContactSingleResponse updateContact(@RequestBody Contact editedContact) throws ContactNotFoundException
+	public ContactDTO updateContact(@RequestBody Contact editedContact) throws ContactNotFoundException
 	{
 		Contact updatedContact = contactService.updateContact(editedContact);
-		ContactSingleResponse contactResponse = new ContactSingleResponse(updatedContact);
+		ContactDTO contactResponse = new ContactDTO(updatedContact);
 		Link link = linkTo(methodOn(ContactRestController.class).findContactById(updatedContact.getContactId())).withSelfRel();
-		contactResponse.getSingleContact().add(link);
-		contactResponse.setSuccess("The contact has been updated successfully");
+		contactResponse.add(link);
 		return contactResponse;
 	}
 	
 	@RequestMapping(value = contactDetails, method = RequestMethod.DELETE)
-	@ResponseStatus(value = HttpStatus.OK)
-	public ContactSingleResponse deleteContact(@PathVariable Integer id) 
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deleteContact(@PathVariable Integer id) 
 			throws ContactNotFoundException, ContactNotDeletedException
 	{		
 		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
 		//		 a contact that has other elements associated with it like a user
 		
 		contactService.deleteContact(id);
-		
-		ContactSingleResponse response = new ContactSingleResponse();
-		response.setStatusCode(HttpStatus.OK.value());
-		response.setSuccess("The contact has been deleted successfully");
-		
-		return response;
 	}
 	
 	@ExceptionHandler(ContactNotFoundException.class)
-	public ResponseEntity<ContactSingleResponse> contactNotFoundExceptionHandler() 
+	public ResponseEntity<ErrorRep> contactNotFoundExceptionHandler() 
 	{
-		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setStatusCode(HttpStatus.NOT_FOUND.value());
-		singleContact.addError("The contact could not be found");
-		return new ResponseEntity<>(singleContact, HttpStatus.NOT_FOUND);
+		ErrorRep errorResponse = new ErrorRep();
+		errorResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
+		errorResponse.addError("The contact could not be found");
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	}
 	
 	@ExceptionHandler(DuplicateContactEntryException.class)
-	public ResponseEntity<ContactSingleResponse> contactUniqueConstraintViolationHandler()
+	public ResponseEntity<ErrorRep> contactUniqueConstraintViolationHandler()
 	{
-		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setStatusCode(HttpStatus.BAD_REQUEST.value());
-		singleContact.addError("The contact to be created or some of its information already exists");
-		return new ResponseEntity<>(singleContact, HttpStatus.BAD_REQUEST);
+		ErrorRep errorResponse = new ErrorRep();
+		errorResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
+		errorResponse.addError("The contact to be created or some of its information already exists");
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(ContactNotDeletedException.class)
-	public ResponseEntity<ContactSingleResponse> contactNotDeletedExceptionHandler()
+	public ResponseEntity<ErrorRep> contactNotDeletedExceptionHandler()
 	{
-		ContactSingleResponse singleContact = new ContactSingleResponse();
-		singleContact.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		singleContact.addError("The contact could not be deleted - Unknown error");
-		singleContact.addMessage("Please try again or contact your system administrator");
-		return new ResponseEntity<>(singleContact, HttpStatus.INTERNAL_SERVER_ERROR);
+		ErrorRep errorResponse = new ErrorRep();
+		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		errorResponse.addError("The contact could not be deleted - Unknown error");
+		errorResponse.addMessage("Please try again or contact your system administrator");
+		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

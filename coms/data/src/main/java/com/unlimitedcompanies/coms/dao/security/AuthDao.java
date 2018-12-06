@@ -21,6 +21,7 @@ public interface AuthDao
 	public User getUserByUsername(String username);
 	public User getUserByContact(Contact contact);
 	public User getUserByUsernameWithContact(String username);
+//	public User getAUserByIdWithRoles(int userId);
 	public User getFullUserByUserId(int id);
 	public User getFullUserByUsername(String username);
 	public void updateUser(int userId, User user);
@@ -35,7 +36,7 @@ public interface AuthDao
 	public void updateRole(String roleId, Role role);
 	public void deleteRole(String roleId);
 
-	public void assignUserToRole(User user, Role role);
+	public void assignUserToRole(int userId, String roleId);
 //	public void removeUserFromRole(Role role, User user);
 	
 	public int getNumberOfPermissions();

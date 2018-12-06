@@ -2,7 +2,6 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -51,26 +50,10 @@ public class AuthDaoImpl implements AuthDao
 				.executeUpdate();
 	}
 	
-//	Method ready to be discontinued - deleted
-//	@Override
-//	public List<User> getAllUsers()
-//	{
-//		return em.createQuery("select user from User as user", User.class).getResultList();
-//	}
-	
 	@Override
 	public List<User> getAllUsers()
 	{
-		List<Object[]> foundUsers = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess from User u", Object[].class)
-								 .getResultList();
-		
-		List<User> allUsers = new ArrayList<>();
-		for (Object[] next : foundUsers)
-		{
-			allUsers.add(new User((int)next[0], (String)next[1], (boolean)next[2], (ZonedDateTime)next[3], (ZonedDateTime)next[4]));
-		}
-		
-		return allUsers;
+		return em.createQuery("select user from User as user", User.class).getResultList();
 	}
 	
 	@Override
@@ -97,9 +80,10 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public User getUserByUsername(String username)
 	{
-		return em.createQuery("select user from User as user where user.username = :username", User.class)
+		Object[] foundUser = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess from User u where u.username = :username", Object[].class)
 							  .setParameter("username", username)
 							  .getSingleResult();
+		return new User((int)foundUser[0], (String)foundUser[1], (boolean)foundUser[2], (ZonedDateTime)foundUser[3], (ZonedDateTime)foundUser[4]);
 	}
 
 	@Override
@@ -117,7 +101,21 @@ public class AuthDaoImpl implements AuthDao
 							  .setParameter("username", username)
 							  .getSingleResult();
 	}
-
+	
+//	@Override
+//	public User getAUserByIdWithRoles(int userId)
+//	{
+//		Object[] foundUser = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess, r.roleId, r.roleName, from User u left join fetch u.roles r where u.userId = :userId", Object[].class)
+//				  .setParameter("userId", userId)
+//				  .getSingleResult();
+//		User user = new User((int)foundUser[0], (String)foundUser[1], (boolean)foundUser[2], (ZonedDateTime)foundUser[3], (ZonedDateTime)foundUser[4]);
+//		Role role = new Role((String)foundUser[6]);
+//		role.setRoleId((String)foundUser[5]);
+//		user.addRole(role);
+//		
+//		return user;
+//	}
+	
 	@Override
 	public User getFullUserByUsername(String username)
 	{
@@ -137,7 +135,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void updateUser(int userId, User user) {
 		User foundUser = em.find(User.class, userId);
-		foundUser.setUsername(user.getUsername());		
+		foundUser.setUsername(user.getUsername());
 		foundUser.setEnabled(user.isEnabled());
 	}	
 
@@ -215,15 +213,13 @@ public class AuthDaoImpl implements AuthDao
 	}
 
 	@Override
-	public void assignUserToRole(User user, Role role)
+	public void assignUserToRole(int userId, String roleId)
 	{
-		Role foundRole = em.createQuery("select role from Role as role where role.roleName = :name", Role.class)
-				.setParameter("name", role.getRoleName()).getSingleResult();
-		User foundUser = em.createQuery("select user from User as user where user.username = :username", User.class)
-				.setParameter("username", user.getUsername()).getSingleResult();
-
-		foundRole.addUser(foundUser);
-		em.persist(foundRole);
+		// TODO: Check for possible exceptions
+		Role role = em.find(Role.class, roleId);
+		User user = em.find(User.class, userId);
+		
+		role.addUser(user);		
 	}
 
 //	@Override
@@ -313,6 +309,5 @@ public class AuthDaoImpl implements AuthDao
 							  .setParameter("andGroup", andGroup)
 							  .getResultList();
 	}
-
 
 }

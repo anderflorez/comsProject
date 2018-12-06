@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.ws.appMgmt;
+package com.unlimitedcompanies.coms.ws.security.reps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,10 +7,9 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.hateoas.ResourceSupport;
 
-public class RepresentationFacade extends ResourceSupport
+public class ErrorRep extends ResourceSupport
 {	
 	private int statusCode;
-	private String success;
 	
 	@XmlElement
 	private List<String> errors;
@@ -18,9 +17,9 @@ public class RepresentationFacade extends ResourceSupport
 	@XmlElement
 	private List<String> messages;
 	
-	public RepresentationFacade()
+	public ErrorRep()
 	{
-		this.statusCode = 200;
+		this.statusCode = 0;
 		this.errors = new ArrayList<>();
 		this.messages = new ArrayList<>();
 	}
@@ -33,16 +32,6 @@ public class RepresentationFacade extends ResourceSupport
 	public void setStatusCode(int statusCode)
 	{
 		this.statusCode = statusCode;
-	}
-
-	public String getSuccess()
-	{
-		return success;
-	}
-
-	public void setSuccess(String success)
-	{
-		this.success = success;
 	}
 
 	public List<String> getErrors()
