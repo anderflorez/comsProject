@@ -10,6 +10,6 @@ module service
 	requires spring.context;
 	requires spring.tx;
 	
-	exports com.unlimitedcompanies.coms.securityService;
-	exports com.unlimitedcompanies.coms.securityServiceExceptions;
+	exports com.unlimitedcompanies.coms.service.security;
+	exports com.unlimitedcompanies.coms.service.exceptions;
 }

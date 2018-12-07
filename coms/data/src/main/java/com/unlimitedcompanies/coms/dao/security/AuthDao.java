@@ -24,7 +24,7 @@ public interface AuthDao
 //	public User getAUserByIdWithRoles(int userId);
 	public User getFullUserByUserId(int id);
 	public User getFullUserByUsername(String username);
-	public void updateUser(int userId, User user);
+	public void updateUser(User user);
 	public void deleteUser(int userId);
 	
 	public int getNumberOfRoles();

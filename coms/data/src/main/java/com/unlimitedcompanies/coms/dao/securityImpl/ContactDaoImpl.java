@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -31,7 +31,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void createContact(Contact contact) throws ConstraintViolationException
+	public void createContact(Contact contact)
 	{	
 		try
 		{
@@ -70,12 +70,12 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public Contact getContactById(int Id) throws RecordNotFoundException
+	public Contact getContactById(int Id)
 	{
 		Contact contact = em.find(Contact.class, Id);
 		if (contact == null)
 		{
-			throw new RecordNotFoundException();
+			throw new NoResultException();
 		}
 		return contact;
 	}
@@ -97,7 +97,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void updateContact(Contact updatedContact) throws RecordNotFoundException
+	public void updateContact(Contact updatedContact)
 	{
 		Contact foundContact = this.getContactById(updatedContact.getContactId());
 		foundContact.setFirstName(updatedContact.getFirstName());
@@ -107,7 +107,7 @@ public class ContactDaoImpl implements ContactDao
 	}
 
 	@Override
-	public void deleteContact(int contactId) throws RecordNotFoundException
+	public void deleteContact(int contactId)
 	{
 		Contact contact = this.getContactById(contactId);
 		em.remove(contact);

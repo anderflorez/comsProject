@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.hateoas.ResourceSupport;
 
+@XmlRootElement(name = "error")
 public class ErrorRep extends ResourceSupport
 {	
 	private int statusCode;

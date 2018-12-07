@@ -3,7 +3,6 @@ package com.unlimitedcompanies.coms.dao.security;
 import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
 
 public interface ContactDao
 {
@@ -12,11 +11,11 @@ public interface ContactDao
 	public List<Contact> getAllContacts();
 //	public List<Contact> getAllContacts(User loggedUser);
 	public List<Contact> getContactsByRange(int page, int elements);
-	public Contact getContactById(int id) throws RecordNotFoundException;
+	public Contact getContactById(int id);
 	public Contact getContactByCharId(String contactCharId);
 	public Contact getContactByEmail(String contactEmail);
-	public void updateContact(Contact updatedContact) throws RecordNotFoundException;
-	public void deleteContact(int contactId) throws RecordNotFoundException;
+	public void updateContact(Contact updatedContact);
+	public void deleteContact(int contactId);
 	
 //	public int getNumberOfAddresses();
 //	public void createContactAddress(Address address, int contactId);

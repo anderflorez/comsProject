@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
-import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
+import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactDTO;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
@@ -40,8 +40,7 @@ public class ContactRestController
 	
 	@RequestMapping(value = allContacts, method = RequestMethod.GET)
 	public ContactCollectionResponse allContacts(@RequestParam(name = "pag", required = false) Integer pag,
-												 @RequestParam(name = "epp", required = false) Integer epp) 
-			throws ContactNotFoundException
+												 @RequestParam(name = "epp", required = false) Integer epp)
 	{
 		if (pag == null) pag = 1;
 		if (epp == null) epp = 10;
@@ -70,15 +69,19 @@ public class ContactRestController
 				
 		for (ContactDTO nextContact : allContacts.getContactCollection())
 		{
-			Link link = linkTo(methodOn(ContactRestController.class).findContactById(nextContact.getContactId())).withSelfRel();
-			nextContact.add(link);
+			Link link;
+			try
+			{
+				link = linkTo(methodOn(ContactRestController.class).findContactById(nextContact.getContactId())).withSelfRel();
+				nextContact.add(link);
+			} catch (RecordNotFoundException e) {}
 		}
 		
 		return allContacts;
 	}
 
 	@RequestMapping(value = contactDetails, method = RequestMethod.GET)
-	public ContactDTO findContactById(@PathVariable Integer id) throws ContactNotFoundException
+	public ContactDTO findContactById(@PathVariable Integer id) throws RecordNotFoundException
 	{
 		Contact foundContact = contactService.searchContactById(id);
 		ContactDTO contact = new ContactDTO(foundContact);
@@ -90,19 +93,23 @@ public class ContactRestController
 	@RequestMapping(value = baseURI, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public ContactDTO saveNewContact(@RequestBody Contact newContact) 
-			throws ContactNotFoundException, DuplicateContactEntryException
+			throws DuplicateRecordException
 	{
 		Contact contact = contactService.saveContact(newContact);
 		ContactDTO contactResponse = new ContactDTO(contact);
-		Link link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
-		contactResponse.add(link);
+		Link link;
+		try
+		{
+			link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
+			contactResponse.add(link);
+		} catch (RecordNotFoundException e) {}
 
 		return contactResponse;
 	}
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
-	public ContactDTO updateContact(@RequestBody Contact editedContact) throws ContactNotFoundException
+	public ContactDTO updateContact(@RequestBody Contact editedContact) throws RecordNotFoundException
 	{
 		Contact updatedContact = contactService.updateContact(editedContact);
 		ContactDTO contactResponse = new ContactDTO(updatedContact);
@@ -113,8 +120,7 @@ public class ContactRestController
 	
 	@RequestMapping(value = contactDetails, method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteContact(@PathVariable Integer id) 
-			throws ContactNotFoundException, ContactNotDeletedException
+	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException
 	{		
 		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
 		//		 a contact that has other elements associated with it like a user
@@ -122,7 +128,7 @@ public class ContactRestController
 		contactService.deleteContact(id);
 	}
 	
-	@ExceptionHandler(ContactNotFoundException.class)
+	@ExceptionHandler(RecordNotFoundException.class)
 	public ResponseEntity<ErrorRep> contactNotFoundExceptionHandler() 
 	{
 		ErrorRep errorResponse = new ErrorRep();
@@ -131,7 +137,7 @@ public class ContactRestController
 		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	}
 	
-	@ExceptionHandler(DuplicateContactEntryException.class)
+	@ExceptionHandler(DuplicateRecordException.class)
 	public ResponseEntity<ErrorRep> contactUniqueConstraintViolationHandler()
 	{
 		ErrorRep errorResponse = new ErrorRep();
@@ -140,7 +146,7 @@ public class ContactRestController
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 	
-	@ExceptionHandler(ContactNotDeletedException.class)
+	@ExceptionHandler(RecordNotDeletedException.class)
 	public ResponseEntity<ErrorRep> contactNotDeletedExceptionHandler()
 	{
 		ErrorRep errorResponse = new ErrorRep();

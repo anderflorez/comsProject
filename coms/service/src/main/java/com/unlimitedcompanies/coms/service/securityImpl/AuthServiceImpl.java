@@ -1,13 +1,14 @@
-package com.unlimitedcompanies.coms.securityServiceImpl;
+package com.unlimitedcompanies.coms.service.securityImpl;
 
 import java.util.List;
+
+import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
-import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
@@ -16,9 +17,11 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
-import com.unlimitedcompanies.coms.securityService.AuthService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.security.ContactService;
 
 @Service
 @Transactional
@@ -28,29 +31,29 @@ public class AuthServiceImpl implements AuthService
 	private AuthDao authDao;
 
 	@Autowired
-	private ContactDao contactDao;
+	private ContactService contactService;
 
 	@Override
-	public User saveUser(User user) throws MissingContactException
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User saveUser(User user) throws RecordNotFoundException, RecordNotCreatedException
 	{
 		if (user.getContact() == null)
 		{
-			throw new MissingContactException();
+			throw new RecordNotFoundException();
 		}
 
-		Contact contact = null;
-		try
-		{
-			contact = contactDao.getContactById(user.getContact().getContactId());
-		} catch (RecordNotFoundException e)
-		{
-			// TODO Throw a new specific exception
-			e.printStackTrace();
-		}
+		Contact contact = contactService.searchContactById(user.getContact().getContactId());
 		user.setContact(contact);
 
 		authDao.createUser(user);
-		return this.searchUserByUsername(user.getUsername());
+		try
+		{
+			return this.searchUserByUsername(user.getUsername());
+		} 
+		catch (RecordNotFoundException e)
+		{
+			throw new RecordNotCreatedException();
+		}
 	}
 	
 	@Override
@@ -86,15 +89,30 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public User searchUserByUserId(Integer id)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User searchUserByUserId(Integer id) throws RecordNotFoundException
 	{
-		return authDao.getUserByUserId(id);
+		try
+		{
+			return authDao.getUserByUserId(id);
+		} 
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
 	}
 
 	@Override
-	public User searchUserByUsername(String username)
+	public User searchUserByUsername(String username) throws RecordNotFoundException
 	{
-		return authDao.getUserByUsername(username);
+		try
+		{
+			return authDao.getUserByUsername(username);
+		} 
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
 	}
 	
 	@Override
@@ -128,10 +146,11 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	public User updateUser(int userId, User user)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User updateUser(User user) throws RecordNotFoundException
 	{
-		authDao.updateUser(userId, user);
-		return this.searchUserByUserId(userId);
+		authDao.updateUser(user);
+		return this.searchUserByUserId(user.getUserId());
 	}
 
 	@Override
@@ -141,9 +160,26 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public void deleteUser(int userId)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
 	{
-		authDao.deleteUser(userId);		
+		try
+		{
+			authDao.deleteUser(userId);
+		} 
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
+		
+		try
+		{
+			this.searchUserByUserId(userId);
+		} 
+		catch (RecordNotFoundException e)
+		{
+			throw new RecordNotDeletedException();
+		}
 	}
 
 	@Override

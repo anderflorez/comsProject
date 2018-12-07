@@ -1,13 +1,15 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
 import java.util.List;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,15 +41,29 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void createUser(User user)
 	{
-		em.createNativeQuery(
-				"INSERT INTO user (username, password, enabled, dateAdded, lastAccess, contact_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
-				.setParameter("username", user.getUsername())
-				.setParameter("password", user.getPassword())
-				.setParameter("enabled", user.isEnabled())
-				.setParameter("dateAdded", user.getDateAdded())
-				.setParameter("lastAccess", user.getLastAccess())
-				.setParameter("contact", user.getContact())
-				.executeUpdate();
+		try
+		{
+			em.createNativeQuery(
+					"INSERT INTO user (username, password, enabled, dateAdded, lastAccess, contact_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
+					.setParameter("username", user.getUsername())
+					.setParameter("password", user.getPassword())
+					.setParameter("enabled", user.isEnabled())
+					.setParameter("dateAdded", user.getDateAdded())
+					.setParameter("lastAccess", user.getLastAccess())
+					.setParameter("contact", user.getContact())
+					.executeUpdate();
+		} 
+		catch (PersistenceException e)
+		{
+			if (e.getCause() instanceof ConstraintViolationException)
+			{
+				throw (ConstraintViolationException)e.getCause();
+			}
+			else
+			{
+				throw e;
+			}
+		}
 	}
 	
 	@Override
@@ -80,10 +96,9 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public User getUserByUsername(String username)
 	{
-		Object[] foundUser = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess from User u where u.username = :username", Object[].class)
-							  .setParameter("username", username)
-							  .getSingleResult();
-		return new User((int)foundUser[0], (String)foundUser[1], (boolean)foundUser[2], (ZonedDateTime)foundUser[3], (ZonedDateTime)foundUser[4]);
+		return em.createQuery("search u from User u where u.username = :username", User.class)
+						   .setParameter("username", username)
+						   .getSingleResult();
 	}
 
 	@Override
@@ -102,20 +117,6 @@ public class AuthDaoImpl implements AuthDao
 							  .getSingleResult();
 	}
 	
-//	@Override
-//	public User getAUserByIdWithRoles(int userId)
-//	{
-//		Object[] foundUser = em.createQuery("select u.userId, u.username, u.enabled, u.dateAdded, u.lastAccess, r.roleId, r.roleName, from User u left join fetch u.roles r where u.userId = :userId", Object[].class)
-//				  .setParameter("userId", userId)
-//				  .getSingleResult();
-//		User user = new User((int)foundUser[0], (String)foundUser[1], (boolean)foundUser[2], (ZonedDateTime)foundUser[3], (ZonedDateTime)foundUser[4]);
-//		Role role = new Role((String)foundUser[6]);
-//		role.setRoleId((String)foundUser[5]);
-//		user.addRole(role);
-//		
-//		return user;
-//	}
-	
 	@Override
 	public User getFullUserByUsername(String username)
 	{
@@ -133,11 +134,14 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public void updateUser(int userId, User user) {
-		User foundUser = em.find(User.class, userId);
+	public void updateUser(User user)
+	{
+		// TODO: Check the behavior of this method by following in the debugger
+		
+		User foundUser = this.getUserByUserId(user.getUserId());
 		foundUser.setUsername(user.getUsername());
 		foundUser.setEnabled(user.isEnabled());
-	}	
+	}
 
 	@Override
 	public void deleteUser(int userId)
@@ -156,7 +160,22 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void createRole(Role role)
 	{
-		em.persist(role);
+		try
+		{
+			em.persist(role);
+		} 
+		catch (EntityExistsException e)
+		{
+			// TODO: Check this possible exception
+			e.printStackTrace();
+		}
+		catch (PersistenceException e)
+		{
+			if (e.getCause() instanceof ConstraintViolationException)
+			{
+				throw (ConstraintViolationException)e.getCause();
+			}
+		}
 	}
 	
 	@Override
@@ -197,11 +216,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void updateRole(String roleId, Role role)
 	{
-		Role foundRole = em.find(Role.class, roleId);
-		if (foundRole == null)
-		{
-			throw new NoResultException();
-		}
+		Role foundRole = this.getRoleById(roleId);
 		foundRole.setRoleName(role.getRoleName());
 	}
 
@@ -215,9 +230,8 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void assignUserToRole(int userId, String roleId)
 	{
-		// TODO: Check for possible exceptions
-		Role role = em.find(Role.class, roleId);
-		User user = em.find(User.class, userId);
+		Role role = this.getRoleById(roleId);
+		User user = this.getUserByUserId(userId);
 		
 		role.addUser(user);		
 	}
@@ -241,7 +255,15 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void createResourcePermission(ResourcePermissions newPermission)
 	{
-		em.persist(newPermission);
+		try
+		{
+			em.persist(newPermission);
+		} 
+		catch (EntityExistsException e)
+		{
+			// TODO Check this exception
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

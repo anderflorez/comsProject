@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.securityServiceImpl;
+package com.unlimitedcompanies.coms.service.securityImpl;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
-import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
+import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 @Service
 @Transactional

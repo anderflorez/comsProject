@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.ws.security.reps;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.hateoas.ResourceSupport;
@@ -32,6 +33,7 @@ public class UserCollectionResponse extends ResourceSupport
 		}
 	}
 
+	@XmlElement(name = "user")
 	public List<UserDTO> getUsers()
 	{
 		return users;

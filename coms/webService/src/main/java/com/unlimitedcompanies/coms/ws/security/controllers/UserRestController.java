@@ -5,17 +5,26 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthService;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
 
@@ -48,7 +57,7 @@ public class UserRestController
 	{
 		if (pag == null) pag = 1;
 		if (epp == null) epp = 10;
-		
+				
 		UserCollectionResponse foundUsers = new UserCollectionResponse(authService.searchUsersByRange(pag, epp));
 		Link baseLink = new Link(baseURL).withRel("base_url");
 		foundUsers.add(baseLink);
@@ -71,91 +80,71 @@ public class UserRestController
 				
 		for (UserDTO nextUser : foundUsers.getUsers())
 		{
-			Link link = linkTo(methodOn(UserRestController.class).findUserById(nextUser.getUserId())).withSelfRel();
-			nextUser.add(link);
+			try
+			{
+				Link link = linkTo(methodOn(UserRestController.class).findUserById(nextUser.getUserId())).withSelfRel();
+				nextUser.add(link);
+			} catch (RecordNotFoundException e) {}
 		}
 		
 		return foundUsers;
 	}
 
 	@RequestMapping(value = userDetails, method = RequestMethod.GET)
-	public UserDTO findUserById(@PathVariable Integer id)
+	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
 	{
-//		Contact foundContact = contactService.searchContactById(id);
-//		ContactSingleResponse contact = new ContactSingleResponse(foundContact);
-//		Link link = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
-//		contact.getSingleContact().add(link);
-//		return contact;
-		return null;
+		UserDTO foundUser = new UserDTO(authService.searchUserByUserId(id));
+		Link link = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
+		foundUser.add(link);
+		return foundUser;
 	}
-//	
-//	@RequestMapping(value = baseURI, method = RequestMethod.POST)
-//	@ResponseStatus(value = HttpStatus.CREATED)
-//	public ContactSingleResponse saveNewContact(@RequestBody Contact newContact) 
-//			throws ContactNotFoundException, DuplicateContactEntryException
-//	{
-//		Contact contact = contactService.saveContact(newContact);
-//		ContactSingleResponse contactResponse = new ContactSingleResponse(contact);
-//		Link link = linkTo(methodOn(ContactRestController.class).findContactById(contact.getContactId())).withSelfRel();
-//		contactResponse.getSingleContact().add(link);
-//		contactResponse.setSuccess("The contact has been created successfully");
-//		return contactResponse;
-//	}
-//	
-//	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
-//	@ResponseStatus(value = HttpStatus.OK)
-//	public ContactSingleResponse updateContact(@RequestBody Contact editedContact) throws ContactNotFoundException
-//	{
-//		Contact updatedContact = contactService.updateContact(editedContact);
-//		ContactSingleResponse contactResponse = new ContactSingleResponse(updatedContact);
-//		Link link = linkTo(methodOn(ContactRestController.class).findContactById(updatedContact.getContactId())).withSelfRel();
-//		contactResponse.getSingleContact().add(link);
-//		contactResponse.setSuccess("The contact has been updated successfully");
-//		return contactResponse;
-//	}
-//	
-//	@RequestMapping(value = userDetails, method = RequestMethod.DELETE)
-//	@ResponseStatus(value = HttpStatus.OK)
-//	public ContactSingleResponse deleteContact(@PathVariable Integer id) 
-//			throws ContactNotFoundException, ContactNotDeletedException
-//	{		
-//		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
-//		//		 a contact that has other elements associated with it like a user
-//		
-//		contactService.deleteContact(id);
-//		
-//		ContactSingleResponse response = new ContactSingleResponse();
-//		response.setStatusCode(HttpStatus.OK.value());
-//		response.setSuccess("The contact has been deleted successfully");
-//		
-//		return response;
-//	}
-//	
-//	@ExceptionHandler(ContactNotFoundException.class)
-//	public ResponseEntity<ContactSingleResponse> contactNotFoundExceptionHandler() 
-//	{
-//		ContactSingleResponse singleContact = new ContactSingleResponse();
-//		singleContact.setStatusCode(HttpStatus.NOT_FOUND.value());
-//		singleContact.addError("The contact could not be found");
-//		return new ResponseEntity<>(singleContact, HttpStatus.NOT_FOUND);
-//	}
-//	
-//	@ExceptionHandler(DuplicateContactEntryException.class)
-//	public ResponseEntity<ContactSingleResponse> contactUniqueConstraintViolationHandler()
-//	{
-//		ContactSingleResponse singleContact = new ContactSingleResponse();
-//		singleContact.setStatusCode(HttpStatus.BAD_REQUEST.value());
-//		singleContact.addError("The contact to be created or some of its information already exists");
-//		return new ResponseEntity<>(singleContact, HttpStatus.BAD_REQUEST);
-//	}
-//	
-//	@ExceptionHandler(ContactNotDeletedException.class)
-//	public ResponseEntity<ContactSingleResponse> contactNotDeletedExceptionHandler()
-//	{
-//		ContactSingleResponse singleContact = new ContactSingleResponse();
-//		singleContact.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-//		singleContact.addError("The contact could not be deleted - Unknown error");
-//		singleContact.addMessage("Please try again or contact your system administrator");
-//		return new ResponseEntity<>(singleContact, HttpStatus.INTERNAL_SERVER_ERROR);
-//	}
+	
+	@RequestMapping(value = baseURI, method = RequestMethod.POST)
+	@ResponseStatus(value = HttpStatus.CREATED)
+	public UserDTO saveNewContact(@RequestBody User newUser) throws RecordNotFoundException, RecordNotCreatedException
+	{
+		UserDTO createdUser = new UserDTO(authService.saveUser(newUser));
+		Link link = linkTo(methodOn(UserRestController.class).findUserById(createdUser.getUserId())).withSelfRel();
+		createdUser.add(link);
+		return createdUser;
+	}
+	
+	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.OK)
+	public UserDTO updateContact(@RequestBody User editedUser) throws RecordNotFoundException
+	{
+		UserDTO updatedUser = new UserDTO(authService.updateUser(editedUser));
+		Link link = linkTo(methodOn(UserRestController.class).findUserById(updatedUser.getUserId())).withSelfRel();
+		updatedUser.add(link);
+		return updatedUser;
+	}
+	
+	@RequestMapping(value = userDetails, method = RequestMethod.DELETE)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
+	{
+		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
+		//		 a contact that has other elements associated with it like a user
+		
+		authService.deleteUser(id.intValue());
+	}
+	
+	@ExceptionHandler(RecordNotFoundException.class)
+	public ResponseEntity<ErrorRep> userNotFoundExceptionHandler() 
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.NOT_FOUND.value());
+		error.addError("The user could not be found");
+		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler({RecordNotCreatedException.class, RecordNotDeletedException.class})
+	public ResponseEntity<ErrorRep> userNotCreatedExceptionHandler()
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		error.addError("The new user could not be created");
+		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 }

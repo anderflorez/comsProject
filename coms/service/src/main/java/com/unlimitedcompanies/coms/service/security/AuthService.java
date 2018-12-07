@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.securityService;
+package com.unlimitedcompanies.coms.service.security;
 
 import java.util.List;
 
@@ -10,24 +10,26 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 
 public interface AuthService
 {
-	public User saveUser(User user) throws MissingContactException;
+	public User saveUser(User user) throws RecordNotFoundException, RecordNotCreatedException;
 	public int searchNumberOfUsers();
 	public boolean hasNextUser(int page, int elements);
 	public List<User> searchAllUsers();
 	public List<User> searchUsersByRange(int page, int elements);
-	public User searchUserByUserId(Integer id);
-	public User searchUserByUsername(String string);
+	public User searchUserByUserId(Integer id) throws RecordNotFoundException;
+	public User searchUserByUsername(String string) throws RecordNotFoundException;
 	public User searchUserByContact(Contact contact);
 	public User searchUserByUsernameWithContact(String username);
 //	public User searchAUserByIdWithRoles(int userId);
 	public User searchFullUserByUserId(int userId);
 	public User searchFullUserByUsername(String username);
-	public User updateUser(int userId, User user);
-	public void deleteUser(int userId);
+	public User updateUser(User user) throws RecordNotFoundException;
+	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException;
 	
 	public int searchNumberOfRoles();
 	public Role saveRole(Role role);

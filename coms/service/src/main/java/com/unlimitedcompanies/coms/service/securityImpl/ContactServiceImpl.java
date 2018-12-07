@@ -1,6 +1,8 @@
-package com.unlimitedcompanies.coms.securityServiceImpl;
+package com.unlimitedcompanies.coms.service.securityImpl;
 
 import java.util.List;
+
+import javax.persistence.NoResultException;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.exen.RecordNotFoundException;
-import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotDeletedException;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
-import com.unlimitedcompanies.coms.securityServiceExceptions.DuplicateContactEntryException;
+import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.ContactService;
 
 @Service
 @Transactional
@@ -27,8 +28,8 @@ public class ContactServiceImpl implements ContactService
 	AuthDao authenticationDao;
 
 	@Override
-	@Transactional(rollbackFor = {DuplicateContactEntryException.class})
-	public Contact saveContact(Contact contact) throws DuplicateContactEntryException
+	@Transactional(rollbackFor = {DuplicateRecordException.class})
+	public Contact saveContact(Contact contact) throws DuplicateRecordException
 	{
 		try
 		{
@@ -39,7 +40,7 @@ public class ContactServiceImpl implements ContactService
 		{
 			if (e.getConstraintName().endsWith("_UNIQUE"))
 			{
-				throw new DuplicateContactEntryException();
+				throw new DuplicateRecordException();
 			}
 			return null;
 		}
@@ -93,15 +94,17 @@ public class ContactServiceImpl implements ContactService
 //	}
 	
 	@Override
-	public Contact searchContactById(int id) throws ContactNotFoundException
+	@Transactional(rollbackFor = {RecordNotFoundException.class})
+	public Contact searchContactById(int id) throws RecordNotFoundException
 	{
 		Contact contact = null;
 		try
 		{
 			contact = dao.getContactById(id);
-		} catch (RecordNotFoundException e)
+		} 
+		catch (NoResultException e)
 		{
-			throw new ContactNotFoundException();
+			throw new RecordNotFoundException();
 		}
 		return contact;
 	}
@@ -113,35 +116,30 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public Contact updateContact(Contact updatedContact) throws ContactNotFoundException
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public Contact updateContact(Contact updatedContact) throws RecordNotFoundException
 	{
-		try
-		{
-			dao.updateContact(updatedContact);
-			return this.searchContactById(updatedContact.getContactId());
-		} 
-		catch (RecordNotFoundException e)
-		{
-			throw new ContactNotFoundException();
-		}
+		dao.updateContact(updatedContact);
+		return this.searchContactById(updatedContact.getContactId());
 	}
 
 	@Override
-	public void deleteContact(int contactId) throws ContactNotFoundException, ContactNotDeletedException
+	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
+	public void deleteContact(int contactId) throws RecordNotFoundException, RecordNotDeletedException
 	{
 		try
 		{
 			dao.deleteContact(contactId);
 		} 
-		catch (RecordNotFoundException e)
+		catch (NoResultException e)
 		{
-			throw new ContactNotFoundException();
+			throw new RecordNotFoundException();
 		}
 		
 		try
 		{
-			dao.getContactById(contactId);
-			throw new ContactNotDeletedException();
+			this.searchContactById(contactId);
+			throw new RecordNotDeletedException();
 		} 
 		catch (RecordNotFoundException e) {}
 	}

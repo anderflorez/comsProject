@@ -13,8 +13,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthService;
-import com.unlimitedcompanies.coms.securityService.ContactService;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -45,7 +47,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping("/userDetail")
-	public ModelAndView showUserDetails(@RequestParam("u") String id)
+	public ModelAndView showUserDetails(@RequestParam("uid") String id) throws RecordNotFoundException
 	{		
 		ModelAndView mv = new ModelAndView("/pages/security/userDetails.jsp");
 		UserForm userForm;
@@ -70,7 +72,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
-	public ModelAndView deleteUser(int userId)
+	public ModelAndView deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
 	{
 		ModelAndView mv = new ModelAndView("/users");
 		try

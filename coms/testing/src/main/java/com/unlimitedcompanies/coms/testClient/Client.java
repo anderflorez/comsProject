@@ -3,7 +3,7 @@ package com.unlimitedcompanies.coms.testClient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.securityService.SecuritySetupService;
+import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 public class Client
 {

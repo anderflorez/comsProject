@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.securityService;
+package com.unlimitedcompanies.coms.service.security;
 
 import java.util.List;
 

@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthService;
+import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Component

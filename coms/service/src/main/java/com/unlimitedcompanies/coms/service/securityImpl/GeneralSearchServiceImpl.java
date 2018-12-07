@@ -1,8 +1,8 @@
-package com.unlimitedcompanies.coms.securityServiceImpl;
+package com.unlimitedcompanies.coms.service.securityImpl;
 
 import org.springframework.stereotype.Service;
 
-import com.unlimitedcompanies.coms.securityService.GeneralSearchService;
+import com.unlimitedcompanies.coms.service.security.GeneralSearchService;
 
 @Service
 public class GeneralSearchServiceImpl implements GeneralSearchService

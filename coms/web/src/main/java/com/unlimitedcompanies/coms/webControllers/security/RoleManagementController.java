@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.securityService.AuthService;
+import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller

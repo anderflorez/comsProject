@@ -13,10 +13,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.securityService.AuthService;
-import com.unlimitedcompanies.coms.securityService.ContactService;
-import com.unlimitedcompanies.coms.securityServiceExceptions.ContactNotFoundException;
-import com.unlimitedcompanies.coms.securityServiceExceptions.MissingContactException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -35,7 +35,7 @@ public class UserManagementController
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView showUserDetails(@RequestParam(value = "u", required = false) String uId, 
-										@RequestParam(value = "c", required = false) Integer cId)
+										@RequestParam(value = "c", required = false) Integer cId) throws RecordNotFoundException
 	{
 		ModelAndView mv = new ModelAndView("/pages/security/userManagement.jsp");
 		UserForm userForm = null;
@@ -58,7 +58,7 @@ public class UserManagementController
 					userForm = new UserForm();
 					userForm.setContactId(contact.getContactId());
 					mv.addObject("userForm", userForm);
-				} catch (ContactNotFoundException e)
+				} catch (RecordNotFoundException e)
 				{
 					mv.setViewName("/contacts");
 					mv.addObject("error", "Error: The contact being used to create the new user could not be found");
@@ -93,7 +93,7 @@ public class UserManagementController
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processUsers(UserForm userForm)
+	public ModelAndView processUsers(UserForm userForm) throws RecordNotFoundException, RecordNotCreatedException
 	{
 		ModelAndView mv = new ModelAndView();
 		
@@ -123,16 +123,11 @@ public class UserManagementController
 				mv.setViewName("/userDetail?u=" + newUser.getUserId());
 				
 			} 
-			catch (ContactNotFoundException e)
+			catch (RecordNotFoundException e)
 			{
 				mv.setViewName("/contacts");
 				mv.addObject("error", "Error: The contact provided could not be found");
 			} 
-			catch (MissingContactException e)
-			{
-				mv.setViewName("/contacts");
-				mv.addObject("error", "Error: The contact provided could not be found");
-			}
 			
 		} 
 		else
@@ -142,7 +137,7 @@ public class UserManagementController
 			{
 				User user = new User(userForm.getUsername(), "mypass".toCharArray(), null);
 				user.setEnabled(userForm.getEnabled());
-				user = authService.updateUser(userForm.getUserId(), user);
+				user = authService.updateUser(user);
 				mv.setViewName("/userDetail");
 				mv.addObject("u", user.getUserId());
 			}
