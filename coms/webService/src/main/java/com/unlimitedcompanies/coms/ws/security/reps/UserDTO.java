@@ -1,15 +1,9 @@
 package com.unlimitedcompanies.coms.ws.security.reps;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.hateoas.ResourceSupport;
 
-import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @XmlRootElement(name = "user")
@@ -21,14 +15,12 @@ public class UserDTO extends ResourceSupport
 	private boolean enabled;
 	private String dateAdded;
 	private String lastAccess;
-	private Contact contact;
-	private List<Role> roles;
+	private Integer contactId;
 	
 	public UserDTO() 
 	{
 		this.password = null;
 		this.enabled = false;
-		this.roles = new ArrayList<>();
 	}
 	
 	public UserDTO(User user) 
@@ -39,6 +31,10 @@ public class UserDTO extends ResourceSupport
 		this.enabled = user.isEnabled();
 		this.dateAdded = user.getClientLocalDateAdded();
 		this.lastAccess = user.getClientLocalLastAccess();
+		if (user.getContact() != null)
+		{
+			this.contactId = user.getContact().getContactId();
+		}
 	}
 
 	public Integer getUserId()
@@ -102,25 +98,26 @@ public class UserDTO extends ResourceSupport
 		this.lastAccess = lastAccess;
 	}
 
-	public Contact getContact()
+	public Integer getContactId()
 	{
-		return contact;
+		return contactId;
 	}
 
-	public void setContact(Contact contact)
+	public void setContactId(Integer contactId)
 	{
-		this.contact = contact;
-	}
-
-	@XmlElement(name = "role")
-	public List<Role> getRoles()
-	{
-		return roles;
-	}
-
-	public void setRoles(List<Role> roles)
-	{
-		this.roles = roles;
+		this.contactId = contactId;
 	}
 	
+	public User getDomainUser()
+	{
+		User user = new User();
+		user.setUserId(this.getUserId());
+		user.setUsername(this.getUsername());
+		user.setPassword(this.getPassword());
+		user.setEnabled(this.isEnabled());
+		user.setDateAdded(this.getDateAdded());
+		user.setLastAccess(this.getLastAccess());
+		
+		return user;
+	}
 }

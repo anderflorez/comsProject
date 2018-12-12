@@ -23,8 +23,9 @@ public interface AuthService
 	public List<User> searchUsersByRange(int page, int elements);
 	public User searchUserByUserId(Integer id) throws RecordNotFoundException;
 	public User searchUserByUsername(String string) throws RecordNotFoundException;
-	public User searchUserByContact(Contact contact);
-	public User searchUserByUsernameWithContact(String username);
+	public User searchUserByContact(Contact contact) throws RecordNotFoundException;
+	public User searchUserByUserIdWithContact(int userId) throws RecordNotFoundException;
+	public User searchUserByUsernameWithContact(String username) throws RecordNotFoundException;
 //	public User searchAUserByIdWithRoles(int userId);
 	public User searchFullUserByUserId(int userId);
 	public User searchFullUserByUsername(String username);

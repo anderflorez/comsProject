@@ -144,6 +144,7 @@ public class ContactServiceImpl implements ContactService
 		catch (RecordNotFoundException e) {}
 	}
 
+
 //	@Override
 //	public int findNumberOfContactAddresses()
 //	{

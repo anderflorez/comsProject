@@ -103,6 +103,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public User searchUserByUsername(String username) throws RecordNotFoundException
 	{
 		try
@@ -116,15 +117,45 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	public User searchUserByContact(Contact contact)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User searchUserByContact(Contact contact) throws RecordNotFoundException
 	{
-		return authDao.getUserByContact(contact);
+		try
+		{
+			return authDao.getUserByContact(contact);
+		} 
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
 	}
-
+	
 	@Override
-	public User searchUserByUsernameWithContact(String username)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User searchUserByUserIdWithContact(int userId) throws RecordNotFoundException
 	{
-		return authDao.getUserByUsernameWithContact(username);
+		try
+		{
+			return authDao.getUserByUserIdWithContact(userId);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
+	}
+	
+	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User searchUserByUsernameWithContact(String username) throws RecordNotFoundException
+	{
+		try
+		{
+			return authDao.getUserByUsernameWithContact(username);
+		} 
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException();
+		}
 	}
 	
 //	@Override
@@ -160,7 +191,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
+	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
 	{
 		try

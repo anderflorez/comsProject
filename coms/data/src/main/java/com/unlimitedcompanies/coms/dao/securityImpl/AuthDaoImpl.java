@@ -96,7 +96,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public User getUserByUsername(String username)
 	{
-		return em.createQuery("search u from User u where u.username = :username", User.class)
+		return em.createQuery("select user from User user where user.username = :username", User.class)
 						   .setParameter("username", username)
 						   .getSingleResult();
 	}
@@ -108,11 +108,19 @@ public class AuthDaoImpl implements AuthDao
 							  .setParameter("contact", contact)
 							  .getSingleResult();
 	}
+
+	@Override
+	public User getUserByUserIdWithContact(int userId)
+	{
+		return em.createQuery("select user from User as user left join fetch user.contact where user.userId = :userId", User.class)
+				  .setParameter("userId", userId)
+				  .getSingleResult();
+	}
 	
 	@Override
 	public User getUserByUsernameWithContact(String username)
 	{
-		return em.createQuery("select user from User as user left join fetch user.contact where username = :username", User.class)
+		return em.createQuery("select user from User as user left join fetch user.contact where user.username = :username", User.class)
 							  .setParameter("username", username)
 							  .getSingleResult();
 	}

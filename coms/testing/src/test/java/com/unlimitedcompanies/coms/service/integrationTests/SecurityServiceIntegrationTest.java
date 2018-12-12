@@ -289,11 +289,6 @@ class SecurityServiceIntegrationTest
 	// id failed");
 	// }
 	//
-	@Test
-	public void getNumberOfUsersTest()
-	{
-		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
-	}
 
 	@Test
 	public void saveNewUserTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
@@ -304,6 +299,12 @@ class SecurityServiceIntegrationTest
 		User user = authService.saveUser(new User("username", "mypass".toCharArray(), contact));
 		assertEquals(1, authService.searchNumberOfUsers(), "Service test to save a new user failed");
 		assertNotNull(user.getUserId(), "Service test to save a new user failed");
+	}
+
+	@Test
+	public void getNumberOfUsersTest()
+	{
+		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
 	}
 	
 	@Test
@@ -366,7 +367,7 @@ class SecurityServiceIntegrationTest
 		User user = new User("jdoe", "mypass".toCharArray(), contact);
 		authService.saveUser(user);
 
-		User founduser = authService.searchUserByUsernameWithContact("jdoe");
+		User founduser = authService.searchUserByUsername("jdoe");
 
 		assertEquals(user, founduser, "Service test for finding user by username with contact failed");
 	}
@@ -380,19 +381,18 @@ class SecurityServiceIntegrationTest
 		User foundUser = authService.searchUserByContact(contact);
 		assertEquals(user.getUserId(), foundUser.getUserId(), "Service test for finding user by contact failed");
 	}
-
-	@Test
-	public void findUserByUsernameWithContactTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	
+	@Test 
+	public void findUserWithContactTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
 	{
-		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-		User user = new User("jdoe", "mypass".toCharArray(), contact);
-		authService.saveUser(user);
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 
-		User founduser = authService.searchUserByUsernameWithContact("jdoe");
-
-		assertEquals(user, founduser, "Service test for finding user by username failed");
-		assertEquals(user.getContact(), founduser.getContact(), "Service test for finding user by username with contact failed");
+		assertEquals(contact, authService.searchUserByUsernameWithContact(user.getUsername()).getContact(),
+				"Integration service test to find a user with contact failed");
+		User foundUser = authService.searchUserByUserIdWithContact(user.getUserId());
+		assertEquals(contact, foundUser.getContact(),
+				"Integration service test to find a user with contact failed");
 	}
 	
 	@Test

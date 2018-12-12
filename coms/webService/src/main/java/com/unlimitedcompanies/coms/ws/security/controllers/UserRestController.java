@@ -19,11 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.ws.config.LinkDirectory;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
@@ -32,26 +35,37 @@ import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
 public class UserRestController
 {
 	@Autowired
+	LinkDirectory linkDirectory;
+	
+	@Autowired
 	AuthService authService;
 	
+	@Autowired
+	ContactService contactService;
+	
+	private final String resource = "user";
 	private final String baseURL = "http://localhost:8080/comsws/rest/user/";
-	private final String baseURI = "/rest/user";
-	private final String allUsers = baseURI + "s";
-	private final String userDetails = baseURI + "/{id}";
+	private final String baseURI = "/rest/" + resource;
+	private final String allRecords = baseURI + "s";
+	private final String recordDetails = baseURI + "/{id}";
 	
 	@RequestMapping("/rest/loggedUser")
-	public UserDTO getUserInfo()
+	public UserDTO getUserInfo() throws RecordNotFoundException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
 		User user = authService.searchUserByUsernameWithContact(userDetails.getUsername());
 		UserDTO loggedUser = new UserDTO(user);
-		loggedUser.setContact(user.getContact());
+		
+		Link selfLink = linkTo(methodOn(UserRestController.class).findUserById(loggedUser.getUserId())).withSelfRel();
+		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(user.getContact().getContactId())).withRel("contact");
+		loggedUser.add(selfLink, contactLink);
 		
 		return loggedUser;
 	}
 	
-	@RequestMapping(value = allUsers, method = RequestMethod.GET)
+	@RequestMapping(value = allRecords, method = RequestMethod.GET)
 	public UserCollectionResponse allUsers(@RequestParam(name = "pag", required = false) Integer pag,
 										   @RequestParam(name = "epp", required = false) Integer epp)
 	{
@@ -90,22 +104,32 @@ public class UserRestController
 		return foundUsers;
 	}
 
-	@RequestMapping(value = userDetails, method = RequestMethod.GET)
+	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
 	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
 	{
-		UserDTO foundUser = new UserDTO(authService.searchUserByUserId(id));
-		Link link = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
-		foundUser.add(link);
-		return foundUser;
+		User user = authService.searchUserByUserIdWithContact(id);
+		UserDTO userResponse = new UserDTO(user);
+
+		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
+		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(userResponse.getUserId())).withRel("contact");
+		userResponse.add(userLink, contactLink);
+		return userResponse;
 	}
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
-	public UserDTO saveNewContact(@RequestBody User newUser) throws RecordNotFoundException, RecordNotCreatedException
+	public UserDTO saveNewUser(@RequestBody UserDTO newUser) throws RecordNotFoundException, RecordNotCreatedException
 	{
-		UserDTO createdUser = new UserDTO(authService.saveUser(newUser));
-		Link link = linkTo(methodOn(UserRestController.class).findUserById(createdUser.getUserId())).withSelfRel();
-		createdUser.add(link);
+		System.out.println("=================> Running server saveNewUser");
+		Contact contact = contactService.searchContactById(newUser.getContactId());
+		User user = newUser.getDomainUser();
+		user.setContact(contact);
+		
+		System.out.println("=================> ready to save the new user from the server");
+		UserDTO createdUser = new UserDTO(authService.saveUser(user));
+
+		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(createdUser.getUserId())).withSelfRel();
+		createdUser.add(userLink);
 		return createdUser;
 	}
 	
@@ -113,13 +137,16 @@ public class UserRestController
 	@ResponseStatus(value = HttpStatus.OK)
 	public UserDTO updateContact(@RequestBody User editedUser) throws RecordNotFoundException
 	{
+		// TODO: Create a new exception to be thrown when the next line does not update the record - probably in services
 		UserDTO updatedUser = new UserDTO(authService.updateUser(editedUser));
-		Link link = linkTo(methodOn(UserRestController.class).findUserById(updatedUser.getUserId())).withSelfRel();
-		updatedUser.add(link);
+		
+		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(updatedUser.getUserId())).withSelfRel();
+		updatedUser.add(userLink);
+		
 		return updatedUser;
 	}
 	
-	@RequestMapping(value = userDetails, method = RequestMethod.DELETE)
+	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
 	{
@@ -141,6 +168,7 @@ public class UserRestController
 	@ExceptionHandler({RecordNotCreatedException.class, RecordNotDeletedException.class})
 	public ResponseEntity<ErrorRep> userNotCreatedExceptionHandler()
 	{
+		System.out.println("===============> Record was not created exception was thrown");
 		ErrorRep error = new ErrorRep();
 		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		error.addError("The new user could not be created");

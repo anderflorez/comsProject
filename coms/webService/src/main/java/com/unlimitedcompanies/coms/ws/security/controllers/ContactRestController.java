@@ -22,23 +22,31 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.ws.config.LinkDirectory;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.ContactDTO;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 
 @RestController
 public class ContactRestController
-{	
+{
+	@Autowired
+	LinkDirectory linkDirectory;
+	
 	@Autowired
 	ContactService contactService;
 	
+	@Autowired
+	AuthService authService;
+	
 	private final String baseURL = "http://localhost:8080/comsws/rest/contact/";
 	private final String baseURI = "/rest/contact";
-	private final String allContacts = baseURI + "s";
-	private final String contactDetails = baseURI + "/{id}";
+	private final String allRecords = baseURI + "s";
+	private final String recordDetails = baseURI + "/{id}";
 	
-	@RequestMapping(value = allContacts, method = RequestMethod.GET)
+	@RequestMapping(value = allRecords, method = RequestMethod.GET)
 	public ContactCollectionResponse allContacts(@RequestParam(name = "pag", required = false) Integer pag,
 												 @RequestParam(name = "epp", required = false) Integer epp)
 	{
@@ -80,13 +88,13 @@ public class ContactRestController
 		return allContacts;
 	}
 
-	@RequestMapping(value = contactDetails, method = RequestMethod.GET)
+	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
 	public ContactDTO findContactById(@PathVariable Integer id) throws RecordNotFoundException
 	{
 		Contact foundContact = contactService.searchContactById(id);
 		ContactDTO contact = new ContactDTO(foundContact);
-		Link link = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
-		contact.add(link);
+		Link selfLink = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
+		contact.add(selfLink);
 		return contact;
 	}
 	
@@ -118,7 +126,7 @@ public class ContactRestController
 		return contactResponse;
 	}
 	
-	@RequestMapping(value = contactDetails, method = RequestMethod.DELETE)
+	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException
 	{		

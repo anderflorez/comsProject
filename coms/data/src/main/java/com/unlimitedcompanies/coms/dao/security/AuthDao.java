@@ -20,6 +20,7 @@ public interface AuthDao
 	public User getUserByUserId(int id);
 	public User getUserByUsername(String username);
 	public User getUserByContact(Contact contact);
+	public User getUserByUserIdWithContact(int userId);
 	public User getUserByUsernameWithContact(String username);
 //	public User getAUserByIdWithRoles(int userId);
 	public User getFullUserByUserId(int id);
