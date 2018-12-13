@@ -107,17 +107,5 @@ public class UserDTO extends ResourceSupport
 	{
 		this.contactId = contactId;
 	}
-	
-	public User getDomainUser()
-	{
-		User user = new User();
-		user.setUserId(this.getUserId());
-		user.setUsername(this.getUsername());
-		user.setPassword(this.getPassword());
-		user.setEnabled(this.isEnabled());
-		user.setDateAdded(this.getDateAdded());
-		user.setLastAccess(this.getLastAccess());
-		
-		return user;
-	}
+
 }

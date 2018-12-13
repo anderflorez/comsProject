@@ -1,22 +1,39 @@
 package com.unlimitedcompanies.coms.ws.security.controllers;
 
-import java.util.Map;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.hateoas.Link;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.unlimitedcompanies.coms.ws.config.LinkDirectory;
+import com.unlimitedcompanies.coms.ws.config.RestLinks;
+import com.unlimitedcompanies.coms.ws.security.reps.ResourceLink;
+import com.unlimitedcompanies.coms.ws.security.reps.ResourceLinkCollection;
 
 @RestController
 public class LinkDirectoryController
 {
-	@Autowired
-	LinkDirectory linkDirectory;
-	
-	@RequestMapping(name = "/restDirectory")
-	public Map<String, String> getLinkDirectory()
+	@RequestMapping(value = RestLinks.URI_BASE + "directory")
+	public ResourceLinkCollection getDirectory()
 	{
-		return linkDirectory.getLinkDir();
+		ResourceLinkCollection resources = new ResourceLinkCollection();
+		List<Link> links = new ArrayList<>();
+		try
+		{
+			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
+			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
+		}
+		catch (Exception e) {}
+		
+		for (Link link : links)
+		{
+			resources.addResources(new ResourceLink(link.getRel(), link.getHref()));
+		}
+		
+		return resources;
 	}
 }

@@ -26,7 +26,6 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
-import com.unlimitedcompanies.coms.ws.config.LinkDirectory;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
@@ -34,9 +33,6 @@ import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
 @RestController
 public class UserRestController
 {
-	@Autowired
-	LinkDirectory linkDirectory;
-	
 	@Autowired
 	AuthService authService;
 	
@@ -120,25 +116,23 @@ public class UserRestController
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public UserDTO saveNewUser(@RequestBody UserDTO newUser) throws RecordNotFoundException, RecordNotCreatedException
 	{
-		System.out.println("=================> Running server saveNewUser");
 		Contact contact = contactService.searchContactById(newUser.getContactId());
-		User user = newUser.getDomainUser();
-		user.setContact(contact);
-		
-		System.out.println("=================> ready to save the new user from the server");
+		User user = new User(newUser.getUsername(), newUser.getPassword(), contact);
 		UserDTO createdUser = new UserDTO(authService.saveUser(user));
-
+		
 		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(createdUser.getUserId())).withSelfRel();
 		createdUser.add(userLink);
+		
 		return createdUser;
 	}
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
-	public UserDTO updateContact(@RequestBody User editedUser) throws RecordNotFoundException
+	public UserDTO updateUser(@RequestBody User editedUser) throws RecordNotFoundException
 	{
 		// TODO: Create a new exception to be thrown when the next line does not update the record - probably in services
-		UserDTO updatedUser = new UserDTO(authService.updateUser(editedUser));
+		User user = new User(editedUser.getUserId(), editedUser.getUsername(), editedUser.isEnabled());
+		UserDTO updatedUser = new UserDTO(authService.updateUser(user));
 		
 		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(updatedUser.getUserId())).withSelfRel();
 		updatedUser.add(userLink);
@@ -148,10 +142,10 @@ public class UserRestController
 	
 	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
+	public void deleteUser(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
 	{
 		// TODO: Spring might throw DataIntegrityViolationException if trying to delete 
-		//		 a contact that has other elements associated with it like a user
+		//		 a user that has other elements associated with it
 		
 		authService.deleteUser(id.intValue());
 	}
@@ -165,14 +159,23 @@ public class UserRestController
 		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 	}
 	
-	@ExceptionHandler({RecordNotCreatedException.class, RecordNotDeletedException.class})
+	@ExceptionHandler({RecordNotCreatedException.class})
 	public ResponseEntity<ErrorRep> userNotCreatedExceptionHandler()
 	{
-		System.out.println("===============> Record was not created exception was thrown");
 		ErrorRep error = new ErrorRep();
 		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		error.addError("The new user could not be created");
 		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(RecordNotDeletedException.class)
+	public ResponseEntity<ErrorRep> userNotDeletedExceptionHandler()
+	{
+		ErrorRep errorResponse = new ErrorRep();
+		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		errorResponse.addError("The user could not be deleted - Unknown error");
+		errorResponse.addMessage("Please try again or contact your system administrator");
+		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

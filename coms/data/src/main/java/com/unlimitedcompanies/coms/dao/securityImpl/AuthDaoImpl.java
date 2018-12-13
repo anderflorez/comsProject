@@ -154,6 +154,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void deleteUser(int userId)
 	{
+		// TODO: Find a way to test this operation at running time to show a success or error message to the user
 		User user = this.getUserByUserId(userId);
 		em.remove(user);
 	}

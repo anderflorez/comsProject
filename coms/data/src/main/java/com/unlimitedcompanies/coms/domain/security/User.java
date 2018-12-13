@@ -38,8 +38,10 @@ public class User
 				inverseJoinColumns = {@JoinColumn(name = "role_FK")})
 	private List<Role> roles = new ArrayList<>();
 	
-	public User() {}
+	// Constructor not to be used - intended for persistence only
+	protected User() {}
 
+	// Constructor intended for new users to be saved in the db
 	public User(String username, char[] password, Contact contact)
 	{
 		this.userId = null;
@@ -51,14 +53,15 @@ public class User
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
 	
-	public User(Integer userId, String username, boolean enabled, ZonedDateTime dateAdded, ZonedDateTime lastAccess)
+	// Constructor intended for existing users in the db to be updated
+	public User(Integer userId, String username, boolean enabled)
 	{
 		this.userId = userId;
 		this.username = username;
 		this.password = null;
 		this.enabled = enabled;
-		this.dateAdded = dateAdded;
-		this.lastAccess = lastAccess;
+		this.dateAdded = null;
+		this.lastAccess = null;
 	}
 
 	public Integer getUserId()
@@ -119,9 +122,12 @@ public class User
 	
 	public void setDateAdded(String dateTime)
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
-		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-		this.dateAdded = accessTime;
+		if (dateTime != null)
+		{
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+			this.dateAdded = accessTime;
+		}
 	}
 	
 	public ZonedDateTime getLastAccess()
@@ -148,9 +154,12 @@ public class User
 	
 	public void setLastAccess(String dateTime)
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
-		ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-		this.lastAccess = accessTime;
+		if (dateTime != null)
+		{
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
+			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+			this.lastAccess = accessTime;
+		}
 	}
 	
 	public Contact getContact()

@@ -185,12 +185,6 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public int searchNumberOfRoles()
-	{
-		return authDao.getNumberOfRoles();
-	}
-
-	@Override
 	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
 	{
@@ -202,15 +196,7 @@ public class AuthServiceImpl implements AuthService
 		{
 			throw new RecordNotFoundException();
 		}
-		
-		try
-		{
-			this.searchUserByUserId(userId);
-		} 
-		catch (RecordNotFoundException e)
-		{
-			throw new RecordNotDeletedException();
-		}
+
 	}
 
 	@Override
@@ -218,6 +204,12 @@ public class AuthServiceImpl implements AuthService
 	{
 		authDao.createRole(role);
 		return this.searchRoleByRoleName(role.getRoleName());
+	}
+	
+	@Override
+	public int searchNumberOfRoles()
+	{
+		return authDao.getNumberOfRoles();
 	}
 
 	@Override
