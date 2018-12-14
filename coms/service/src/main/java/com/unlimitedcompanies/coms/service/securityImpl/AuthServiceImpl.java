@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,9 @@ public class AuthServiceImpl implements AuthService
 
 		Contact contact = contactService.searchContactById(user.getContact().getContactId());
 		user.setContact(contact);
+		
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		user.setPassword(pe.encode(user.getPassword().toString()).toCharArray());
 
 		authDao.createUser(user);
 		try
