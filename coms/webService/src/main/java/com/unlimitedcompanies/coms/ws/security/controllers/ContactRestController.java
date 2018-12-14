@@ -135,11 +135,11 @@ public class ContactRestController
 	}
 	
 	@ExceptionHandler(RecordNotFoundException.class)
-	public ResponseEntity<ErrorRep> contactNotFoundExceptionHandler() 
+	public ResponseEntity<ErrorRep> contactNotFoundExceptionHandler(RecordNotFoundException e) 
 	{
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-		errorResponse.addError("The contact could not be found");
+		errorResponse.addError(e.getMessage());
 		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	}
 	
@@ -153,11 +153,12 @@ public class ContactRestController
 	}
 	
 	@ExceptionHandler(RecordNotDeletedException.class)
-	public ResponseEntity<ErrorRep> contactNotDeletedExceptionHandler()
+	public ResponseEntity<ErrorRep> contactNotDeletedExceptionHandler(RecordNotDeletedException e)
 	{
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		errorResponse.addError("The contact could not be deleted - Unknown error");
+		errorResponse.addError("Unknown error");
+		errorResponse.addError(e.getMessage());
 		errorResponse.addMessage("Please try again or contact your system administrator");
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}

@@ -6,8 +6,9 @@ import com.unlimitedcompanies.coms.domain.security.Contact;
 
 public interface ContactDao
 {
-	public int getNumberOfContacts();
 	public void createContact(Contact contact);
+	public int getNumberOfContacts();
+	boolean existingContact(int contactId);
 	public List<Contact> getAllContacts();
 //	public List<Contact> getAllContacts(User loggedUser);
 	public List<Contact> getContactsByRange(int page, int elements);

@@ -24,13 +24,6 @@ public class ContactDaoImpl implements ContactDao
 	private EntityManager em;
 
 	@Override
-	public int getNumberOfContacts()
-	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contact").getSingleResult();
-		return bigInt.intValue();
-	}
-
-	@Override
 	public void createContact(Contact contact)
 	{	
 		try
@@ -51,6 +44,20 @@ public class ContactDaoImpl implements ContactDao
 				throw (ConstraintViolationException)e.getCause();
 			}
 		}
+	}
+	
+	@Override
+	public int getNumberOfContacts()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contact").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public boolean existingContact(int contactId)
+	{
+		Contact contact = em.find(Contact.class, contactId);
+		return contact == null ? false : true;
 	}
 	
 	@Override

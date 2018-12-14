@@ -5,11 +5,13 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -151,12 +153,16 @@ public class UserRestController
 	}
 	
 	@ExceptionHandler(RecordNotFoundException.class)
-	public ResponseEntity<ErrorRep> userNotFoundExceptionHandler() 
+	public ResponseEntity<ErrorRep> userNotFoundExceptionHandler(RecordNotFoundException e) 
 	{
 		ErrorRep error = new ErrorRep();
 		error.setStatusCode(HttpStatus.NOT_FOUND.value());
-		error.addError("The user could not be found");
-		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+		error.addError(e.getMessage());
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", baseURL);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
 	}
 	
 	@ExceptionHandler({RecordNotCreatedException.class})
@@ -165,17 +171,26 @@ public class UserRestController
 		ErrorRep error = new ErrorRep();
 		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		error.addError("The new user could not be created");
-		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", baseURL);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	@ExceptionHandler(RecordNotDeletedException.class)
-	public ResponseEntity<ErrorRep> userNotDeletedExceptionHandler()
+	public ResponseEntity<ErrorRep> userNotDeletedExceptionHandler(RecordNotDeletedException e)
 	{
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		errorResponse.addError("The user could not be deleted - Unknown error");
+		errorResponse.addError("Unknown error");
+		errorResponse.addError(e.getMessage());
 		errorResponse.addMessage("Please try again or contact your system administrator");
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", baseURL);
+		
+		return new ResponseEntity<>(errorResponse, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

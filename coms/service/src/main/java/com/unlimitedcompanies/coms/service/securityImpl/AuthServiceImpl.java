@@ -41,7 +41,8 @@ public class AuthServiceImpl implements AuthService
 	{
 		if (user.getContact() == null)
 		{
-			throw new RecordNotFoundException();
+			String exceptionMessage = "The contact associated with the user you are trying to create could not be found";
+			throw new RecordNotFoundException(exceptionMessage);
 		}
 
 		Contact contact = contactService.searchContactById(user.getContact().getContactId());
@@ -103,7 +104,7 @@ public class AuthServiceImpl implements AuthService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user could not be found");
 		}
 	}
 
@@ -117,7 +118,7 @@ public class AuthServiceImpl implements AuthService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user could not be found");
 		}
 	}
 	
@@ -131,7 +132,7 @@ public class AuthServiceImpl implements AuthService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user could not be found");
 		}
 	}
 	
@@ -145,7 +146,7 @@ public class AuthServiceImpl implements AuthService
 		}
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user could not be found");
 		}
 	}
 	
@@ -159,7 +160,7 @@ public class AuthServiceImpl implements AuthService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user could not be found");
 		}
 	}
 	
@@ -195,13 +196,17 @@ public class AuthServiceImpl implements AuthService
 	{
 		try
 		{
-			authDao.deleteUser(userId);
+			authDao.deleteUser(userId); 
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The user you are trying to delete could not be found");
 		}
-
+		
+		if (authDao.existingUser(userId))
+		{
+			throw new RecordNotDeletedException("The user could not be deleted");
+		}
 	}
 
 	@Override

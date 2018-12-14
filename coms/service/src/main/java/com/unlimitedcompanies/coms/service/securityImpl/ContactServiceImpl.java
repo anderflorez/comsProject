@@ -104,7 +104,7 @@ public class ContactServiceImpl implements ContactService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The contact could not be found");
 		}
 		return contact;
 	}
@@ -133,17 +133,14 @@ public class ContactServiceImpl implements ContactService
 		} 
 		catch (NoResultException e)
 		{
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException("The contact you are trying to delete could not be found");
 		}
 		
-		try
+		if (dao.existingContact(contactId))
 		{
-			this.searchContactById(contactId);
-			throw new RecordNotDeletedException();
-		} 
-		catch (RecordNotFoundException e) {}
+			throw new RecordNotDeletedException("The contact could not be deleted");
+		}
 	}
-
 
 //	@Override
 //	public int findNumberOfContactAddresses()

@@ -436,7 +436,7 @@ class SecurityServiceIntegrationTest
 	
 	 @Test
 	 public void deleteSingleUserTest() throws DuplicateRecordException, RecordNotFoundException, 
-	 										   RecordNotCreatedException, RecordNotDeletedException
+			 								   RecordNotCreatedException, RecordNotDeletedException
 	 {
 		 Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		 Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));

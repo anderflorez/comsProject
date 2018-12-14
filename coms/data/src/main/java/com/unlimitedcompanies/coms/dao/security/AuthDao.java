@@ -13,8 +13,9 @@ import com.unlimitedcompanies.coms.domain.security.User;
 
 public interface AuthDao
 {
-	public int getNumberOfUsers();
 	public void createUser(User user);
+	public int getNumberOfUsers();
+	boolean existingUser(int userId);
 	public List<User> getAllUsers();
 	public List<User> getUsersByRange(int page, int elements);
 	public User getUserByUserId(int id);

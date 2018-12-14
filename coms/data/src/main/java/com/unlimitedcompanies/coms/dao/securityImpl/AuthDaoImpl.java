@@ -32,13 +32,6 @@ public class AuthDaoImpl implements AuthDao
 	private EntityManager em;
 
 	@Override
-	public int getNumberOfUsers()
-	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM user").getSingleResult();
-		return bigInt.intValue();
-	}
-
-	@Override
 	public void createUser(User user)
 	{
 		try
@@ -64,6 +57,20 @@ public class AuthDaoImpl implements AuthDao
 				throw e;
 			}
 		}
+	}
+	
+	@Override
+	public int getNumberOfUsers()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM user").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public boolean existingUser(int userId)
+	{
+		User user = em.find(User.class, userId);
+		return user == null ? false : true;
 	}
 	
 	@Override
@@ -144,8 +151,6 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void updateUser(User user)
 	{
-		// TODO: Check the behavior of this method by following in the debugger
-		
 		User foundUser = this.getUserByUserId(user.getUserId());
 		foundUser.setUsername(user.getUsername());
 		foundUser.setEnabled(user.isEnabled());
