@@ -12,12 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
-import com.unlimitedcompanies.coms.webFormObjects.UserForm;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
 @Controller
@@ -31,70 +27,6 @@ public class ViewSecurityObjectController
 	
 	@Autowired
 	AuthService authService;
-	
-	@RequestMapping("/users")
-	public ModelAndView showUsers(@RequestParam(name = "error", required = false) String error)
-	{
-		List<User> allUsers = authService.searchAllUsers();
-		ModelAndView mv = new ModelAndView("/pages/security/userView.jsp");
-		mv.addObject("users", allUsers);
-		mv.addObject("user", authUser.getUser());
-		if (error != null)
-		{
-			mv.addObject("error", error);
-		}
-		return mv;
-	}
-	
-	@RequestMapping("/userDetail")
-	public ModelAndView showUserDetails(@RequestParam("uid") String id) throws RecordNotFoundException
-	{		
-		ModelAndView mv = new ModelAndView("/pages/security/userDetails.jsp");
-		UserForm userForm;
-		try
-		{
-			int userId = Integer.valueOf(id);
-			userForm = new UserForm(authService.searchUserByUserId(userId));
-		} 
-		catch (NoResultException e)
-		{
-			userForm = new UserForm();
-			mv.addObject("error", "Error: The user could not be found");
-		}
-		catch (NumberFormatException e)
-		{
-			userForm = new UserForm();
-			mv.addObject("error", "Error: The user information provided is invalid");
-		}
-		mv.addObject("userForm", userForm);
-		mv.addObject("user", authUser.getUser());
-		return mv;
-	}
-	
-	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
-	public ModelAndView deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
-	{
-		ModelAndView mv = new ModelAndView("/users");
-		try
-		{
-			User user = authService.searchUserByUserId(userId);
-			Role adminRole = authService.searchRoleByIdWithMembers("1");
-			if (adminRole.getMembers().size() == 1 && adminRole.getMembers().contains(user))
-			{
-				mv.addObject("error", "Error: The last administrator user cannot be deleted");
-			}
-			else 
-			{
-				authService.deleteUser(userId);				
-			}
-			
-		} 
-		catch (NoResultException e)
-		{
-			mv.addObject("error", "Error: The user to be deleted could not be found");
-		}
-		return mv;
-	}
 	
 	@RequestMapping("/roles")
 	public ModelAndView showRoles()

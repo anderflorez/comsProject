@@ -13,6 +13,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -421,6 +423,28 @@ class SecurityServiceIntegrationTest
 		User updatedUser = authService.updateUser(user);		
 		assertEquals("john.doe", updatedUser.getUsername(), "Service test for updating user username failed");
 	}
+	
+	@Test
+	public void checkUserPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		assertTrue(authService.checkUserPassword(user.getUserId(), "mypass".toCharArray()));
+	}
+	
+//	@Test
+//	public void changeUserPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+//	{
+//		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+//		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+//		
+//		authService.changePassword(user.getUserId(), "mypass".toCharArray(), "mynewpass".toCharArray());
+//		User changedUser = authService.searchUserByUserId(user.getUserId());
+//		
+//		PasswordEncoder pe = new BCryptPasswordEncoder();
+//		assertTrue(pe.matches("mynewpass", changedUser.getPassword().toString()));
+//	}
 	
 	@Test
 	public void updateUserStatus() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException

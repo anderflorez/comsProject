@@ -29,7 +29,9 @@ public interface AuthService
 //	public User searchAUserByIdWithRoles(int userId);
 	public User searchFullUserByUserId(int userId);
 	public User searchFullUserByUsername(String username);
+	public boolean checkUserPassword(int userId, char[] password) throws RecordNotFoundException;
 	public User updateUser(User user) throws RecordNotFoundException;
+	//public void changePassword(int userId, char[] oldPassword, char[] newPassword);
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException;
 	
 	public int searchNumberOfRoles();

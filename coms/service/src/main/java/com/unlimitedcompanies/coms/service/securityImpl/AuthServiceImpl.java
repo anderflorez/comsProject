@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -183,12 +184,45 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
+	public boolean checkUserPassword(int userId, char[] password) throws RecordNotFoundException
+	{
+		User user = this.searchUserByUserId(userId);
+		
+		System.out.println("=========> password sent: " + Arrays.toString(password));
+		System.out.println("=========> encoded password: " + Arrays.toString(user.getPassword()));
+		
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		if (pe.matches(Arrays.toString(password), Arrays.toString(user.getPassword())))
+		{
+			return true;
+		}
+		else 
+		{
+			return false;
+		}
+	}
+	
+	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public User updateUser(User user) throws RecordNotFoundException
 	{
 		authDao.updateUser(user);
 		return this.searchUserByUserId(user.getUserId());
 	}
+	
+
+//	@Override
+//	public void changePassword(int userId, char[] oldPassword, char[] newPassword) throws RecordNotFoundException
+//	{
+//		User user = this.searchUserByUserId(userId);
+//		
+//		PasswordEncoder pe = new BCryptPasswordEncoder();
+//		if (pe.matches(oldPassword.toString(), user.getPassword().toString()))
+//		{
+//			user.setPassword(pe.encode(newPassword.toString()).toCharArray());
+//		}
+//
+//	}
 
 	@Override
 	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})

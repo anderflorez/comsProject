@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +33,7 @@ import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
+import com.unlimitedcompanies.coms.ws.security.reps.UserPasswordDTO;
 
 @RestController
 public class UserRestController
@@ -140,6 +143,28 @@ public class UserRestController
 		updatedUser.add(userLink);
 		
 		return updatedUser;
+	}
+	
+	@RequestMapping(value = baseURI + "Password", method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException
+	{
+		// TODO: consider placing all of this process in a new service method
+		
+		User user = authService.searchUserByUserId(password.getUserId());
+		
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		if (pe.matches(password.getOldPassword().toString(), user.getPassword().toString()))
+		{
+			user.setPassword(password.getNewPassword());
+			authService.updateUser(user);
+			
+			// TODO: create some checking and throw some exception if the password is not changed
+		}
+		else
+		{
+			// TODO: throw some exception to idicate the old password is incorrect
+		}
 	}
 	
 	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
