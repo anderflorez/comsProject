@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -113,7 +113,8 @@ public class UserRestController
 
 		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
 		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(userResponse.getUserId())).withRel("contact");
-		userResponse.add(userLink, contactLink);
+		Link passwordLink = new Link(baseURI + "/password/{id}" + userResponse.getUserId(), "password_change");
+		userResponse.add(userLink, contactLink, passwordLink);
 		return userResponse;
 	}
 	
@@ -133,8 +134,8 @@ public class UserRestController
 	
 	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
-	public UserDTO updateUser(@RequestBody User editedUser) throws RecordNotFoundException
-	{
+	public UserDTO updateUser(@RequestBody UserDTO editedUser) throws RecordNotFoundException
+	{		
 		// TODO: Create a new exception to be thrown when the next line does not update the record - probably in services
 		User user = new User(editedUser.getUserId(), editedUser.getUsername(), editedUser.isEnabled());
 		UserDTO updatedUser = new UserDTO(authService.updateUser(user));
@@ -145,26 +146,13 @@ public class UserRestController
 		return updatedUser;
 	}
 	
-	@RequestMapping(value = baseURI + "Password", method = RequestMethod.PUT)
+	@RequestMapping(value = baseURI + "/password/{id}", method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException
+	public void chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException, 
+																			IncorrectPasswordException, 
+																			RecordNotChangedException
 	{
-		// TODO: consider placing all of this process in a new service method
-		
-		User user = authService.searchUserByUserId(password.getUserId());
-		
-		PasswordEncoder pe = new BCryptPasswordEncoder();
-		if (pe.matches(password.getOldPassword().toString(), user.getPassword().toString()))
-		{
-			user.setPassword(password.getNewPassword());
-			authService.updateUser(user);
-			
-			// TODO: create some checking and throw some exception if the password is not changed
-		}
-		else
-		{
-			// TODO: throw some exception to idicate the old password is incorrect
-		}
+		authService.changeUserPassword(password.getUserId(), password.getOldPassword(), password.getNewPassword());
 	}
 	
 	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
@@ -190,7 +178,7 @@ public class UserRestController
 		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
 	}
 	
-	@ExceptionHandler({RecordNotCreatedException.class})
+	@ExceptionHandler(RecordNotCreatedException.class)
 	public ResponseEntity<ErrorRep> userNotCreatedExceptionHandler()
 	{
 		ErrorRep error = new ErrorRep();
@@ -203,12 +191,38 @@ public class UserRestController
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	@ExceptionHandler(RecordNotChangedException.class)
+	public ResponseEntity<ErrorRep> userNotEditedExceptionHandler(RecordNotChangedException e)
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		error.addError(e.getMessage());
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", baseURL);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler({IncorrectPasswordException.class})
+	public ResponseEntity<ErrorRep> incorrectPasswordExceptionHandler()
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+		error.addError("The password could not be changed");
+		error.addError("The user password you have provided is incorrect");
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", baseURL);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	@ExceptionHandler(RecordNotDeletedException.class)
 	public ResponseEntity<ErrorRep> userNotDeletedExceptionHandler(RecordNotDeletedException e)
 	{
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		errorResponse.addError("Unknown error");
 		errorResponse.addError(e.getMessage());
 		errorResponse.addMessage("Please try again or contact your system administrator");
 		

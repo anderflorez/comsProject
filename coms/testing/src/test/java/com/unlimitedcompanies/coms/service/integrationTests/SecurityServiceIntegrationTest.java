@@ -1,11 +1,13 @@
 package com.unlimitedcompanies.coms.service.integrationTests;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,8 +15,6 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,6 +33,8 @@ import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -425,12 +427,94 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void checkUserPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	public void successfullUserPasswordChangeTest() throws DuplicateRecordException, 
+														   RecordNotFoundException, 
+														   RecordNotCreatedException, 
+														   IncorrectPasswordException, 
+														   RecordNotChangedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		String oldpass = String.valueOf(user.getPassword());
+		
+		authService.changeUserPassword(user.getUserId(), "mypass".toCharArray(), "newPass".toCharArray());
+		User foundUser = authService.searchUserByUserId(user.getUserId());
+		String newpass = String.valueOf(foundUser.getPassword());
+		
+		assertNotEquals(oldpass, newpass);
+		assertTrue(authService.passwordMatch(user.getUserId(), "newPass".toCharArray()));
+	}
+	
+	@Test
+	public void userPasswordChangeWithIncorrectPasswordTest() throws DuplicateRecordException, 
+														   RecordNotFoundException, 
+														   RecordNotCreatedException, 
+														   IncorrectPasswordException, 
+														   RecordNotChangedException
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
 		
-		assertTrue(authService.checkUserPassword(user.getUserId(), "mypass".toCharArray()));
+		assertThrows(IncorrectPasswordException.class, 
+					 () -> authService.changeUserPassword(user.getUserId(), "incorrectPassword".toCharArray(), "newPass".toCharArray()));		
+	}
+	
+	@Test
+	public void userPasswordChangeWithNoChanngeTest() throws DuplicateRecordException, 
+														   RecordNotFoundException, 
+														   RecordNotCreatedException, 
+														   IncorrectPasswordException, 
+														   RecordNotChangedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		assertThrows(RecordNotChangedException.class, 
+					 () -> authService.changeUserPassword(user.getUserId(), "mypass".toCharArray(), "mypass".toCharArray()));		
+	}
+	
+	@Test
+	public void matchingPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		assertTrue(authService.passwordMatch(user.getUserId(), "mypass".toCharArray()));
+	}
+	
+	@Test
+	public void incorrectPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		assertFalse(authService.passwordMatch(user.getUserId(), "incorrectpassword".toCharArray()));
+	}
+	
+	// TODO: Test for encrypted password both when creating a new user and when updating the password
+	@Test
+	public void successfullEncryptedNewUserPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		assertNotEquals(Arrays.toString("mypass".toCharArray()), Arrays.toString(user.getPassword()));
+		assertTrue(authService.passwordMatch(user.getUserId(), "mypass".toCharArray()));
+	}
+	
+	@Test
+	public void successfullEncryptedChangedUserPasswordTest() throws DuplicateRecordException, 
+																	 RecordNotFoundException, 
+																	 RecordNotCreatedException, 
+																	 IncorrectPasswordException, 
+																	 RecordNotChangedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		
+		authService.changeUserPassword(user.getUserId(), "mypass".toCharArray(), "newpassword".toCharArray());
+		
+		assertTrue(authService.passwordMatch(user.getUserId(), "newpassword".toCharArray()));
 	}
 	
 //	@Test
@@ -855,5 +939,4 @@ class SecurityServiceIntegrationTest
 		}
 		assertEquals(2, foundOrGroup.getConditions().size(), "Save OrGroup with conditions test for group failed");
 	}
-
 }

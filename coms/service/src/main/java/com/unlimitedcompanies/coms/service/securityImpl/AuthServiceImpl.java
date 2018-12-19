@@ -1,6 +1,5 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -20,6 +19,8 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -50,12 +51,15 @@ public class AuthServiceImpl implements AuthService
 		user.setContact(contact);
 		
 		PasswordEncoder pe = new BCryptPasswordEncoder();
-		user.setPassword(pe.encode(user.getPassword().toString()).toCharArray());
+		String encoded = pe.encode(String.valueOf(user.getPassword()));
+		char[] passencoded = encoded.toCharArray();
+		user.setPassword(passencoded);
 
 		authDao.createUser(user);
 		try
 		{
-			return this.searchUserByUsername(user.getUsername());
+			User savedUser = this.searchUserByUsername(user.getUsername());
+			return savedUser;
 		} 
 		catch (RecordNotFoundException e)
 		{
@@ -183,16 +187,37 @@ public class AuthServiceImpl implements AuthService
 		return authDao.getFullUserByUsername(username);
 	}
 	
+//	@Override
+//	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException
+//	{
+//		User user = this.searchUserByUserId(userId);
+//		
+//		PasswordEncoder pe = new BCryptPasswordEncoder();
+//		if (pe.matches(String.valueOf(password), String.valueOf(user.getPassword())))
+//		{
+//			return true;
+//		}
+//		else 
+//		{
+//			return false;
+//		}
+//	}
+	
 	@Override
-	public boolean checkUserPassword(int userId, char[] password) throws RecordNotFoundException
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User updateUser(User user) throws RecordNotFoundException
+	{
+		authDao.updateUser(user);
+		return this.searchUserByUserId(user.getUserId());
+	}
+	
+	@Override
+	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException
 	{
 		User user = this.searchUserByUserId(userId);
 		
-		System.out.println("=========> password sent: " + Arrays.toString(password));
-		System.out.println("=========> encoded password: " + Arrays.toString(user.getPassword()));
-		
 		PasswordEncoder pe = new BCryptPasswordEncoder();
-		if (pe.matches(Arrays.toString(password), Arrays.toString(user.getPassword())))
+		if (pe.matches(String.valueOf(password), String.valueOf(user.getPassword())))
 		{
 			return true;
 		}
@@ -203,11 +228,25 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public User updateUser(User user) throws RecordNotFoundException
+	public void changeUserPassword(int userId, char[] currentPassword, char[] newPassword) throws RecordNotFoundException, IncorrectPasswordException, RecordNotChangedException
 	{
-		authDao.updateUser(user);
-		return this.searchUserByUserId(user.getUserId());
+		if (this.passwordMatch(userId, currentPassword))
+		{
+			// Change the password
+			PasswordEncoder pe = new BCryptPasswordEncoder();
+			newPassword = pe.encode(String.valueOf(newPassword)).toCharArray();
+			authDao.changeUserPassword(userId, newPassword);
+			
+			// Check if user password was actually changed
+			if (this.passwordMatch(userId, currentPassword))
+			{
+				throw new RecordNotChangedException("Unknown error - The user password was not changed");
+			}
+		}
+		else
+		{
+			throw new IncorrectPasswordException();
+		}
 	}
 	
 

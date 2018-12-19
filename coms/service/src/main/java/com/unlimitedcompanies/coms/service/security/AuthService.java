@@ -10,6 +10,8 @@ import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -28,10 +30,11 @@ public interface AuthService
 	public User searchUserByUsernameWithContact(String username) throws RecordNotFoundException;
 //	public User searchAUserByIdWithRoles(int userId);
 	public User searchFullUserByUserId(int userId);
-	public User searchFullUserByUsername(String username);
-	public boolean checkUserPassword(int userId, char[] password) throws RecordNotFoundException;
+	public User searchFullUserByUsername(String username);	
+	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException;
 	public User updateUser(User user) throws RecordNotFoundException;
-	//public void changePassword(int userId, char[] oldPassword, char[] newPassword);
+	public void changeUserPassword(int userId, char[] currentPassword, char[] newPassword) 
+			throws RecordNotFoundException, IncorrectPasswordException, RecordNotChangedException;
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException;
 	
 	public int searchNumberOfRoles();

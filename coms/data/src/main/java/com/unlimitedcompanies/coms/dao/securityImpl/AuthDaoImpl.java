@@ -155,6 +155,13 @@ public class AuthDaoImpl implements AuthDao
 		foundUser.setUsername(user.getUsername());
 		foundUser.setEnabled(user.isEnabled());
 	}
+	
+	@Override
+	public void changeUserPassword(int userId, char[] newPassword)
+	{
+		User foundUser = this.getUserByUserId(userId);
+		foundUser.setPassword(newPassword);
+	}
 
 	@Override
 	public void deleteUser(int userId)
