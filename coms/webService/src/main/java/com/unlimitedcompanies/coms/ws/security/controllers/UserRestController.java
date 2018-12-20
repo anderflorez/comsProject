@@ -50,7 +50,7 @@ public class UserRestController
 	private final String allRecords = baseURI + "s";
 	private final String recordDetails = baseURI + "/{id}";
 	
-	@RequestMapping("/rest/loggedUser")
+	@RequestMapping(value = "/rest/loggedUser", method = RequestMethod.GET)
 	public UserDTO getUserInfo() throws RecordNotFoundException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -104,17 +104,17 @@ public class UserRestController
 		
 		return foundUsers;
 	}
-
+	
 	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
 	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
 	{
 		User user = authService.searchUserByUserIdWithContact(id);
 		UserDTO userResponse = new UserDTO(user);
-
+		
 		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
 		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(userResponse.getUserId())).withRel("contact");
-		Link passwordLink = new Link(baseURI + "/password/{id}" + userResponse.getUserId(), "password_change");
-		userResponse.add(userLink, contactLink, passwordLink);
+		userResponse.add(userLink, contactLink);
+		
 		return userResponse;
 	}
 	
@@ -146,13 +146,16 @@ public class UserRestController
 		return updatedUser;
 	}
 	
-	@RequestMapping(value = baseURI + "/password/{id}", method = RequestMethod.PUT)
+	@RequestMapping(value = baseURI + "/password", method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException, 
+	public int chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException, 
 																			IncorrectPasswordException, 
 																			RecordNotChangedException
 	{
+		// TODO: Create a method that allows admin to change any user's password
+		
 		authService.changeUserPassword(password.getUserId(), password.getOldPassword(), password.getNewPassword());
+		return 0;
 	}
 	
 	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
