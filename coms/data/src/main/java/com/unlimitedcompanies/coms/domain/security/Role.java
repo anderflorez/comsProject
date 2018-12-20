@@ -73,16 +73,10 @@ public class Role
 	
 	public void addUser(User user)
 	{
-		System.out.println("==========> In Role addUser() - role: " + this + " - user: " + user);
-		System.out.println("==========> user contained in role: " + users.contains(user));
 		if (!users.contains(user))
 		{
 			this.users.add(user);
-			System.out.println("==========> added user ");
 			user.addRole(this);	
-		}
-		else {
-			System.out.println("=========> user contained: " + this.getMembers().get(0) + " " + this.getMembers().get(0).getUsername());
 		}
 	}
 	

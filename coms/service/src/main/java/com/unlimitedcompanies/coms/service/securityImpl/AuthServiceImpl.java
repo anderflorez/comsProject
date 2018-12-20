@@ -286,6 +286,9 @@ public class AuthServiceImpl implements AuthService
 	public Role saveRole(Role role)
 	{
 		authDao.createRole(role);
+		
+		// TODO: Return an exception if the role is not created
+		
 		return this.searchRoleByRoleName(role.getRoleName());
 	}
 	
@@ -302,8 +305,16 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
+	public List<Role> searchRolesByRange(int page, int elements)
+	{
+		return authDao.getAllRolesByRange(page - 1, elements);
+	}
+
+	@Override
 	public Role searchRoleById(String id)
 	{
+		// TODO: Throw an exception if the role is not found
+		
 		return authDao.getRoleById(id);
 	}
 

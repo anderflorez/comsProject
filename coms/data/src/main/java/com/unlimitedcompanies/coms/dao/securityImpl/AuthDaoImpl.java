@@ -206,6 +206,15 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
+	public List<Role> getAllRolesByRange(int page, int elements)
+	{
+		return em.createQuery("select role from Role role order by role.roleName", Role.class)
+				  .setFirstResult(page * elements)
+				  .setMaxResults(elements)
+				  .getResultList();
+	}
+	
+	@Override
 	public Role getRoleById(String id)
 	{
 		Role role = em.find(Role.class, id);

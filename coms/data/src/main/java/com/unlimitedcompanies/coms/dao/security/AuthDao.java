@@ -33,6 +33,7 @@ public interface AuthDao
 	public int getNumberOfRoles();
 	public void createRole(Role role);
 	public List<Role> getAllRoles();
+	public List<Role> getAllRolesByRange(int page, int elements);
 	public Role getRoleById(String id);
 	public Role getRoleByRoleName(String roleName);
 	public Role getRoleByIdWithMembers(String id);

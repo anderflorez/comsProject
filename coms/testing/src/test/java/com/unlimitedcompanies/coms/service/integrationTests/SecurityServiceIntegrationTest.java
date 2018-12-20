@@ -517,19 +517,6 @@ class SecurityServiceIntegrationTest
 		assertTrue(authService.passwordMatch(user.getUserId(), "newpassword".toCharArray()));
 	}
 	
-//	@Test
-//	public void changeUserPasswordTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
-//	{
-//		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-//		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
-//		
-//		authService.changePassword(user.getUserId(), "mypass".toCharArray(), "mynewpass".toCharArray());
-//		User changedUser = authService.searchUserByUserId(user.getUserId());
-//		
-//		PasswordEncoder pe = new BCryptPasswordEncoder();
-//		assertTrue(pe.matches("mynewpass", changedUser.getPassword().toString()));
-//	}
-	
 	@Test
 	public void updateUserStatus() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
 	{
@@ -579,6 +566,21 @@ class SecurityServiceIntegrationTest
 		authService.saveRole(new Role("Engineer"));
 		
 		assertEquals(3, authService.searchNumberOfRoles(), "Service test for finding all roles failed");
+	}
+	
+	@Test
+	public void findRolesByRangeTest()
+	{
+		authService.saveRole(new Role("Administrator"));		//2
+		authService.saveRole(new Role("Manager"));				//5
+		authService.saveRole(new Role("Engineer"));				//4
+		authService.saveRole(new Role("Accountant"));			//1
+		authService.saveRole(new Role("Receptionist"));			//6
+		authService.saveRole(new Role("Architect"));			//3
+		
+		assertEquals("Architect", authService.searchRolesByRange(2, 2).get(0).getRoleName());
+		assertEquals("Receptionist", authService.searchRolesByRange(3, 2).get(1).getRoleName());
+		assertEquals("Administrator", authService.searchRolesByRange(1, 3).get(1).getRoleName());
 	}
 	
 	@Test
