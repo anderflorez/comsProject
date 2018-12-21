@@ -37,15 +37,15 @@ public interface AuthService
 			throws RecordNotFoundException, IncorrectPasswordException, RecordNotChangedException;
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException;
 	
-	public Role saveRole(Role role);
+	public Role saveRole(Role role) throws RecordNotCreatedException;
 	public int searchNumberOfRoles();
 	public List<Role> searchAllRoles();
 	public List<Role> searchRolesByRange(int page, int elements);
-	public Role searchRoleById(String string);
-	public Role searchRoleByIdWithMembers(String string);
-	public Role searchRoleByRoleName(String roleName);
-	public Role updateRole(String roleId, Role role);
-	public void deleteRole(String roleId);
+	public Role searchRoleByRoleId(int roleId) throws RecordNotFoundException;
+	public Role searchRoleByIdWithMembers(int roleId) throws RecordNotFoundException;
+	public Role searchRoleByRoleName(String roleName) throws RecordNotFoundException;
+	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException;
+	public void deleteRole(int roleId) throws RecordNotFoundException, RecordNotDeletedException;
 
 	public void assignUserToRole(User user, Role role);
 //	public void removeUserFromRole(Role role, User user);

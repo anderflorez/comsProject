@@ -283,13 +283,20 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public Role saveRole(Role role)
+	public Role saveRole(Role role) throws RecordNotCreatedException
 	{
-		authDao.createRole(role);
+		authDao.createRole(role.getRoleName());
 		
 		// TODO: Return an exception if the role is not created
 		
-		return this.searchRoleByRoleName(role.getRoleName());
+		try
+		{
+			return this.searchRoleByRoleName(role.getRoleName());
+		}
+		catch (RecordNotFoundException e)
+		{
+			throw new RecordNotCreatedException();
+		}
 	}
 	
 	@Override
@@ -311,36 +318,78 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public Role searchRoleById(String id)
+	public Role searchRoleByRoleId(int id) throws RecordNotFoundException
 	{
 		// TODO: Throw an exception if the role is not found
 		
-		return authDao.getRoleById(id);
+		try
+		{
+			return authDao.getRoleById(id);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The role could not be found");
+		}
 	}
 
 	@Override
-	public Role searchRoleByIdWithMembers(String id)
+	public Role searchRoleByIdWithMembers(int id) throws RecordNotFoundException
 	{
-		return authDao.getRoleByIdWithMembers(id);
+		try
+		{
+			return authDao.getRoleByIdWithMembers(id);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The role could not be found");
+		}
 	}
 
 	@Override
-	public Role searchRoleByRoleName(String roleName)
+	public Role searchRoleByRoleName(String roleName) throws RecordNotFoundException
 	{
-		return authDao.getRoleByRoleName(roleName);
+		try
+		{
+			return authDao.getRoleByRoleName(roleName);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The role could not be found");
+		}
 	}
 	
 	@Override
-	public Role updateRole(String roleId, Role role)
+	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException
 	{
-		authDao.updateRole(roleId, role);
-		return this.searchRoleById(roleId);
+		String roleName = editRole.getRoleName();
+		
+		authDao.updateRole(editRole);
+		Role foundRole = this.searchRoleByRoleId(editRole.getRoleId());
+		
+		if (editRole.getRoleName().equals(roleName))
+		{
+			throw new RecordNotChangedException("Error: The role details have not been changed");
+		}
+		
+		return foundRole;
 	}
 	
 	@Override
-	public void deleteRole(String roleId)
+	public void deleteRole(int roleId) throws RecordNotFoundException, RecordNotDeletedException
 	{
-		authDao.deleteRole(roleId);
+		try
+		{
+			authDao.deleteRole(roleId);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The role to be deleted could not be found");
+		}
+		
+		if (authDao.existingRole(roleId))
+		{
+			throw new RecordNotDeletedException("Error: The role could not be deleted");
+		}
 	}
 
 	@Override

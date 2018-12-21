@@ -541,6 +541,7 @@ class SecurityServiceIntegrationTest
 		
 		 authService.deleteUser(user.getUserId());
 		
+		 // TODO: Change the assert statement to an assert that gets an exception
 		 assertEquals(1, authService.searchNumberOfUsers(), "Service test for deleting a single user failed");
 	 }
 
@@ -551,7 +552,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void saveNewRoleTest()
+	public void saveNewRoleTest() throws RecordNotCreatedException
 	{
 		Role role = authService.saveRole(new Role("Administrator"));
 		assertEquals(1, authService.searchNumberOfRoles(), "Service test for saving new role failed");
@@ -559,7 +560,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findAllRolesTest()
+	public void findAllRolesTest() throws RecordNotCreatedException
 	{
 		authService.saveRole(new Role("Administrator"));
 		authService.saveRole(new Role("Manager"));
@@ -569,7 +570,7 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findRolesByRangeTest()
+	public void findRolesByRangeTest() throws RecordNotCreatedException
 	{
 		authService.saveRole(new Role("Administrator"));		//2
 		authService.saveRole(new Role("Manager"));				//5
@@ -584,20 +585,20 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findRoleByRoleIdTest()
+	public void findRoleByRoleIdTest() throws RecordNotCreatedException, RecordNotFoundException
 	{
 		Role initialrole = new Role("Administrator");
 		System.out.println(initialrole.getRoleId());
 		Role savedRole = authService.saveRole(initialrole);
 		System.out.println("Searching for role with id: " + savedRole.getRoleId());
-		Role foundRole = authService.searchRoleById(savedRole.getRoleId());
+		Role foundRole = authService.searchRoleByRoleId(savedRole.getRoleId());
 		System.out.println("found Role: " + foundRole.getRoleId());
 		
 		assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
 	}
 	
 	@Test
-	public void findRoleByRoleNameTest()
+	public void findRoleByRoleNameTest() throws RecordNotCreatedException, RecordNotFoundException
 	{
 		Role initialrole = new Role("Administrator");
 		authService.saveRole(initialrole);
@@ -627,15 +628,27 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	 public void updateRoleTest()
+	 public void updateRoleTest() throws RecordNotCreatedException, RecordNotFoundException, RecordNotChangedException
 	 {
 		Role role = authService.saveRole(new Role("Administrator"));
 		Role newrole = new Role("Admins");
-		role = authService.updateRole(role.getRoleId(), newrole);
+		newrole.setRoleId(role.getRoleId());
+		role = authService.updateRole(newrole);		
 		
 		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
 		assertEquals(1, authService.searchNumberOfRoles(), "Service test for updating role has failed");
 	 }
+	
+	@Test
+	public void deleteRoleTest() throws RecordNotCreatedException, RecordNotFoundException, RecordNotDeletedException
+	{
+		authService.saveRole(new Role("Administrators"));
+		Role role = authService.saveRole(new Role("Managers"));
+		authService.saveRole(new Role("Engineers"));
+		
+		authService.deleteRole(role.getRoleId());
+		assertThrows(RecordNotFoundException.class, () -> authService.searchRoleByRoleId(role.getRoleId()));
+	}
 
 	@Test
 	public void assignUserToRoleTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
@@ -651,7 +664,7 @@ class SecurityServiceIntegrationTest
 		authService.assignUserToRole(user, role);
 		
 		User checkUser = authService.searchFullUserByUserId(user.getUserId());
-		Role checkRole = authService.searchRoleById(role.getRoleId());
+		Role checkRole = authService.searchRoleByRoleId(role.getRoleId());
 
 		assertTrue(checkUser.getRoles().contains(role), "Service test for assigning a user to a role failed");
 		assertTrue(checkRole.getMembers().contains(user), "Service test for assigning a user to a role failed");
@@ -720,7 +733,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	void saveNewPermission()
+	void saveNewPermission() throws RecordNotCreatedException
 	{
 		setupService.checkAllResources();
 		Role role = authService.saveRole(new Role("Administrator"));
@@ -733,7 +746,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	void saveNewPermissionWithConditionsTest()
+	void saveNewPermissionWithConditionsTest() throws RecordNotCreatedException
 	{
 		setupService.checkAllResources();
 		Role role = authService.saveRole(new Role("Administrator"));
@@ -762,7 +775,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	void savePermissionWithChainedIndividualConditionsTest()
+	void savePermissionWithChainedIndividualConditionsTest() throws RecordNotCreatedException
 	{
 		setupService.checkAllResources();
 		Role role = authService.saveRole(new Role("Administrator"));
@@ -805,7 +818,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void saveFullPermissionTest()
+	public void saveFullPermissionTest() throws RecordNotCreatedException
 	{
 		setupService.checkAllResources();
 		Role role = authService.saveRole(new Role("Administrator"));
@@ -850,7 +863,7 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void retrieveFullPermissionWithAllConditionsTest()
+	public void retrieveFullPermissionWithAllConditionsTest() throws RecordNotCreatedException
 	{
 		setupService.checkAllResources();
 		Role role = authService.saveRole(new Role("Administrator"));

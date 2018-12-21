@@ -6,10 +6,10 @@ import org.springframework.hateoas.ResourceSupport;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
 
-@XmlRootElement(name = "contact")
+@XmlRootElement(name = "role")
 public class RoleDTO extends ResourceSupport
 {
-	private String roleId;
+	private Integer roleId;
 	private String roleName;
 
 	public RoleDTO() {}
@@ -20,12 +20,12 @@ public class RoleDTO extends ResourceSupport
 		this.roleName = role.getRoleName();
 	}
 
-	public String getRoleId()
+	public Integer getRoleId()
 	{
 		return roleId;
 	}
 
-	public void setRoleId(String roleId)
+	public void setRoleId(Integer roleId)
 	{
 		this.roleId = roleId;
 	}

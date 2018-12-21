@@ -170,17 +170,12 @@ public class AuthDaoImpl implements AuthDao
 		User user = this.getUserByUserId(userId);
 		em.remove(user);
 	}
-	
-	@Override
-	public int getNumberOfRoles()
-	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleId) FROM role").getSingleResult();
-		return bigInt.intValue();
-	}
 
 	@Override
-	public void createRole(Role role)
+	public Role createAdminRole()
 	{
+		Role role = new Role("Administrators");
+		role.setRoleId(1);
 		try
 		{
 			em.persist(role);
@@ -197,6 +192,51 @@ public class AuthDaoImpl implements AuthDao
 				throw (ConstraintViolationException)e.getCause();
 			}
 		}
+		
+		Role adminRole = em.find(Role.class, 1);
+		if (adminRole == null)
+		{
+			throw new NoResultException();
+		}
+		
+		return adminRole;
+	}
+
+	@Override
+	public void createRole(String roleName)
+	{
+		try
+		{
+			em.createNativeQuery(
+					"INSERT INTO role (roleName) VALUES (:rolename)")
+					.setParameter("rolename", roleName)
+					.executeUpdate();
+		}
+		catch (PersistenceException e)
+		{
+			if (e.getCause() instanceof ConstraintViolationException)
+			{
+				throw (ConstraintViolationException)e.getCause();
+			}
+			else
+			{
+				throw e;
+			}
+		}
+	}
+	
+	@Override
+	public int getNumberOfRoles()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleId) FROM role").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public boolean existingRole(int roleId)
+	{
+		Role role = em.find(Role.class, roleId);
+		return role == null ? false : true;
 	}
 	
 	@Override
@@ -215,9 +255,9 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public Role getRoleById(String id)
+	public Role getRoleById(int roleId)
 	{
-		Role role = em.find(Role.class, id);
+		Role role = em.find(Role.class, roleId);
 		if (role == null)
 		{
 			throw new NoResultException();
@@ -234,7 +274,7 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public Role getRoleByIdWithMembers(String id)
+	public Role getRoleByIdWithMembers(int id)
 	{
 		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
 				+ "where role.roleId = :roleId", Role.class)
@@ -244,21 +284,21 @@ public class AuthDaoImpl implements AuthDao
 
 	
 	@Override
-	public void updateRole(String roleId, Role role)
+	public void updateRole(Role role)
 	{
-		Role foundRole = this.getRoleById(roleId);
+		Role foundRole = this.getRoleById(role.getRoleId());
 		foundRole.setRoleName(role.getRoleName());
 	}
 
 	@Override
-	public void deleteRole(String roleId)
+	public void deleteRole(int roleId)
 	{
 		Role role = this.getRoleById(roleId);
 		em.remove(role);
 	}
 
 	@Override
-	public void assignUserToRole(int userId, String roleId)
+	public void assignUserToRole(int userId, int roleId)
 	{
 		Role role = this.getRoleById(roleId);
 		User user = this.getUserByUserId(userId);

@@ -13,7 +13,7 @@ import com.unlimitedcompanies.coms.domain.security.User;
 @XmlRootElement(name = "users")
 public class UserCollectionResponse extends ResourceSupport
 {
-	List<UserDTO> users;
+	private List<UserDTO> users;
 	private Integer prevPage;
 	private Integer nextPage;
 	

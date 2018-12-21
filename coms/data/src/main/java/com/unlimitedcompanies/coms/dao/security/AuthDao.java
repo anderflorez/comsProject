@@ -30,17 +30,19 @@ public interface AuthDao
 	public void changeUserPassword(int userId, char[] newPassword);
 	public void deleteUser(int userId);
 	
+	public Role createAdminRole();
+	public void createRole(String roleName);
 	public int getNumberOfRoles();
-	public void createRole(Role role);
+	public boolean existingRole(int roleId);
 	public List<Role> getAllRoles();
 	public List<Role> getAllRolesByRange(int page, int elements);
-	public Role getRoleById(String id);
+	public Role getRoleById(int id);
 	public Role getRoleByRoleName(String roleName);
-	public Role getRoleByIdWithMembers(String id);
-	public void updateRole(String roleId, Role role);
-	public void deleteRole(String roleId);
+	public Role getRoleByIdWithMembers(int id);
+	public void updateRole(Role role);
+	public void deleteRole(int roleId);
 
-	public void assignUserToRole(int userId, String roleId);
+	public void assignUserToRole(int userId, int roleId);
 //	public void removeUserFromRole(Role role, User user);
 	
 	public int getNumberOfPermissions();

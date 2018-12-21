@@ -5,11 +5,19 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.ws.security.reps.RoleCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.RoleDTO;
@@ -26,9 +34,9 @@ public class RoleRestController
 	private final String allRecords = baseURI + "s";
 	private final String recordDetails = baseURI + "/{id}";
 	
-	@RequestMapping(value = "allRecords", method = RequestMethod.GET)
-	public RoleCollectionResponse displayAllllRoles(@RequestParam(name = "pag", required = false) Integer pag,
-										   @RequestParam(name = "epp", required = false) Integer epp)
+	@RequestMapping(value = allRecords, method = RequestMethod.GET)
+	public RoleCollectionResponse displayAllRoles(@RequestParam(name = "pag", required = false) Integer pag,
+												  @RequestParam(name = "epp", required = false) Integer epp)
 	{
 		if (pag == null) pag = 1;
 		if (epp == null) epp = 10;
@@ -45,14 +53,14 @@ public class RoleRestController
 			allRoles.add(prevLink);
 		}
 		
-		if (authService.hasNextUser(pag + 1, epp))
+		if (authService.hasNextRole(pag + 1, epp))
 		{
 			int next = pag + 1;
 			allRoles.setNext(next);
 			Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");
 			allRoles.add(nextLink);
 		}		
-				
+
 		for (RoleDTO nextRole : allRoles.getRoles())
 		{
 			Link link = linkTo(methodOn(RoleRestController.class).findRoleById(nextRole.getRoleId())).withSelfRel();
@@ -63,9 +71,60 @@ public class RoleRestController
 	}
 
 	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
-	private RoleDTO findRoleById(String roleId)
+	public RoleDTO findRoleById(@PathVariable int roleId) throws RecordNotFoundException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Role role = authService.searchRoleByRoleId(roleId);
+		RoleDTO roleResponse = new RoleDTO(role);
+		
+		Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(roleId)).withSelfRel();
+		roleResponse.add(roleLink);
+		
+		return roleResponse;
 	}
+
+	@RequestMapping(value = baseURI, method = RequestMethod.POST)
+	@ResponseStatus(value = HttpStatus.CREATED)
+	public RoleDTO saveNewRole(@RequestBody RoleDTO role) throws RecordNotCreatedException
+	{		
+		Role newrole = new Role(role.getRoleName());
+		Role createdRole = authService.saveRole(newrole);
+		RoleDTO roleResponse = new RoleDTO(createdRole);
+		
+		try
+		{
+			Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(createdRole.getRoleId())).withSelfRel();
+			roleResponse.add(roleLink);
+		}
+		catch (RecordNotFoundException e) {}
+		
+		return roleResponse;
+	}
+	
+	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.OK)
+	public RoleDTO updateRole(@RequestBody RoleDTO editedRole) throws RecordNotFoundException, RecordNotChangedException
+	{
+		Role role = new Role(editedRole.getRoleName());
+		role.setRoleId(editedRole.getRoleId());
+		role = authService.updateRole(role);
+		
+		RoleDTO updatedRole = new RoleDTO(role);
+		
+		Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(role.getRoleId())).withSelfRel();
+		updatedRole.add(roleLink);
+		
+		return updatedRole;
+	}
+	
+	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deleteRole(@PathVariable int roleId)
+	{
+		// TODO: Make sure to throw an exception if the role is not deleted
+		authService.deleteRole(roleId);
+	}
+	
+	
+	// TODO: Add an exception handler for record not found
+	// TODO: Add an exception handler for record not created
 }

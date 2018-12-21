@@ -25,13 +25,13 @@ public class RoleManagementController
 	AuthService authService;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showRoleDetails(@RequestParam(name = "r", required = false) String rId)
+	public ModelAndView showRoleDetails(@RequestParam(name = "r", required = false) Integer rId)
 	{		
 		// TODO: check for errors if the id is null or invalid
 		ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp");
 		Role role;
 
-		if (rId == null || rId.isEmpty())
+		if (rId == null)
 		{
 			// This is a request for the form to create a new role
 			role = new Role(null);
@@ -44,7 +44,7 @@ public class RoleManagementController
 
 			try
 			{
-				role = authService.searchRoleById(rId);
+				role = authService.searchRoleByRoleId(rId);
 				mv.addObject("role", role);
 			}
 			catch (NoResultException e)
@@ -62,7 +62,7 @@ public class RoleManagementController
 	public ModelAndView processRole(Role role)
 	{	
 		ModelAndView mv = new ModelAndView("redirect:/roleDetail");
-		if (role.getRoleId() == null || role.getRoleId().isEmpty())
+		if (role.getRoleId() == null)
 		{
 			// This is a request to create a new role
 			// TODO: Create some validation for the role name
@@ -86,7 +86,7 @@ public class RoleManagementController
 			try
 			{
 				// TODO: Create some validation for the role name
-				role = authService.updateRole(role.getRoleId(), role);
+				role = authService.updateRole(role);
 				mv.addObject("r", role.getRoleId());
 			} 
 			catch (NoResultException e)

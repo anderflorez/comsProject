@@ -26,6 +26,7 @@ public class LinkDirectoryController
 		{
 			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
 			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
+			links.add(linkTo(methodOn(RoleRestController.class).saveNewRole(null)).withRel("base_role"));
 		}
 		catch (Exception e) {}
 		

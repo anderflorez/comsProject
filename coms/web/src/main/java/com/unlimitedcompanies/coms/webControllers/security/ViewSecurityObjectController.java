@@ -39,7 +39,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping("/roleDetail")
-	public ModelAndView showRoleDetails(@RequestParam("r") String id)
+	public ModelAndView showRoleDetails(@RequestParam("r") Integer id)
 	{
 		ModelAndView mv = new ModelAndView("/pages/security/roleDetails.jsp");
 		Role role;
@@ -64,14 +64,14 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping(value = "/deleteRole", method = RequestMethod.POST)
-	public ModelAndView deleteRole(String roleId)
+	public ModelAndView deleteRole(Integer roleId)
 	{
 		ModelAndView mv = new ModelAndView("/roles");
 		try
 		{
 			System.out.println("=====> Role id obtained: " + roleId);
-			Role role = authService.searchRoleById(roleId);
-			if (role.getRoleId().equals("1"))
+			Role role = authService.searchRoleByRoleId(roleId);
+			if (role.getRoleId().equals(1))
 			{
 				mv.addObject("error", "Error: The administrator role cannot be deleted");
 			}
