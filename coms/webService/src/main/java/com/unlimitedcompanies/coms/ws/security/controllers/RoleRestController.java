@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.ws.security.reps.RoleCollectionResponse;
@@ -63,8 +64,13 @@ public class RoleRestController
 
 		for (RoleDTO nextRole : allRoles.getRoles())
 		{
-			Link link = linkTo(methodOn(RoleRestController.class).findRoleById(nextRole.getRoleId())).withSelfRel();
-			nextRole.add(link);
+			Link link;
+			try
+			{
+				link = linkTo(methodOn(RoleRestController.class).findRoleById(nextRole.getRoleId())).withSelfRel();
+				nextRole.add(link);
+			}
+			catch (RecordNotFoundException e) {}			
 		}
 		
 		return allRoles;
@@ -118,7 +124,7 @@ public class RoleRestController
 	
 	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteRole(@PathVariable int roleId)
+	public void deleteRole(@PathVariable int roleId) throws RecordNotFoundException, RecordNotDeletedException
 	{
 		// TODO: Make sure to throw an exception if the role is not deleted
 		authService.deleteRole(roleId);
@@ -127,4 +133,5 @@ public class RoleRestController
 	
 	// TODO: Add an exception handler for record not found
 	// TODO: Add an exception handler for record not created
+	// TODO: Add an exception handler for record not deleted
 }

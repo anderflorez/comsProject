@@ -39,6 +39,7 @@ public interface AuthService
 	
 	public Role saveRole(Role role) throws RecordNotCreatedException;
 	public int searchNumberOfRoles();
+	public boolean hasNextRole(int page, int elements);
 	public List<Role> searchAllRoles();
 	public List<Role> searchRolesByRange(int page, int elements);
 	public Role searchRoleByRoleId(int roleId) throws RecordNotFoundException;

@@ -418,6 +418,7 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void updateUsernameTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
 	{
+		// TODO: check this test as it might not be accurate - compare with the role updating tests
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
@@ -633,10 +634,22 @@ class SecurityServiceIntegrationTest
 		Role role = authService.saveRole(new Role("Administrator"));
 		Role newrole = new Role("Admins");
 		newrole.setRoleId(role.getRoleId());
-		role = authService.updateRole(newrole);		
 		
+		role = authService.updateRole(newrole);
+		
+		assertNotEquals("Administrator", role.getRoleName(), "Service test for updating role has failed");
 		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
-		assertEquals(1, authService.searchNumberOfRoles(), "Service test for updating role has failed");
+	 }
+	
+	@Test
+	 public void updateFailureRoleTest() throws RecordNotCreatedException
+	 {
+		Role role = authService.saveRole(new Role("Administrator"));
+		Role newrole = new Role("Administrator");
+		newrole.setRoleId(role.getRoleId());
+
+		assertThrows(RecordNotChangedException.class, () -> authService.updateRole(newrole),
+				"Service test for updating role faiure has failed");
 	 }
 	
 	@Test

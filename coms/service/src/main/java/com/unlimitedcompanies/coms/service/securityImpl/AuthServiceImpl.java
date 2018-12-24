@@ -304,6 +304,20 @@ public class AuthServiceImpl implements AuthService
 	{
 		return authDao.getNumberOfRoles();
 	}
+	
+	@Override
+	public boolean hasNextRole(int page, int elements)
+	{
+		List<Role> foundRoles = authDao.getAllRolesByRange((page - 1) * elements, 1);
+		if (foundRoles.isEmpty()) 
+		{
+			return false;
+		}
+		else 
+		{
+			return true;
+		}
+	}
 
 	@Override
 	public List<Role> searchAllRoles()
@@ -361,12 +375,12 @@ public class AuthServiceImpl implements AuthService
 	@Override
 	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException
 	{
-		String roleName = editRole.getRoleName();
+		Role foundRole = this.searchRoleByRoleId(editRole.getRoleId());
+		String originalFoundRoleName = foundRole.getRoleName();
 		
 		authDao.updateRole(editRole);
-		Role foundRole = this.searchRoleByRoleId(editRole.getRoleId());
-		
-		if (editRole.getRoleName().equals(roleName))
+
+		if (foundRole.getRoleName().equals(originalFoundRoleName))
 		{
 			throw new RecordNotChangedException("Error: The role details have not been changed");
 		}

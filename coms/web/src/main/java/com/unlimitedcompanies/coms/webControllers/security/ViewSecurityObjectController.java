@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
@@ -39,7 +41,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping("/roleDetail")
-	public ModelAndView showRoleDetails(@RequestParam("r") Integer id)
+	public ModelAndView showRoleDetails(@RequestParam("r") Integer id) throws RecordNotFoundException
 	{
 		ModelAndView mv = new ModelAndView("/pages/security/roleDetails.jsp");
 		Role role;
@@ -64,7 +66,7 @@ public class ViewSecurityObjectController
 	}
 	
 	@RequestMapping(value = "/deleteRole", method = RequestMethod.POST)
-	public ModelAndView deleteRole(Integer roleId)
+	public ModelAndView deleteRole(Integer roleId) throws RecordNotFoundException, RecordNotDeletedException
 	{
 		ModelAndView mv = new ModelAndView("/roles");
 		try

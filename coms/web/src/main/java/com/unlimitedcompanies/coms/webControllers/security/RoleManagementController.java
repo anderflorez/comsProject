@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.webappSecurity.AuthenticatedUserDetail;
 
@@ -25,7 +28,7 @@ public class RoleManagementController
 	AuthService authService;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView showRoleDetails(@RequestParam(name = "r", required = false) Integer rId)
+	public ModelAndView showRoleDetails(@RequestParam(name = "r", required = false) Integer rId) throws RecordNotFoundException
 	{		
 		// TODO: check for errors if the id is null or invalid
 		ModelAndView mv = new ModelAndView("/pages/security/roleManagement.jsp");
@@ -59,7 +62,7 @@ public class RoleManagementController
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView processRole(Role role)
+	public ModelAndView processRole(Role role) throws RecordNotCreatedException, RecordNotFoundException, RecordNotChangedException
 	{	
 		ModelAndView mv = new ModelAndView("redirect:/roleDetail");
 		if (role.getRoleId() == null)
