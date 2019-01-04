@@ -39,6 +39,7 @@ public interface AuthDao
 	public Role getRoleById(int id);
 	public Role getRoleByRoleName(String roleName);
 	public Role getRoleByIdWithMembers(int id);
+	public List<User> getRoleNonMembersByCriteria(int roleId, String searchCriteria);
 	public void updateRole(Role role);
 	public void deleteRole(int roleId);
 

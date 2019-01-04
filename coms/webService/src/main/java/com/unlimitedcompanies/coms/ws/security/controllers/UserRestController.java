@@ -30,6 +30,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.ws.config.RestLinks;
 import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.UserDTO;
@@ -45,12 +46,8 @@ public class UserRestController
 	ContactService contactService;
 	
 	private final String resource = "user";
-	private final String baseURL = "http://localhost:8080/comsws/rest/user/";
-	private final String baseURI = "/rest/" + resource;
-	private final String allRecords = baseURI + "s";
-	private final String recordDetails = baseURI + "/{id}";
 	
-	@RequestMapping(value = "/rest/loggedUser", method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_BASE + "loggedUser", method = RequestMethod.GET)
 	public UserDTO getUserInfo() throws RecordNotFoundException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,7 +63,7 @@ public class UserRestController
 		return loggedUser;
 	}
 	
-	@RequestMapping(value = allRecords, method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "s", method = RequestMethod.GET)
 	public UserCollectionResponse allUsers(@RequestParam(name = "pag", required = false) Integer pag,
 										   @RequestParam(name = "epp", required = false) Integer epp)
 	{
@@ -74,14 +71,14 @@ public class UserRestController
 		if (epp == null) epp = 10;
 				
 		UserCollectionResponse foundUsers = new UserCollectionResponse(authService.searchUsersByRange(pag, epp));
-		Link baseLink = new Link(baseURL).withRel("base_url");
+		Link baseLink = new Link(RestLinks.URL_BASE + resource).withRel("base_url");
 		foundUsers.add(baseLink);
 
 		if (pag > 1)
 		{
 			int prev = pag - 1;
 			foundUsers.setPrevPage(prev);
-			Link prevLink = new Link(baseURL + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+			Link prevLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
 			foundUsers.add(prevLink);
 		}
 		
@@ -89,7 +86,7 @@ public class UserRestController
 		{
 			int next = pag + 1;
 			foundUsers.setNextPage(next);
-			Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");			
+			Link nextLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");			
 			foundUsers.add(nextLink);
 		}		
 				
@@ -105,7 +102,7 @@ public class UserRestController
 		return foundUsers;
 	}
 	
-	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
 	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
 	{
 		User user = authService.searchUserByUserIdWithContact(id);
@@ -118,7 +115,7 @@ public class UserRestController
 		return userResponse;
 	}
 	
-	@RequestMapping(value = baseURI, method = RequestMethod.POST)
+	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public UserDTO saveNewUser(@RequestBody UserDTO newUser) throws RecordNotFoundException, RecordNotCreatedException
 	{
@@ -132,7 +129,7 @@ public class UserRestController
 		return createdUser;
 	}
 	
-	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
+	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
 	public UserDTO updateUser(@RequestBody UserDTO editedUser) throws RecordNotFoundException
 	{		
@@ -146,7 +143,7 @@ public class UserRestController
 		return updatedUser;
 	}
 	
-	@RequestMapping(value = baseURI + "/password", method = RequestMethod.PUT)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/password", method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public int chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException, 
 																			IncorrectPasswordException, 
@@ -158,7 +155,7 @@ public class UserRestController
 		return 0;
 	}
 	
-	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
 	{
@@ -176,7 +173,7 @@ public class UserRestController
 		error.addError(e.getMessage());
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", baseURL);
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
 	}
@@ -189,7 +186,7 @@ public class UserRestController
 		error.addError("The new user could not be created");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", baseURL);
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -202,7 +199,7 @@ public class UserRestController
 		error.addError(e.getMessage());
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", baseURL);
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -216,7 +213,7 @@ public class UserRestController
 		error.addError("The user password you have provided is incorrect");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", baseURL);
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -227,10 +224,10 @@ public class UserRestController
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		errorResponse.addError(e.getMessage());
-		errorResponse.addMessage("Please try again or contact your system administrator");
+		errorResponse.addMessage("The user could not be deleted. Please try again or contact your system administrator");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", baseURL);
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
 		
 		return new ResponseEntity<>(errorResponse, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}

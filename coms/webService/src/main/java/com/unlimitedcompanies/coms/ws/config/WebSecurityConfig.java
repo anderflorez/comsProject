@@ -73,6 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 						.deleteCookies("JSESSIONID")
 						.clearAuthentication(true)
 						.invalidateHttpSession(true)
+						// TODO: when the user logs out send back a message to the client so it knows the user is not logged in anymore
 						.logoutSuccessUrl("http://localhost:8080/coms/logout")
 						.permitAll()
 				

@@ -282,6 +282,18 @@ public class AuthDaoImpl implements AuthDao
 				.getSingleResult();
 	}
 
+	@Override
+	public List<User> getRoleNonMembersByCriteria(int roleId, String searchCriteria)
+	{
+		return em.createQuery("select u from User u "
+							+ "left join u.roles r "
+							+ "join u.contact c "
+							+ "where (r.roleId != :roleId or r.roleId is null) "
+							+ "and (u.username like :criteria or c.firstName like :criteria or c.lastName like :criteria)", User.class)
+				 .setParameter("roleId", roleId)
+				 .setParameter("criteria", "%" + searchCriteria + "%")
+				 .getResultList();
+	}
 	
 	@Override
 	public void updateRole(Role role)

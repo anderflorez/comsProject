@@ -24,6 +24,7 @@ public class LinkDirectoryController
 		List<Link> links = new ArrayList<>();
 		try
 		{
+			links.add(new Link("http://localhost/comsws/rest/").withRel("base_rest"));
 			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
 			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
 			links.add(linkTo(methodOn(RoleRestController.class).saveNewRole(null)).withRel("base_role"));

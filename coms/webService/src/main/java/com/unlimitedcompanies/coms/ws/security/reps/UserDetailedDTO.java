@@ -6,34 +6,40 @@ import org.springframework.hateoas.ResourceSupport;
 
 import com.unlimitedcompanies.coms.domain.security.User;
 
-@XmlRootElement(name = "user")
-public class UserDTO extends ResourceSupport
+@XmlRootElement(name = "userDetailed")
+public class UserDetailedDTO extends ResourceSupport
 {
 	private Integer userId;
 	private String username;
-	private char[] password;
 	private boolean enabled;
 	private String dateAdded;
 	private String lastAccess;
 	private Integer contactId;
+	private String firstName;
+	private String middleName;
+	private String lastName;
+	private String email;
 	
-	public UserDTO() 
+	public UserDetailedDTO() 
 	{
-		this.password = null;
 		this.enabled = false;
 	}
-	
-	public UserDTO(User user) 
+
+	public UserDetailedDTO(User user)
 	{
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.password = null;
 		this.enabled = user.isEnabled();
 		this.dateAdded = user.getClientLocalDateAdded();
 		this.lastAccess = user.getClientLocalLastAccess();
+		
 		if (user.getContact() != null)
 		{
 			this.contactId = user.getContact().getContactId();
+			this.firstName = user.getContact().getFirstName();
+			this.middleName = user.getContact().getMiddleName();
+			this.lastName = user.getContact().getLastName();
+			this.email = user.getContact().getEmail();
 		}
 	}
 
@@ -45,7 +51,7 @@ public class UserDTO extends ResourceSupport
 	public void setUserId(Integer userId)
 	{
 		this.userId = userId;
-	}	
+	}
 
 	public String getUsername()
 	{
@@ -55,16 +61,6 @@ public class UserDTO extends ResourceSupport
 	public void setUsername(String username)
 	{
 		this.username = username;
-	}
-
-	public char[] getPassword()
-	{
-		return password;
-	}
-
-	public void setPassword(char[] password)
-	{
-		this.password = password;
 	}
 
 	public boolean isEnabled()
@@ -106,4 +102,45 @@ public class UserDTO extends ResourceSupport
 	{
 		this.contactId = contactId;
 	}
+
+	public String getFirstName()
+	{
+		return firstName;
+	}
+
+	public void setFirstName(String firstName)
+	{
+		this.firstName = firstName;
+	}
+
+	public String getMiddleName()
+	{
+		return middleName;
+	}
+
+	public void setMiddleName(String middleName)
+	{
+		this.middleName = middleName;
+	}
+
+	public String getLastName()
+	{
+		return lastName;
+	}
+
+	public void setLastName(String lastName)
+	{
+		this.lastName = lastName;
+	}
+
+	public String getEmail()
+	{
+		return email;
+	}
+
+	public void setEmail(String email)
+	{
+		this.email = email;
+	}
+
 }

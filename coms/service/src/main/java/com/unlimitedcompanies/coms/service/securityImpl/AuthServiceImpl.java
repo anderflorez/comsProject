@@ -267,6 +267,9 @@ public class AuthServiceImpl implements AuthService
 	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
 	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
 	{
+		// TODO: Prevent this method from deleting the last user in the administrator role
+		// TODO: Provide error message if user tries to delete the last administrator user
+		
 		try
 		{
 			authDao.deleteUser(userId); 
@@ -283,6 +286,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
+	@Transactional(rollbackFor = RecordNotCreatedException.class)
 	public Role saveRole(Role role) throws RecordNotCreatedException
 	{
 		authDao.createRole(role.getRoleName());
@@ -332,6 +336,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public Role searchRoleByRoleId(int id) throws RecordNotFoundException
 	{
 		// TODO: Throw an exception if the role is not found
@@ -345,21 +350,9 @@ public class AuthServiceImpl implements AuthService
 			throw new RecordNotFoundException("The role could not be found");
 		}
 	}
-
+	
 	@Override
-	public Role searchRoleByIdWithMembers(int id) throws RecordNotFoundException
-	{
-		try
-		{
-			return authDao.getRoleByIdWithMembers(id);
-		}
-		catch (NoResultException e)
-		{
-			throw new RecordNotFoundException("The role could not be found");
-		}
-	}
-
-	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public Role searchRoleByRoleName(String roleName) throws RecordNotFoundException
 	{
 		try
@@ -371,8 +364,30 @@ public class AuthServiceImpl implements AuthService
 			throw new RecordNotFoundException("The role could not be found");
 		}
 	}
+
+	// TODO: Check if this method is actually needed - delete it if not being used
+	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public Role searchRoleByIdWithMembers(int id) throws RecordNotFoundException
+	{
+		try
+		{
+			return authDao.getRoleByIdWithMembers(id);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The role could not be found");
+		}
+	}
 	
 	@Override
+	public List<User> searchRoleNonMembers(int roleId, String searchCriteria)
+	{
+		return authDao.getRoleNonMembersByCriteria(roleId, searchCriteria);
+	}
+	
+	@Override
+	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotChangedException.class})
 	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException
 	{
 		Role foundRole = this.searchRoleByRoleId(editRole.getRoleId());
@@ -389,8 +404,12 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
+	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
 	public void deleteRole(int roleId) throws RecordNotFoundException, RecordNotDeletedException
 	{
+		// TODO: Prevent this method from deleting the original administrator role
+		// TODO: Provide an error message if the user tries to delete the original administrator role
+		
 		try
 		{
 			authDao.deleteRole(roleId);

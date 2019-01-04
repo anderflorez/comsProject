@@ -243,11 +243,9 @@
 		</dependencies>
 	</dependencyManagement>
 
-
 	<modules>
 		<module>data</module>
 		<module>service</module>
-		<module>web</module>
 		<module>testing</module>
 		<module>webService</module>
 	</modules>

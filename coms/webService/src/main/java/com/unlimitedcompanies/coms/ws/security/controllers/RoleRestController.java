@@ -5,7 +5,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +24,12 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.ws.config.RestLinks;
+import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 import com.unlimitedcompanies.coms.ws.security.reps.RoleCollectionResponse;
 import com.unlimitedcompanies.coms.ws.security.reps.RoleDTO;
+import com.unlimitedcompanies.coms.ws.security.reps.UserDetailedCollection;
+import com.unlimitedcompanies.coms.ws.security.reps.UserDetailedDTO;
 
 @RestController
 public class RoleRestController
@@ -30,12 +38,8 @@ public class RoleRestController
 	AuthService authService;
 	
 	private final String resource = "role";
-	private final String baseURL = "http://localhost:8080/comsws/rest/role/";
-	private final String baseURI = "/rest/" + resource;
-	private final String allRecords = baseURI + "s";
-	private final String recordDetails = baseURI + "/{id}";
 	
-	@RequestMapping(value = allRecords, method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "s", method = RequestMethod.GET)
 	public RoleCollectionResponse displayAllRoles(@RequestParam(name = "pag", required = false) Integer pag,
 												  @RequestParam(name = "epp", required = false) Integer epp)
 	{
@@ -43,14 +47,14 @@ public class RoleRestController
 		if (epp == null) epp = 10;
 		
 		RoleCollectionResponse allRoles = new RoleCollectionResponse(authService.searchRolesByRange(pag, epp));
-		Link baseLink = new Link(baseURL).withRel("base_url");
+		Link baseLink = new Link(RestLinks.URL_BASE + resource).withRel("base_url");
 		allRoles.add(baseLink);
 		
 		if (pag > 1)
 		{
 			int prev = pag - 1;
 			allRoles.setPrev(prev);
-			Link prevLink = new Link(baseURL + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+			Link prevLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
 			allRoles.add(prevLink);
 		}
 		
@@ -58,7 +62,7 @@ public class RoleRestController
 		{
 			int next = pag + 1;
 			allRoles.setNext(next);
-			Link nextLink = new Link(baseURL + "?pag=" + next + "&epp=" + epp).withRel("next");
+			Link nextLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");
 			allRoles.add(nextLink);
 		}		
 
@@ -76,19 +80,59 @@ public class RoleRestController
 		return allRoles;
 	}
 
-	@RequestMapping(value = recordDetails, method = RequestMethod.GET)
-	public RoleDTO findRoleById(@PathVariable int roleId) throws RecordNotFoundException
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
+	public RoleDTO findRoleById(@PathVariable int id) throws RecordNotFoundException
 	{
-		Role role = authService.searchRoleByRoleId(roleId);
+		Role role = authService.searchRoleByRoleId(id);
 		RoleDTO roleResponse = new RoleDTO(role);
 		
-		Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(roleId)).withSelfRel();
-		roleResponse.add(roleLink);
+		Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(id)).withSelfRel();
+		Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withRel("role_members");
+		Link roleNonMembers = linkTo(methodOn(RoleRestController.class).RoleNonMemberSearch(id, "")).withRel("role_nonMembers");
+		roleResponse.add(roleLink, roleMembersLink, roleNonMembers);
 		
 		return roleResponse;
 	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.GET)
+	public UserDetailedCollection findRoleMembersById(@PathVariable int id) throws RecordNotFoundException
+	{
+		Role role = authService.searchRoleByIdWithMembers(id);
+		UserDetailedCollection membersResponse = new UserDetailedCollection(role.getMembers());
+		
+		Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
+		membersResponse.add(roleMembersLink);
+		
+		for (UserDetailedDTO member : membersResponse.getUsers())
+		{
+			Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
+			member.add(memberLink);
+		}
+		
+		return membersResponse;
+	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.GET)
+	public UserDetailedCollection RoleNonMemberSearch(@PathVariable int id, @RequestParam String query)
+	{
+		UserDetailedCollection usersResponse = new UserDetailedCollection(authService.searchRoleNonMembers(id, query));
+		
+		try
+		{
+			Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
+			usersResponse.add(roleMembersLink);
+			for (UserDetailedDTO member : usersResponse.getUsers())
+			{
+				Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
+				member.add(memberLink);
+			}
+		}
+		catch (RecordNotFoundException e) {}
+		
+		return usersResponse;
+	}
 
-	@RequestMapping(value = baseURI, method = RequestMethod.POST)
+	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public RoleDTO saveNewRole(@RequestBody RoleDTO role) throws RecordNotCreatedException
 	{		
@@ -106,7 +150,7 @@ public class RoleRestController
 		return roleResponse;
 	}
 	
-	@RequestMapping(value = baseURI, method = RequestMethod.PUT)
+	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
 	public RoleDTO updateRole(@RequestBody RoleDTO editedRole) throws RecordNotFoundException, RecordNotChangedException
 	{
@@ -122,16 +166,64 @@ public class RoleRestController
 		return updatedRole;
 	}
 	
-	@RequestMapping(value = recordDetails, method = RequestMethod.DELETE)
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteRole(@PathVariable int roleId) throws RecordNotFoundException, RecordNotDeletedException
-	{
+	public void deleteRole(@PathVariable int id) throws RecordNotFoundException, RecordNotDeletedException
+	{		
 		// TODO: Make sure to throw an exception if the role is not deleted
-		authService.deleteRole(roleId);
+		authService.deleteRole(id);
 	}
 	
+	@ExceptionHandler(RecordNotFoundException.class)
+	public ResponseEntity<ErrorRep> roleNotFoundExceptionHandler(RecordNotFoundException e)
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.NOT_FOUND.value());
+		error.addError(e.getMessage());
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
+	}
 	
-	// TODO: Add an exception handler for record not found
-	// TODO: Add an exception handler for record not created
-	// TODO: Add an exception handler for record not deleted
+	@ExceptionHandler(RecordNotCreatedException.class)
+	public ResponseEntity<ErrorRep> roleNotCreatedExceptionHandler()
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		error.addError("The new role could not be created");
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(RecordNotChangedException.class)
+	public ResponseEntity<ErrorRep> roleNotEditedExceptionHandler(RecordNotChangedException e)
+	{
+		ErrorRep error = new ErrorRep();
+		error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		error.addError(e.getMessage());
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		
+		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(RecordNotDeletedException.class)
+	public ResponseEntity<ErrorRep> roleNotDeletedExceptionHandler(RecordNotDeletedException e)
+	{
+		ErrorRep errorResponse = new ErrorRep();
+		errorResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		errorResponse.addError(e.getMessage());
+		errorResponse.addMessage("The role could not be deleted. Please try again or contact your system administrator");
+		
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		
+		return new ResponseEntity<>(errorResponse, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }

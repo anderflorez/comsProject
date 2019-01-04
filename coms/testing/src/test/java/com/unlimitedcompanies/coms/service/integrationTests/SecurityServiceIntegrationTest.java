@@ -627,6 +627,29 @@ class SecurityServiceIntegrationTest
 		Role foundRole = authService.searchRoleByIdWithMembers(role.getRoleId());
 		assertEquals(3, foundRole.getMembers().size(), "Service test for finding a role with its members failed");
 	}
+	
+	@Test
+	public void searchRoleNonMembersTest() throws RecordNotCreatedException, DuplicateRecordException, RecordNotFoundException
+	{
+		Role role = authService.saveRole(new Role("Administrator"));
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
+		Contact contact3 = contactService.saveContact(new Contact("Richard", null, "Roe", "richd@example.com"));
+		
+		User user1 = authService.saveUser(new User("johnd", "pass".toCharArray(), contact1));
+		authService.saveUser(new User("janed", "pass".toCharArray(), contact2));
+		authService.saveUser(new User("richd", "pass".toCharArray(), contact3));
+		
+		authService.assignUserToRole(user1, role);
+		
+		List<User> foundUsers = authService.searchRoleNonMembers(role.getRoleId(), "Doe");
+		assertEquals(1, foundUsers.size(), "Service test for search role non members failed");
+		assertEquals("Jane", foundUsers.get(0).getContact().getFirstName(), "Service test for search role non members failed");
+		
+		foundUsers = authService.searchRoleNonMembers(role.getRoleId(), "OE");
+		assertEquals(2, foundUsers.size(), "Service test for search role non members failed");
+		assertEquals("Richard", foundUsers.get(1).getContact().getFirstName(), "Service test for search role non members failed");
+	}
 
 	@Test
 	 public void updateRoleTest() throws RecordNotCreatedException, RecordNotFoundException, RecordNotChangedException

@@ -24,7 +24,7 @@ public class OAuth2ServerConfiguration
 	@Configuration
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter
-	{
+	{		
 		@Autowired
 		@Qualifier("authenticationManagerBean")
 		private AuthenticationManager authenticationManager;
