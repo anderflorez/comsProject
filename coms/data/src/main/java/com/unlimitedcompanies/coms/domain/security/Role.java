@@ -77,8 +77,11 @@ public class Role
 	
 	public void removeUser(User user)
 	{
-		this.users.remove(user);
-		user.getRoles().remove(this);
+		if (this.users.contains(user))
+		{
+			this.users.remove(user);
+			user.removeRole(this);
+		}
 	}
 	
 	public void addResourcePermission(ResourcePermissions permission)

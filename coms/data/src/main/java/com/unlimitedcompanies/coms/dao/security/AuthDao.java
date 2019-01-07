@@ -44,7 +44,7 @@ public interface AuthDao
 	public void deleteRole(int roleId);
 
 	public void assignUserToRole(int userId, int roleId);
-//	public void removeUserFromRole(Role role, User user);
+	public void removeUserFromRole(int userId, int roleId);
 	
 	public int getNumberOfPermissions();
 	public void createResourcePermission(ResourcePermissions newPermission);

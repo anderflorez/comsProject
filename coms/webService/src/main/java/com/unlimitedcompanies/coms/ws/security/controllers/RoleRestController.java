@@ -93,44 +93,6 @@ public class RoleRestController
 		
 		return roleResponse;
 	}
-	
-	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.GET)
-	public UserDetailedCollection findRoleMembersById(@PathVariable int id) throws RecordNotFoundException
-	{
-		Role role = authService.searchRoleByIdWithMembers(id);
-		UserDetailedCollection membersResponse = new UserDetailedCollection(role.getMembers());
-		
-		Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
-		membersResponse.add(roleMembersLink);
-		
-		for (UserDetailedDTO member : membersResponse.getUsers())
-		{
-			Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
-			member.add(memberLink);
-		}
-		
-		return membersResponse;
-	}
-	
-	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.GET)
-	public UserDetailedCollection RoleNonMemberSearch(@PathVariable int id, @RequestParam String query)
-	{
-		UserDetailedCollection usersResponse = new UserDetailedCollection(authService.searchRoleNonMembers(id, query));
-		
-		try
-		{
-			Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
-			usersResponse.add(roleMembersLink);
-			for (UserDetailedDTO member : usersResponse.getUsers())
-			{
-				Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
-				member.add(memberLink);
-			}
-		}
-		catch (RecordNotFoundException e) {}
-		
-		return usersResponse;
-	}
 
 	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
@@ -172,6 +134,70 @@ public class RoleRestController
 	{		
 		// TODO: Make sure to throw an exception if the role is not deleted
 		authService.deleteRole(id);
+	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.GET)
+	public UserDetailedCollection findRoleMembersById(@PathVariable int id) throws RecordNotFoundException
+	{
+		Role role = authService.searchRoleByIdWithMembers(id);
+		UserDetailedCollection membersResponse = new UserDetailedCollection(role.getMembers());
+		
+		Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
+		membersResponse.add(roleMembersLink);
+		
+		for (UserDetailedDTO member : membersResponse.getUsers())
+		{
+			Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
+			member.add(memberLink);
+		}
+		
+		return membersResponse;
+	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void addRoleMembers(@PathVariable int id, @RequestBody int[] memberIds) throws RecordNotFoundException
+	{
+		if (memberIds != null)
+		{
+			for (int i = 0; i < memberIds.length; i++)
+			{
+				authService.assignUserToRole(memberIds[i], id);
+			}
+		}
+	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.GET)
+	public UserDetailedCollection RoleNonMemberSearch(@PathVariable int id, @RequestParam String query)
+	{
+		UserDetailedCollection usersResponse = new UserDetailedCollection(authService.searchRoleNonMembers(id, query));
+		
+		try
+		{
+			Link roleMembersLink = linkTo(methodOn(RoleRestController.class).findRoleMembersById(id)).withSelfRel();
+			usersResponse.add(roleMembersLink);
+			for (UserDetailedDTO member : usersResponse.getUsers())
+			{
+				Link memberLink = linkTo(methodOn(UserRestController.class).findUserById(member.getUserId())).withSelfRel();
+				member.add(memberLink);
+			}
+		}
+		catch (RecordNotFoundException e) {}
+		
+		return usersResponse;
+	}
+	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.PUT)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void removeMembers(@PathVariable int id, @RequestBody int[] memberIds) throws RecordNotFoundException
+	{
+		if (memberIds != null)
+		{
+			for (int i = 0; i < memberIds.length; i++)
+			{
+				authService.removeRoleMember(memberIds[i], id);
+			}
+		}
 	}
 	
 	@ExceptionHandler(RecordNotFoundException.class)

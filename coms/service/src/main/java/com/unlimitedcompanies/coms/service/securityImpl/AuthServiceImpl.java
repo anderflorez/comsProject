@@ -426,16 +426,36 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public void assignUserToRole(User user, Role role)
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public void assignUserToRole(int userId, int roleId) throws RecordNotFoundException
 	{
-		authDao.assignUserToRole(user.getUserId().intValue(), role.getRoleId());
+		try
+		{
+			authDao.assignUserToRole(userId, roleId);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("Error: The role or some users scheduled to be added as members of the role could not be found");
+		}
+		
+		// TODO: Need to create some checking and throw an exception when the user is not added to the role
 	}
 	
-//	@Override
-//	public void removeUserFromRole(Role role, User user)
-//	{
-//		authDao.removeUserFromRole(role, user);
-//	}
+	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public void removeRoleMember(int userId, int roleId) throws RecordNotFoundException
+	{
+		try
+		{
+			authDao.removeUserFromRole(userId, roleId);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("Error: The role or some members scheduled to be removed from the role could not be found");
+		}
+		
+		// TODO: Create some checking and throw a new exception if the member is not removed.
+	}
 
 	@Override
 	public ResourcePermissions savePermission(ResourcePermissions permission)

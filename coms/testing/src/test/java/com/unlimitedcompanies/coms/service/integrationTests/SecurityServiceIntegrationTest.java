@@ -408,8 +408,8 @@ class SecurityServiceIntegrationTest
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("username", "mypass".toCharArray(), contact));
 		
-		authService.assignUserToRole(user, role1);
-		authService.assignUserToRole(user, role2);
+		authService.assignUserToRole(user.getUserId(), role1.getRoleId());
+		authService.assignUserToRole(user.getUserId(), role2.getRoleId());
 		
 		User foundUser = authService.searchFullUserByUsername(user.getUsername());
 		assertEquals(2, foundUser.getRoles().size(), "Service test for finding user role list failed");
@@ -620,9 +620,9 @@ class SecurityServiceIntegrationTest
 		User user2 = authService.saveUser(new User("janed", "pass".toCharArray(), contact2));
 		User user3 = authService.saveUser(new User("richd", "pass".toCharArray(), contact3));
 		
-		authService.assignUserToRole(user1, role);
-		authService.assignUserToRole(user2, role);
-		authService.assignUserToRole(user3, role);
+		authService.assignUserToRole(user1.getUserId(), role.getRoleId());
+		authService.assignUserToRole(user2.getUserId(), role.getRoleId());
+		authService.assignUserToRole(user3.getUserId(), role.getRoleId());
 		
 		Role foundRole = authService.searchRoleByIdWithMembers(role.getRoleId());
 		assertEquals(3, foundRole.getMembers().size(), "Service test for finding a role with its members failed");
@@ -640,7 +640,7 @@ class SecurityServiceIntegrationTest
 		authService.saveUser(new User("janed", "pass".toCharArray(), contact2));
 		authService.saveUser(new User("richd", "pass".toCharArray(), contact3));
 		
-		authService.assignUserToRole(user1, role);
+		authService.assignUserToRole(user1.getUserId(), role.getRoleId());
 		
 		List<User> foundUsers = authService.searchRoleNonMembers(role.getRoleId(), "Doe");
 		assertEquals(1, foundUsers.size(), "Service test for search role non members failed");
@@ -691,13 +691,9 @@ class SecurityServiceIntegrationTest
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
 		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
-
 		Role role = authService.saveRole(new Role("Administrator"));
 
-		assertFalse(user.getRoles().contains(role), "Service test for assigning a user to a role failed");
-		assertFalse(role.getMembers().contains(user), "Service test for assigning a user to a role failed");
-
-		authService.assignUserToRole(user, role);
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
 		
 		User checkUser = authService.searchFullUserByUserId(user.getUserId());
 		Role checkRole = authService.searchRoleByRoleId(role.getRoleId());
@@ -706,23 +702,19 @@ class SecurityServiceIntegrationTest
 		assertTrue(checkRole.getMembers().contains(user), "Service test for assigning a user to a role failed");
 	}
 
-	// @Test
-	// public void removeUserFromRole() throws NonExistingContactException
-	// {
-	// contactService.saveContact(new Contact("John", null, "Doe",
-	// "johnd@example.com"));
-	// Contact contact = contactService.findContactByEmail("johnd@example.com");
-	// authService.saveUser(new User("jdoe", "mypass", contact));
-	// authService.saveRole(new Role("Administrator"));
-	//
-	// Role role = authService.findRoleByRoleName("Administrator");
-	// User user = authService.findUserByUsername("jdoe");
-	// authService.assignUserToRole(role, user);
-	//
-	// authService.removeUserFromRole(role, user);
-	// assertEquals(0, authService.findNumberOfAssignments(),
-	// "Service test for removing a user from a role failed");
-	// }
+	@Test
+	public void removeUserFromRole() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
+		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Administrator"));
+
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		authService.removeRoleMember(user.getUserId(), role.getRoleId());
+		
+		assertFalse(authService.searchRoleByIdWithMembers(role.getRoleId()).getMembers().contains(user), "Service test for removing a user from a role failed");
+		// TODO: this should also test if the role was removed from the user;
+	}
 
 	@Test
 	public void findUserWithContactAndRoles() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException

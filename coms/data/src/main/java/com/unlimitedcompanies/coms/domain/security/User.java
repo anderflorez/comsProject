@@ -188,8 +188,11 @@ public class User
 	
 	public void removeRole(Role role)
 	{
-		this.roles.remove(role);
-		role.getMembers().remove(this);
+		if (this.roles.contains(role))
+		{
+			this.roles.remove(role);
+			role.removeUser(this);
+		}
 	}
 
 	@Override

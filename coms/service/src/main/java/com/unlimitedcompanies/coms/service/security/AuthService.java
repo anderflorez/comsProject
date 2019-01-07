@@ -49,8 +49,8 @@ public interface AuthService
 	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException;
 	public void deleteRole(int roleId) throws RecordNotFoundException, RecordNotDeletedException;
 
-	public void assignUserToRole(User user, Role role);
-//	public void removeUserFromRole(Role role, User user);
+	public void assignUserToRole(int userId, int roleId) throws RecordNotFoundException;
+	public void removeRoleMember(int userId, int roleId) throws RecordNotFoundException;
 	
 	public ResourcePermissions savePermission(ResourcePermissions permission);
 	public ResourcePermissions searchPermissionById(String id);

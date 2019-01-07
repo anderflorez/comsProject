@@ -318,14 +318,14 @@ public class AuthDaoImpl implements AuthDao
 		role.addUser(user);		
 	}
 
-//	@Override
-//	public void removeUserFromRole(Role role, User user)
-//	{
-//		Role foundRole = this.getRoleByRoleName(role.getRoleName());
-//		User foundUser = this.searchUserByUsername(user.getUsername());
-//
-//		foundRole.removeUser(foundUser);
-//	}
+	@Override
+	public void removeUserFromRole(int userId, int roleId)
+	{
+		Role foundRole = this.getRoleById(roleId);
+		User foundUser = this.getUserByUserId(userId);
+
+		foundRole.removeUser(foundUser);
+	}
 	
 	@Override
 	public int getNumberOfPermissions()
