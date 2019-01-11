@@ -228,4 +228,5 @@ public class User
 	{
 		return this.username + " - " + contact.getFirstName() + " " + contact.getLastName();
 	}
+
 }

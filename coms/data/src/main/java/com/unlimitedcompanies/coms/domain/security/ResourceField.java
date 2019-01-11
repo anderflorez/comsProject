@@ -26,8 +26,7 @@ public class ResourceField
 	@ManyToMany(mappedBy = "restrictedFields")
 	private List<Role> restrictedForRoles = new ArrayList<>();
 
-	protected ResourceField()
-	{}
+	protected ResourceField() {}
 
 	public ResourceField(String resourceFieldName, boolean association, Resource resource)
 	{
