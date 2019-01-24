@@ -40,6 +40,28 @@ public class Resource
 		return resourceName;
 	}
 	
+	public Set<ResourceField> getResourceFields()
+	{
+		return resourceFields;
+	}
+	
+	public ResourceField getResourceFieldByName(String fieldName)
+	{
+		// TODO: need to improve possibly using lambda
+		
+		if (this.resourceFields != null)
+		{
+			for (ResourceField next : this.resourceFields)
+			{
+				if (next.getResourceFieldName().equals(fieldName))
+				{
+					return next;
+				}
+			} 
+		}
+		return null;
+	}
+
 	public void addField(ResourceField field)
 	{
 		if (!this.resourceFields.contains(field))

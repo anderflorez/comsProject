@@ -48,4 +48,10 @@ public class SecuritySetupServiceImpl implements SecuritySetupService
 		return dao.findResourceByName(name);
 	}
 
+	@Override
+	public Resource findResourceByNameWithFields(String name)
+	{
+		return dao.findResourceByNameWithFields(name);
+	}
+
 }

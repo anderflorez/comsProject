@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.unlimitedcompanies.coms.data.query.LOperator;
+import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.search.Operator;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
@@ -288,4 +291,62 @@ class DomainSecurityUnitTest
 		assertTrue(foundAndGroup.contains(andGroup4));
 	}
 	
+	
+	// Testing new search query functionality
+	
+	@Test
+	public void searchChaininigTest()
+	{
+		Resource userResource = new Resource("User");
+		userResource.addField(new ResourceField("userId", false, userResource));
+		userResource.addField(new ResourceField("username", false, userResource));
+		userResource.addField(new ResourceField("enabled", false, userResource));
+		userResource.addField(new ResourceField("contact", true, userResource));
+		userResource.addField(new ResourceField("roles", true, userResource));
+		
+		Resource contactResource = new Resource("Contact");
+		contactResource.addField(new ResourceField("contactId", false, contactResource));
+		contactResource.addField(new ResourceField("firstName", false, contactResource));
+		contactResource.addField(new ResourceField("lastName", false, contactResource));
+		contactResource.addField(new ResourceField("email", false, contactResource));
+		
+		Resource roleResource = new Resource("Role");
+		roleResource.addField(new ResourceField("roleId", false, roleResource));
+		roleResource.addField(new ResourceField("roleName", false, roleResource));
+		roleResource.addField(new ResourceField("permission", true, roleResource));
+		
+		Resource permissionResource = new Resource("Permission");
+		permissionResource.addField(new ResourceField("permId", false, permissionResource));
+		permissionResource.addField(new ResourceField("permName", false, permissionResource));
+		
+		SearchQuery userSearch = new SearchQuery(userResource);
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role")
+				  .leftJoinFetch(roleResource.getResourceFieldByName("permission"), "perm");
+		
+		String expectedResult = "select root from User as root "
+									+ "left join fetch root.contact as contact "
+									+ "left join fetch root.roles as role "
+									+ "left join fetch role.permission as perm";
+		
+		LOperator ops = LOperator.EQUALS;
+		System.out.println(ops.symbolOperator());
+		
+		assertTrue(userSearch.generateFullQuery().equals(expectedResult));
+	}
+	
+	@Test
+	public void searchQueryWithConditionsTest()
+	{
+		fail();
+		Resource userResource = new Resource("User");
+		userResource.addField(new ResourceField("userId", false, userResource));
+		userResource.addField(new ResourceField("username", false, userResource));
+		userResource.addField(new ResourceField("enabled", false, userResource));
+		userResource.addField(new ResourceField("contact", true, userResource));
+		userResource.addField(new ResourceField("roles", true, userResource));
+		
+		SearchQuery userSearch = new SearchQuery(userResource);
+		
+	}
 }

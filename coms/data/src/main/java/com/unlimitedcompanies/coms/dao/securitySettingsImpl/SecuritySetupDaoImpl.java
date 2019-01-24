@@ -146,6 +146,13 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		return em.createQuery("select resource from Resource resource where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
+	
+	@Override
+	public Resource findResourceByNameWithFields(String name)
+	{
+		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields where resource.resourceName = :name",
+				Resource.class).setParameter("name", name).getSingleResult();
+	}
 
 	@Override
 	public void registerResource(String resourceName)

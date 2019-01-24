@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
@@ -102,7 +103,7 @@ public class AuthDaoImpl implements AuthDao
 
 	@Override
 	public User getUserByUsername(String username)
-	{
+	{		
 		return em.createQuery("select user from User user where user.username = :username", User.class)
 						   .setParameter("username", username)
 						   .getSingleResult();

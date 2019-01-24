@@ -1,8 +1,8 @@
 package com.unlimitedcompanies.coms.service.integrationTests;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
+import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.search.Operator;
 import com.unlimitedcompanies.coms.domain.security.AndCondition;
 import com.unlimitedcompanies.coms.domain.security.AndGroup;
@@ -40,6 +41,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.service.security.SearchQueryService;
 import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 @ExtendWith(SpringExtension.class)
@@ -56,6 +58,9 @@ class SecurityServiceIntegrationTest
 
 	@Autowired
 	SecuritySetupService setupService;
+	
+	@Autowired
+	SearchQueryService searchService;
 
 	@Test
 	public void numberOfContactsIntegrationTest()
@@ -112,6 +117,17 @@ class SecurityServiceIntegrationTest
 		assertEquals(ella.getContactCharId(), contactService.searchContactsByRange(3, 2).get(0).getContactCharId());
 		assertEquals(diane.getContactCharId(), contactService.searchContactsByRange(2, 3).get(0).getContactCharId());
 		assertEquals(ella.getContactCharId(), contactService.searchContactsByRange(2, 3).get(1).getContactCharId());
+	}
+	
+	@Test
+	public void findAllContacts() throws DuplicateRecordException
+	{
+		contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
+		contactService.saveContact(new Contact("Ella", null, null, "ella@example.com"));
+		contactService.saveContact(new Contact("Catherine", null, null, "catherine@example.com"));
+		contactService.saveContact(new Contact("marcela", null, null, "marcela@example.com"));
+		
+		assertEquals(4, contactService.searchAllContacts().size());
 	}
 
 	@Test
@@ -981,5 +997,42 @@ class SecurityServiceIntegrationTest
 					"Save OrGroup with conditions test for conditions failed");
 		}
 		assertEquals(2, foundOrGroup.getConditions().size(), "Save OrGroup with conditions test for group failed");
+	}
+	
+	
+	// TESTING PROCESS OF THE STORED SEARCH QUERIES
+	
+	@Test
+	public void saveStoredSearchQueryTestWithJoins()
+	{
+		setupService.checkAllResources();
+		Resource userResource = setupService.findResourceByNameWithFields("User");
+		
+		SearchQuery sq = new SearchQuery(userResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact")
+		  .leftJoinFetch(userResource.getResourceFieldByName("roles"), "role");
+		
+		searchService.storeSearchQuery(sq);
+		
+		assertEquals(1, searchService.storedSearchQueriesNum());
+		assertEquals(3, searchService.storedSearchQueriesPathNum());
+	}
+	
+	@Test
+	public void findStoredSearchQueryTest()
+	{
+		setupService.checkAllResources();
+		Resource userResource = setupService.findResourceByNameWithFields("User");
+		
+		SearchQuery sq = new SearchQuery(userResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
+		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role");
+		searchService.storeSearchQuery(sq);
+		
+		SearchQuery foundSQ = searchService.findQueryById(sq.getSearchQueryId());
+		
+		assertEquals("select root from User as root left join fetch root.contact as contact left join fetch root.roles as role",
+					foundSQ.generateFullQuery());
+		assertEquals(sq.getQueryResource().getPathId(), foundSQ.getQueryResource().getPathId());
 	}
 }
