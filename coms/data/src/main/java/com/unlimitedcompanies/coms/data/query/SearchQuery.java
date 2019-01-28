@@ -1,7 +1,11 @@
 package com.unlimitedcompanies.coms.data.query;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.persistence.Entity;
@@ -9,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.graalvm.compiler.nodes.java.ArrayLengthNode;
 
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -117,15 +123,39 @@ public class SearchQuery
 
 	private void setConditionGL1(ConditionGL1 conditionGL1)
 	{
-		if (this.conditionGL1 == null)
+		if (this.conditionGL1 == null || this.conditionGL1.equals(conditionGL1))
 		{
 			this.conditionGL1 = conditionGL1;
-			if (!conditionGL1.getSearch().equals(this)) conditionGL1.setSearch(this);
+			// TODO: Create a unit test to make sure the search query equals method works as expected (based on id only)
+			if (conditionGL1.getSearch() == null) conditionGL1.setSearch(this);
 		}
 		else
 		{
 			// TODO: Throw an exception as the search already has a condition group setup
 		}
+	}
+	
+	private boolean verifyConditionFields(String fieldName)
+	{
+		
+	}
+	
+	private List<Path> findAllPaths(Path path)
+	{
+		List<Path> allPaths = new ArrayList<>();
+		allPaths.add(path);
+		if (!path.getBranches().isEmpty())
+		{
+			for ()
+		}
+		
+		
+		
+		
+		
+		
+		
+		
 	}
 
 	public Path leftJoinFetch(ResourceField field, String alias)
@@ -133,12 +163,17 @@ public class SearchQuery
 		return this.queryResource.leftJoinFetch(field, alias);
 	}
 	
-	public ConditionGL1 where(String field, String cOperator, String value, char valueType)
+	// The logic operator should be set from the "and" and "or" methods in the condition group classes
+	// This method expects the condition the be the first and only; therefore, no logical operator will be used
+	public ConditionGL1 where(String field, COperator condOperator, String value, char valueType)
 	{
-		ConditionGL1 conditionGL1 = new ConditionGL1(LOperator.AND);
+		ConditionGL1 conditionGL1 = new ConditionGL1();
+		// TODO: Test this is being added in both sides of the relationship
 		this.setConditionGL1(conditionGL1);
 		
-		conditionGL1.and(field, cOperator, value, valueType);
+		// TODO: Check the next line does create a ConditionL1 and add it to the corresponding ConditionGL1
+		// TODO: Make sure the method called on the next line checks this is the first and only condition in the conditionGL1
+		conditionGL1.addCondition(field, condOperator, value, valueType);
 		
 		return conditionGL1;
 	}
@@ -146,8 +181,11 @@ public class SearchQuery
 	public String generateFullQuery()
 	{
 		// TODO: Create some checking mechanism to make sure there are no repeated aliases in the same search query
-		
-		return "select root " + this.queryResource.getFullQuery();
+		// TODO: Update this method to include the where clause of the query		
+		StringBuilder sb = new StringBuilder("select root ");
+		sb.append(this.queryResource.getFullQuery());
+		sb.append(this.getConditionGL1().conditionalGroupQuery());
+		return sb.toString();
 	}
 
 	@Override

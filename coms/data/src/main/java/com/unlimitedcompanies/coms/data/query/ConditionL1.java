@@ -22,18 +22,18 @@ public class ConditionL1
 	
 	@ManyToOne
 	@JoinColumn(name = "conditionGroupL1_FK")
-	private ConditionGL1 group;
+	private ConditionGL1 containerGroup;
 	
 	@OneToOne
 	@JoinColumn(name = "searchId_FK")
 	private SearchQuery sqValue;
 
-	public ConditionL1() 
+	protected ConditionL1() 
 	{
 		this.conditionL1Id = UUID.randomUUID().toString();
 	}
 
-	public ConditionL1(String field, COperator cOperator, String value, char valueType)
+	protected ConditionL1(String field, COperator cOperator, String value, char valueType)
 	{
 		this.conditionL1Id = UUID.randomUUID().toString();
 		this.field = field;
@@ -41,8 +41,18 @@ public class ConditionL1
 		this.value = value;
 		this.valueType = valueType;
 	}
+	
+	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, String value, char valueType)
+	{
+		this.conditionL1Id = UUID.randomUUID().toString();
+		this.containerGroup = containerGroup;		
+		this.field = field;
+		this.cOperator = cOperator.symbolOperator();
+		this.value = value;
+		this.valueType = valueType;
+	}
 
-	protected String getConditionL1Id()
+	public String getConditionL1Id()
 	{
 		return conditionL1Id;
 	}
@@ -67,6 +77,11 @@ public class ConditionL1
 		return cOperator;
 	}
 	
+	private void setcOperator(String cOperator)
+	{
+		this.cOperator = cOperator;
+	}
+
 	public COperator getOperator()
 	{
 		if (this.cOperator.equals("="))
@@ -91,11 +106,6 @@ public class ConditionL1
 		}
 	}
 
-	private void setcOperator(String cOperator)
-	{
-		this.cOperator = cOperator;
-	}
-
 	protected String getValue()
 	{
 		return value;
@@ -116,24 +126,20 @@ public class ConditionL1
 		this.valueType = valueType;
 	}
 
-	protected ConditionGL1 getGroup()
+	protected ConditionGL1 getContainerGroup()
 	{
-		return group;
+		return containerGroup;
 	}
 
-	protected void setGroup(ConditionGL1 group)
+	protected void setContainerGroup(ConditionGL1 containerGroup)
 	{
-		this.group = group;
-		if (!group.getConditions().contains(this))
+		if (containerGroup.getConditions().contains(this))
 		{
-			if (group.getOperator().toString().equals("AND"))
-			{
-				group.and(this);
-			}
-			else if (group.getOperator().toString().equals("OR"))
-			{
-				group.or(this);
-			}
+			this.containerGroup = containerGroup;
+		}
+		else 
+		{
+			// TODO: Throw a new exception as the Group and Condition are not being updated in both sides of the relationship
 		}
 	}
 
@@ -145,5 +151,34 @@ public class ConditionL1
 	protected void setSqValue(SearchQuery sqValue)
 	{
 		this.sqValue = sqValue;
+	}
+	
+	protected String conditionalQuery()
+	{
+		return this.field + " " + this.getOperator().symbolOperator() + " " + this.value;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((conditionL1Id == null) ? 0 : conditionL1Id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		ConditionL1 other = (ConditionL1) obj;
+		if (conditionL1Id == null)
+		{
+			if (other.conditionL1Id != null) return false;
+		}
+		else if (!conditionL1Id.equals(other.conditionL1Id)) return false;
+		return true;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.unlimitedcompanies.coms.data.query.COperator;
 import com.unlimitedcompanies.coms.data.query.LOperator;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.search.Operator;
@@ -329,16 +330,13 @@ class DomainSecurityUnitTest
 									+ "left join fetch root.roles as role "
 									+ "left join fetch role.permission as perm";
 		
-		LOperator ops = LOperator.EQUALS;
-		System.out.println(ops.symbolOperator());
-		
 		assertTrue(userSearch.generateFullQuery().equals(expectedResult));
 	}
 	
 	@Test
 	public void searchQueryWithConditionsTest()
 	{
-		fail();
+
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
 		userResource.addField(new ResourceField("username", false, userResource));
@@ -346,7 +344,21 @@ class DomainSecurityUnitTest
 		userResource.addField(new ResourceField("contact", true, userResource));
 		userResource.addField(new ResourceField("roles", true, userResource));
 		
+		Resource contactResource = new Resource("Contact");
+		contactResource.addField(new ResourceField("contactId", false, contactResource));
+		contactResource.addField(new ResourceField("firstName", false, contactResource));
+		contactResource.addField(new ResourceField("lastName", false, contactResource));
+		contactResource.addField(new ResourceField("email", false, contactResource));
+		
 		SearchQuery userSearch = new SearchQuery(userResource);
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
+		userSearch.where("username", COperator.EQUALS, "administrator", 't');
+		
+		String expectedResult = "select root from User as root left join fetch root.contact as contact where root.username = administrator;";
+		String obtainedResult = userSearch.generateFullQuery();
+		System.out.println(obtainedResult);
+		
+		assertEquals(expectedResult, obtainedResult);
 		
 	}
 }
