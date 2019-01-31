@@ -4,14 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.data.query.COperator;
-import com.unlimitedcompanies.coms.data.query.LOperator;
+import com.unlimitedcompanies.coms.data.query.Path;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.search.Operator;
 import com.unlimitedcompanies.coms.domain.security.Address;
@@ -321,22 +320,51 @@ class DomainSecurityUnitTest
 		permissionResource.addField(new ResourceField("permName", false, permissionResource));
 		
 		SearchQuery userSearch = new SearchQuery(userResource);
-		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
-		userSearch.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role")
-				  .leftJoinFetch(roleResource.getResourceFieldByName("permission"), "perm");
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource)
+				  .leftJoinFetch(roleResource.getResourceFieldByName("permission"), "perm", permissionResource);
 		
 		String expectedResult = "select root from User as root "
 									+ "left join fetch root.contact as contact "
 									+ "left join fetch root.roles as role "
-									+ "left join fetch role.permission as perm";
+									+ "left join fetch role.permission as perm;";
 		
 		assertTrue(userSearch.generateFullQuery().equals(expectedResult));
 	}
 	
+//	@Test
+//	public void savedSearchWrongFiledsNotAllowed()
+//	{
+//		Resource userResource = new Resource("User");
+//		userResource.addField(new ResourceField("userId", false, userResource));
+//		userResource.addField(new ResourceField("username", false, userResource));
+//		userResource.addField(new ResourceField("enabled", false, userResource));
+//		userResource.addField(new ResourceField("contact", true, userResource));
+//		userResource.addField(new ResourceField("roles", true, userResource));
+//		
+//		Resource contactResource = new Resource("Contact");
+//		contactResource.addField(new ResourceField("contactId", false, contactResource));
+//		contactResource.addField(new ResourceField("firstName", false, contactResource));
+//		contactResource.addField(new ResourceField("lastName", false, contactResource));
+//		contactResource.addField(new ResourceField("email", false, contactResource));
+//		
+//		Resource roleResource = new Resource("Role");
+//		roleResource.addField(new ResourceField("roleId", false, roleResource));
+//		roleResource.addField(new ResourceField("roleName", false, roleResource));
+//		roleResource.addField(new ResourceField("permission", true, roleResource));
+//		
+//		SearchQuery userSearch = new SearchQuery(userResource);
+//		Path contactPath = userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+//		
+//		//This should get an exception as the resource "Contact" does not have a field "roles"
+//		contactPath.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
+//
+//		assertThrows(expectedType, executable);
+//	}
+	
 	@Test
 	public void searchQueryWithConditionsTest()
 	{
-
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
 		userResource.addField(new ResourceField("username", false, userResource));
@@ -351,12 +379,11 @@ class DomainSecurityUnitTest
 		contactResource.addField(new ResourceField("email", false, contactResource));
 		
 		SearchQuery userSearch = new SearchQuery(userResource);
-		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
-		userSearch.where("username", COperator.EQUALS, "administrator", 't');
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
 		
 		String expectedResult = "select root from User as root left join fetch root.contact as contact where root.username = administrator;";
 		String obtainedResult = userSearch.generateFullQuery();
-		System.out.println(obtainedResult);
 		
 		assertEquals(expectedResult, obtainedResult);
 		

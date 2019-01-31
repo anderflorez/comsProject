@@ -1,11 +1,7 @@
 package com.unlimitedcompanies.coms.data.query;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.persistence.Entity;
@@ -13,8 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.graalvm.compiler.nodes.java.ArrayLengthNode;
 
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -135,32 +129,11 @@ public class SearchQuery
 		}
 	}
 	
-	private boolean verifyConditionFields(String fieldName)
-	{
-		
-	}
-	
-	private List<Path> findAllPaths(Path path)
-	{
-		List<Path> allPaths = new ArrayList<>();
-		allPaths.add(path);
-		if (!path.getBranches().isEmpty())
-		{
-			for ()
-		}
-		
-		
-		
-		
-		
-		
-		
-		
-	}
+	// TODO: Future upgrades: There could be methods here to verify a condition field does belong to the search
 
-	public Path leftJoinFetch(ResourceField field, String alias)
+	public Path leftJoinFetch(ResourceField field, String alias, Resource relationResource)
 	{
-		return this.queryResource.leftJoinFetch(field, alias);
+		return this.queryResource.leftJoinFetch(field, alias, relationResource);
 	}
 	
 	// The logic operator should be set from the "and" and "or" methods in the condition group classes
@@ -184,7 +157,11 @@ public class SearchQuery
 		// TODO: Update this method to include the where clause of the query		
 		StringBuilder sb = new StringBuilder("select root ");
 		sb.append(this.queryResource.getFullQuery());
-		sb.append(this.getConditionGL1().conditionalGroupQuery());
+		if (this.getConditionGL1() != null)
+		{
+			sb.append(this.getConditionGL1().conditionalGroupQuery());
+		}
+		sb.append(';');
 		return sb.toString();
 	}
 

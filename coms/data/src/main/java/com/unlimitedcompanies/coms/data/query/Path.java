@@ -104,15 +104,16 @@ public class Path
 		this.branches = branches;		
 	}
 	
-	public Path leftJoinFetch(ResourceField field, String joinAlias)
+	public Path leftJoinFetch(ResourceField field, String joinAlias, Resource relationResource)
 	{
-		// TODO: Make sure that field belongs to the parent resource
+		// TODO: Make sure that field belongs to the parent resource and it has an association
 		if (!field.getResource().equals(this.getResource()))
 		{
 			// TODO: Throw an exception
+			System.out.println("ERROR: The field does not belong to the parent resource");
 		}
 		
-		Path branchPath = new Path(field.getResource(), joinAlias);
+		Path branchPath = new Path(relationResource, joinAlias);
 		branchPath.setParentRelation(this.alias + "." + field.getResourceFieldName());
 		branchPath.setParent(this);
 		

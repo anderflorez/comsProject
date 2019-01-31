@@ -117,7 +117,7 @@ public class ConditionGL3 implements ConditionGroup
 	{
 		if (this.conditions.isEmpty())
 		{
-			ConditionL3 condition = new ConditionL3(field, condOperator, value, valueType);
+			ConditionL3 condition = new ConditionL3(this, field, condOperator, value, valueType);
 			// TODO: Make sure the next line adds the condition on both sides of the relationship
 			this.addCondition(condition);
 		}

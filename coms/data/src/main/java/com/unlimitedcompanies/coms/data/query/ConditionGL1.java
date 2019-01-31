@@ -120,7 +120,7 @@ public class ConditionGL1 implements ConditionGroup
 	{
 		if (this.conditions.isEmpty())
 		{
-			ConditionL1 condition = new ConditionL1(field, condOperator, value, valueType);
+			ConditionL1 condition = new ConditionL1(this, field, condOperator, value, valueType);
 			// TODO: Make sure the next line adds the condition on both sides of the relationship
 			this.addCondition(condition);
 		}
@@ -217,7 +217,6 @@ public class ConditionGL1 implements ConditionGroup
 		{
 			sb.append(this.getConditionGroup().conditionalGroupQuery());			
 		}
-		sb.append(";");
 		return sb;
 	}
 

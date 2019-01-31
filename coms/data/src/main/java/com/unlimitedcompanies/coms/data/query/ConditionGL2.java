@@ -120,7 +120,7 @@ public class ConditionGL2 implements ConditionGroup
 	{
 		if (this.conditions.isEmpty())
 		{
-			ConditionL2 condition = new ConditionL2(field, condOperator, value, valueType);
+			ConditionL2 condition = new ConditionL2(this, field, condOperator, value, valueType);
 			// TODO: Make sure the next line adds the condition on both sides of the relationship
 			this.addCondition(condition);
 		}

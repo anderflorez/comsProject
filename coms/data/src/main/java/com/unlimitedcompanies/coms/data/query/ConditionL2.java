@@ -33,13 +33,32 @@ public class ConditionL2
 		this.conditionL2Id = UUID.randomUUID().toString();
 	}
 
-	public ConditionL2(String field, COperator cOperator, String value, char valueType)
+	public ConditionL2(ConditionGL2 containerGroup, String field, COperator cOperator, String value, char valueType)
 	{
-		this.conditionL2Id = UUID.randomUUID().toString();
-		this.field = field;
-		this.cOperator = cOperator.toString();
-		this.value = value;
-		this.valueType = valueType;
+		int i = field.indexOf('.');
+		if (i > 0)
+		{
+			Path path = containerGroup.getParentGroup().getSearch().getQueryResource();
+			if (ConditionGroup.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			{
+				this.conditionL2Id = UUID.randomUUID().toString();
+				this.containerGroup = containerGroup;
+				this.field = field;
+				this.cOperator = cOperator.toString();
+				this.value = value;
+				this.valueType = valueType;			
+			}
+			else
+			{
+				// TODO: Throw an exception as the field does not exist in the search
+				System.out.println("ERROR: The field does not exist in the current search");
+			}			
+		}
+		else
+		{
+			// TODO: Throw an exception as the field format is incorrect
+			System.out.println("ERROR: The field format entered is incorrect");
+		}
 	}
 
 	public String getConditionL2Id()

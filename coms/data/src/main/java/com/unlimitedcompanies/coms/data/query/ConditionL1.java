@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.data.query;
 
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -8,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
 @Entity
 @Table(name = "conditionL1")
@@ -33,23 +36,41 @@ public class ConditionL1
 		this.conditionL1Id = UUID.randomUUID().toString();
 	}
 
-	protected ConditionL1(String field, COperator cOperator, String value, char valueType)
-	{
-		this.conditionL1Id = UUID.randomUUID().toString();
-		this.field = field;
-		this.cOperator = cOperator.symbolOperator();
-		this.value = value;
-		this.valueType = valueType;
-	}
+//	protected ConditionL1(String field, COperator cOperator, String value, char valueType)
+//	{
+//		this.conditionL1Id = UUID.randomUUID().toString();
+//		this.field = field;
+//		this.cOperator = cOperator.symbolOperator();
+//		this.value = value;
+//		this.valueType = valueType;
+//	}
 	
 	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, String value, char valueType)
 	{
-		this.conditionL1Id = UUID.randomUUID().toString();
-		this.containerGroup = containerGroup;		
-		this.field = field;
-		this.cOperator = cOperator.symbolOperator();
-		this.value = value;
-		this.valueType = valueType;
+		int i = field.indexOf('.');
+		if (i > 0)
+		{
+			Path path = containerGroup.getSearch().getQueryResource();
+			if (ConditionGroup.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			{
+				this.conditionL1Id = UUID.randomUUID().toString();
+				this.containerGroup = containerGroup;		
+				this.field = field;
+				this.cOperator = cOperator.symbolOperator();
+				this.value = value;
+				this.valueType = valueType;
+			}
+			else
+			{
+				// TODO: Throw an exception as the field does not exist in the search
+				System.out.println("ERROR: The field does not exist in the current search");
+			}			
+		}
+		else
+		{
+			// TODO: Throw an exception as the field format is incorrect
+			System.out.println("ERROR: The field format entered is incorrect");
+		}
 	}
 
 	public String getConditionL1Id()

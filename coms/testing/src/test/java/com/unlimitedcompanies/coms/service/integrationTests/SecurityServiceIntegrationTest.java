@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -1007,10 +1008,12 @@ class SecurityServiceIntegrationTest
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource roleResource = setupService.findResourceByNameWithFields("Role");
 		
 		SearchQuery sq = new SearchQuery(userResource);
-		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact")
-		  .leftJoinFetch(userResource.getResourceFieldByName("roles"), "role");
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
 		
 		searchService.storeSearchQuery(sq);
 		
@@ -1023,15 +1026,17 @@ class SecurityServiceIntegrationTest
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource roleResource = setupService.findResourceByNameWithFields("Role");
 		
 		SearchQuery sq = new SearchQuery(userResource);
-		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact");
-		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role");
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
 		searchService.storeSearchQuery(sq);
 		
 		SearchQuery foundSQ = searchService.findQueryById(sq.getSearchQueryId());
 		
-		assertEquals("select root from User as root left join fetch root.contact as contact left join fetch root.roles as role",
+		assertEquals("select root from User as root left join fetch root.contact as contact left join fetch root.roles as role;",
 					foundSQ.generateFullQuery());
 		assertEquals(sq.getQueryResource().getPathId(), foundSQ.getQueryResource().getPathId());
 	}
