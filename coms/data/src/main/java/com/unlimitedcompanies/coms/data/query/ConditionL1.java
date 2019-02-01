@@ -51,7 +51,7 @@ public class ConditionL1
 		if (i > 0)
 		{
 			Path path = containerGroup.getSearch().getQueryResource();
-			if (ConditionGroup.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			if (SearchQuery.verifyField(field.substring(0, i), field.substring(i + 1), path))
 			{
 				this.conditionL1Id = UUID.randomUUID().toString();
 				this.containerGroup = containerGroup;		

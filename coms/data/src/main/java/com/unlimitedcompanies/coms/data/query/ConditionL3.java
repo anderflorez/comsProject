@@ -39,7 +39,7 @@ public class ConditionL3
 		if (i > 0)
 		{
 			Path path = containerGroup.getParentGroup().getParentGroup().getSearch().getQueryResource();
-			if (ConditionGroup.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			if (SearchQuery.verifyField(field.substring(0, i), field.substring(i + 1), path))
 			{
 				this.conditionL3Id = UUID.randomUUID().toString();
 				this.containerGroup = containerGroup;

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -387,5 +388,32 @@ class DomainSecurityUnitTest
 		
 		assertEquals(expectedResult, obtainedResult);
 		
+	}
+	
+	@Test
+	public void searchSingleResultQueryWithConditionsTest()
+	{
+		Resource userResource = new Resource("User");
+		userResource.addField(new ResourceField("userId", false, userResource));
+		userResource.addField(new ResourceField("username", false, userResource));
+		userResource.addField(new ResourceField("enabled", false, userResource));
+		userResource.addField(new ResourceField("contact", true, userResource));
+		userResource.addField(new ResourceField("roles", true, userResource));
+		
+		Resource contactResource = new Resource("Contact");
+		contactResource.addField(new ResourceField("contactId", false, contactResource));
+		contactResource.addField(new ResourceField("firstName", false, contactResource));
+		contactResource.addField(new ResourceField("lastName", false, contactResource));
+		contactResource.addField(new ResourceField("email", false, contactResource));
+		
+		SearchQuery userSearch = new SearchQuery(userResource);
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
+		userSearch.assignSingleResultField("root", "userId");
+		
+		String expectedResult = "select root.userId from User as root left join fetch root.contact as contact where root.username = administrator;";
+		String obtainedResult = userSearch.generateFullQuery();
+		
+		assertEquals(expectedResult, obtainedResult);
 	}
 }

@@ -39,7 +39,7 @@ public class ConditionL2
 		if (i > 0)
 		{
 			Path path = containerGroup.getParentGroup().getSearch().getQueryResource();
-			if (ConditionGroup.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			if (SearchQuery.verifyField(field.substring(0, i), field.substring(i + 1), path))
 			{
 				this.conditionL2Id = UUID.randomUUID().toString();
 				this.containerGroup = containerGroup;

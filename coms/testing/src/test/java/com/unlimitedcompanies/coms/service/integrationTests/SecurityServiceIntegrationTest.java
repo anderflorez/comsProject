@@ -1021,6 +1021,21 @@ class SecurityServiceIntegrationTest
 		assertEquals(3, searchService.storedSearchQueriesPathNum());
 	}
 	
+	// This test method should expect to get an exception 
+//	@Test
+//	public void saveStoredSearchQueryWithWrongFieldsNotAllowedTest()
+//	{
+//		setupService.checkAllResources();
+//		Resource userResource = setupService.findResourceByNameWithFields("User");
+//		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+//		Resource roleResource = setupService.findResourceByNameWithFields("Role");
+//		
+//		SearchQuery sq = new SearchQuery(userResource);
+//		// TODO: The next line should expect an exception
+//		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource)
+//		  .leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
+//	}
+	
 	@Test
 	public void findStoredSearchQueryTest()
 	{

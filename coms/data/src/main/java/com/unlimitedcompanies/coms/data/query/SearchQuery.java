@@ -2,7 +2,6 @@ package com.unlimitedcompanies.coms.data.query;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -69,36 +68,29 @@ public class SearchQuery
 		this.searchName = searchName;
 	}
 
-	public String getSingleResultField()
+	protected String getSingleResultField()
 	{
 		return singleResultField;
 	}
 
-	public void setSingleResultField(String singleResultField)
-	{		
-		Predicate<String> fieldCheck = testField -> {
-			Set<ResourceField> parentFields = this.getQueryResource().getResource().getResourceFields();
-			boolean result = false;
-			for(ResourceField next : parentFields)
-			{
-				if (next.getResourceFieldName().equals(testField))
-				{
-					result = true;
-				}
-			}
-			return result;
-		}; 
-		
+	protected void setSingleResultField(String singleResultField)
+	{
+		this.singleResultField = singleResultField;
+	}
+
+	public void assignSingleResultField(String alias, String field)
+	{
 		// TODO: Use a lambda function to verify the singleResultField exists in the root resource fields; then add it
-		if (fieldCheck.test(singleResultField))
+		if (verifyField(alias, field, this.getQueryResource()))
 		{
-			this.singleResultField = singleResultField;
+			this.singleResultField = alias + "." + field;
 		}
 		else
 		{
 			// TODO: Throw an exception or somehow provide an error as the search cannot return this single result
+			System.out.println("This field cannot be retrieve as it could not be found within the search resources");
 		}
-	}	
+	}
 
 	public Path getQueryResource()
 	{
@@ -133,7 +125,8 @@ public class SearchQuery
 
 	public Path leftJoinFetch(ResourceField field, String alias, Resource relationResource)
 	{
-		return this.queryResource.leftJoinFetch(field, alias, relationResource);
+		Path resultPath = this.queryResource.leftJoinFetch(field, alias, relationResource); 
+		return resultPath;
 	}
 	
 	// The logic operator should be set from the "and" and "or" methods in the condition group classes
@@ -154,8 +147,17 @@ public class SearchQuery
 	public String generateFullQuery()
 	{
 		// TODO: Create some checking mechanism to make sure there are no repeated aliases in the same search query
-		// TODO: Update this method to include the where clause of the query		
-		StringBuilder sb = new StringBuilder("select root ");
+		// TODO: Update this method to include the where clause of the query
+		
+		StringBuilder sb = new StringBuilder();
+		if (this.getSingleResultField() == null)
+		{
+			sb.append("select root ");			
+		}
+		else 
+		{
+			sb.append("select " + this.getSingleResultField() + " ");
+		}
 		sb.append(this.queryResource.getFullQuery());
 		if (this.getConditionGL1() != null)
 		{
@@ -189,4 +191,38 @@ public class SearchQuery
 		return true;
 	}
 	
+	public static boolean verifyField(String alias, String field, Path path)
+	{
+		if (path.getAlias().equals(alias))
+		{
+			Set<ResourceField> rfs = path.getResource().getResourceFields();
+			for (ResourceField next : rfs)
+			{
+				if (next.getResourceFieldName().equals(field))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			if (!path.getBranches().isEmpty())
+			{
+				for (Path nextPath : path.getBranches())
+				{
+//					if (verifyField(alias, field, nextPath))
+//					{
+//						return true;
+//					}
+					return verifyField(alias, field, nextPath);
+				}
+				return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
 }
