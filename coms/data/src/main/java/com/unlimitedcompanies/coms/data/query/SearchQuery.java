@@ -211,10 +211,6 @@ public class SearchQuery
 			{
 				for (Path nextPath : path.getBranches())
 				{
-//					if (verifyField(alias, field, nextPath))
-//					{
-//						return true;
-//					}
 					return verifyField(alias, field, nextPath);
 				}
 				return false;
