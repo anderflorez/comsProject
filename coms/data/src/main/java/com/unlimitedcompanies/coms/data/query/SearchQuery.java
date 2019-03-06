@@ -68,7 +68,7 @@ public class SearchQuery
 		this.searchName = searchName;
 	}
 
-	protected String getSingleResultField()
+	public String getSingleResultField()
 	{
 		return singleResultField;
 	}
@@ -80,7 +80,6 @@ public class SearchQuery
 
 	public void assignSingleResultField(String alias, String field)
 	{
-		// TODO: Use a lambda function to verify the singleResultField exists in the root resource fields; then add it
 		if (verifyField(alias, field, this.getQueryResource()))
 		{
 			this.singleResultField = alias + "." + field;
@@ -88,7 +87,7 @@ public class SearchQuery
 		else
 		{
 			// TODO: Throw an exception or somehow provide an error as the search cannot return this single result
-			System.out.println("This field cannot be retrieve as it could not be found within the search resources");
+			System.out.println("ERROR: This field cannot be retrieved as it could not be found within the search resources");
 		}
 	}
 

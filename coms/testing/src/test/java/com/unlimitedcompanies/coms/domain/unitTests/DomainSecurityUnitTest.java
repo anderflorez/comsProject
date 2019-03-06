@@ -4,26 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.data.query.COperator;
-import com.unlimitedcompanies.coms.data.query.Path;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
-import com.unlimitedcompanies.coms.domain.search.Operator;
 import com.unlimitedcompanies.coms.domain.security.Address;
-import com.unlimitedcompanies.coms.domain.security.AndCondition;
-import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.OrCondition;
-import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.Phone;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
@@ -144,156 +134,9 @@ class DomainSecurityUnitTest
 		assertNotEquals(resourceField1, resourceField2, "Unit test for resourceFieldNotEqualsTest failed");
 	}
 	
-	@Test
-	public void andGroupWithConditionsSetInGroupTest()
-	{
-		AndGroup andGroup = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup.addAndConditionBidirectional(andCondition1);
-		andGroup.addAndConditionBidirectional(andCondition2);
-		
-		List<AndCondition> conditions = andGroup.getConditions();
-		for (AndCondition condition : conditions)
-		{
-			assertTrue(condition.getAndGroup().equals(andGroup));
-		}
-	}
-	
-	@Test
-	public void andGroupWithConditionsSetInConditionTest()
-	{
-		AndGroup andGroup = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andCondition1.assignToGroupBidirectional(andGroup);
-		andCondition2.assignToGroupBidirectional(andGroup);
-		
-		List<AndCondition> conditions = andGroup.getConditions();
-		for (AndCondition condition : conditions)
-		{
-			assertTrue(condition.getAndGroup().equals(andGroup));
-		}
-	}
-	
-	@Test
-	public void orGroupWithConditionsSetInGroupTest()
-	{
-		OrGroup orGroup = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
-		orGroup.addOrConditionBidirectional(orCondition1);
-		orGroup.addOrConditionBidirectional(orCondition2);
-		
-		List<OrCondition> conditions = orGroup.getConditions();
-		for (OrCondition condition : conditions)
-		{
-			assertTrue(condition.getOrGroup().equals(orGroup));
-		}
-	}
-	
-	@Test
-	public void orGroupWithConditionsSetInConditionTest()
-	{
-		OrGroup orGroup = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
-		orCondition1.assignToGroupBidirectional(orGroup);
-		orCondition2.assignToGroupBidirectional(orGroup);
-		
-		List<OrCondition> conditions = orGroup.getConditions();
-		for (OrCondition condition : conditions)
-		{
-			assertTrue(condition.getOrGroup().equals(orGroup));
-		}
-	}
-	
-	@Test
-	public void resourcePermissionsWithAndConditionsTest()
-	{
-		Role role = new Role("Administrator");
-		Resource resource = new Resource("Contact");
-		AndGroup conditionGroup = new AndGroup();
-		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		conditionGroup.addAndConditionBidirectional(condition1);
-		conditionGroup.addAndConditionBidirectional(condition2);
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(conditionGroup);
-		
-		List<AndCondition> conditions = permission.getViewCondtitions().getConditions();
-		for (AndCondition condition : conditions)
-		{
-			assertTrue(condition.getAndGroup().equals(conditionGroup), "Resource permissions with conditions unit test failed");
-		}
-		assertEquals(2, conditions.size(), "Resource permissions with conditions unit test failed");
-	}
-	
-	@Test
-	public void chainedConditionGroupsTest()
-	{
-		AndGroup andGroup1 = new AndGroup();		
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andCondition1.assignToGroupBidirectional(andGroup1);
-		andCondition2.assignToGroupBidirectional(andGroup1);
-		
-		OrGroup orGroup1 = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
-		orCondition1.assignToGroupBidirectional(orGroup1);
-		orCondition2.assignToGroupBidirectional(orGroup1);
-		
-		andGroup1.setContainerOrGroup(orGroup1);
-		
-		assertTrue(andGroup1.getContainerOrGroup().getConditions().contains(orCondition2));
-	}
-	
-	@Test
-	public void deepPermissionWithConditionsTest()
-	{
-		Role role = new Role("Administrator");
-		Resource resource = new Resource("Contact");
-		
-		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup1.addAndConditionBidirectional(andCondition1);
-		andGroup1.addAndConditionBidirectional(andCondition2);
-		
-		OrGroup orGroup2 = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("roleName", "Administrator", Operator.NOT_EQUAL);
-		orGroup2.addOrConditionBidirectional(orCondition1);
-		
-		OrGroup orGroup3 = new OrGroup();
-		OrCondition orCondition2 = new OrCondition("userId", "5", Operator.LESS_THAN);
-		orGroup3.addOrConditionBidirectional(orCondition2);
-		
-		AndGroup andGroup4 = new AndGroup();
-		AndCondition andCondition3 = new AndCondition("contactId", "2", Operator.GRATER_THAN);
-		andGroup4.addAndConditionBidirectional(andCondition3);
-		
-		andGroup1.addOrGroup(orGroup2);
-		andGroup1.addOrGroup(orGroup3);
-		orGroup2.addAndGroup(andGroup4);
-		
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(andGroup1);
-		
-		List<AndGroup> foundAndGroup = null;
-		for (OrGroup o : permission.getViewCondtitions().getOrGroups())
-		{
-			assertTrue(o.equals(orGroup2) || o.equals(orGroup3));
-			if (o.getAndGroups().size() > 0)
-			{
-				foundAndGroup = o.getAndGroups();
-			}
-		}
-		assertTrue(foundAndGroup.contains(andGroup4));
-	}
-	
-	
+
 	// Testing new search query functionality
+	// TODO: Extract to a new class
 	
 	@Test
 	public void searchChaininigTest()

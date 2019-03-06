@@ -20,7 +20,7 @@ public class Resource
 	private Set<ResourceField> resourceFields = new HashSet<>();
 	
 	@OneToMany(mappedBy = "resource")
-	private Set<ResourcePermissions> permissions = new HashSet<>();
+	private Set<Permission> permissions = new HashSet<>();
 
 	public Resource() {}
 
@@ -71,7 +71,7 @@ public class Resource
 		}
 	}
 	
-	public void addPermission(ResourcePermissions permission)
+	public void addPermission(Permission permission)
 	{
 		if (!this.permissions.contains(permission))
 		{

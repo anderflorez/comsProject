@@ -26,7 +26,7 @@ public class Role
 	private List<User> users = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "role")
-	private Set<ResourcePermissions> resourcePermissions = new HashSet<>();
+	private Set<Permission> permissions = new HashSet<>();
 	
 	@ManyToMany
 	@JoinTable(name = "role_resourceField", 
@@ -84,11 +84,11 @@ public class Role
 		}
 	}
 	
-	public void addResourcePermission(ResourcePermissions permission)
+	public void addResourcePermission(Permission permission)
 	{
-		if (!this.resourcePermissions.contains(permission))
+		if (!this.permissions.contains(permission))
 		{
-			this.resourcePermissions.add(permission);
+			this.permissions.add(permission);
 			permission.assignRole(this);
 		}
 	}

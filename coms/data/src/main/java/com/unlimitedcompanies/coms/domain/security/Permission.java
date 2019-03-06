@@ -6,12 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "role_resource")
-public class ResourcePermissions
+@Table(name = "permissions")
+public class Permission
 {
 	@Id
 	private String roleResourceIdentifier;
@@ -24,25 +23,17 @@ public class ResourcePermissions
 	@JoinColumn(name = "resourceId_FK")
 	private Resource resource;
 
-	@OneToOne
-	@JoinColumn(name = "viewConditions_FK")
-	private AndGroup viewCondtitions;
-	
-	@OneToOne
-	@JoinColumn(name = "editConditions_FK")
-	private AndGroup editConditions;
-
 	private byte createRec;
 	private byte readRec;
 	private byte updateRec;
 	private byte deleteRec;
 
-	public ResourcePermissions() 
+	public Permission() 
 	{
 		this.roleResourceIdentifier = UUID.randomUUID().toString();
 	}
 
-	public ResourcePermissions(Role role, Resource resource, boolean createRec, boolean readRec, boolean updateRec,
+	public Permission(Role role, Resource resource, boolean createRec, boolean readRec, boolean updateRec,
 			boolean deleteRec)
 	{
 		this.roleResourceIdentifier = UUID.randomUUID().toString();
@@ -67,16 +58,6 @@ public class ResourcePermissions
 	public Resource getResource()
 	{
 		return resource;
-	}
-
-	public AndGroup getViewCondtitions()
-	{
-		return viewCondtitions;
-	}
-
-	public AndGroup getEditConditions()
-	{
-		return editConditions;
 	}
 
 	public byte getCreateRec()
@@ -107,16 +88,6 @@ public class ResourcePermissions
 	public void setResource(Resource resource)
 	{
 		this.resource = resource;
-	}
-
-	public void setViewCondtitions(AndGroup viewCondtitions)
-	{
-		this.viewCondtitions = viewCondtitions;
-	}
-
-	public void setEditConditions(AndGroup editConditions)
-	{
-		this.editConditions = editConditions;
 	}
 
 	public void setCreateRec(boolean createRec)
@@ -156,15 +127,6 @@ public class ResourcePermissions
 			resource.addPermission(this);
 		}
 	}
-	
-	public void assignViewConditionGroup(AndGroup andGroup)
-	{
-		if (!this.viewCondtitions.equals(andGroup))
-		{
-			this.viewCondtitions = andGroup;
-			andGroup.assignToViewPermission(this);
-		}
-	}
 
 	@Override
 	public int hashCode()
@@ -185,7 +147,7 @@ public class ResourcePermissions
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ResourcePermissions other = (ResourcePermissions) obj;
+		Permission other = (Permission) obj;
 		if (resource == null)
 		{
 			if (other.resource != null)

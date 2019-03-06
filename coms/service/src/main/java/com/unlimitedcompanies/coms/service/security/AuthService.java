@@ -2,12 +2,8 @@ package com.unlimitedcompanies.coms.service.security;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.domain.security.AndCondition;
-import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.OrCondition;
-import com.unlimitedcompanies.coms.domain.security.OrGroup;
-import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
+import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
@@ -52,16 +48,7 @@ public interface AuthService
 	public void assignUserToRole(int userId, int roleId) throws RecordNotFoundException;
 	public void removeRoleMember(int userId, int roleId) throws RecordNotFoundException;
 	
-	public ResourcePermissions savePermission(ResourcePermissions permission);
-	public ResourcePermissions searchPermissionById(String id);
-	public List<ResourcePermissions> searchAllRolePermissions(Role role);
-	
-	public AndGroup saveAndGroup(AndGroup andGroup);
-	public AndGroup searchAndGroupById(String andGroupId);
-	public void saveAndCondition(AndCondition andCondition);
-	public OrGroup saveOrGroup(OrGroup orGroup);
-	public OrGroup searchOrGroupById(String orGroupId);
-	public void saveOrCondition(OrCondition orCondition);
-	public AndGroup fullAndGroupSearch(AndGroup andGroup);
+	public Permission searchPermissionById(String id);
+	public List<Permission> searchAllRolePermissions(Role role);
 	
 }

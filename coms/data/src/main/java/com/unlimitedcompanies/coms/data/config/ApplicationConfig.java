@@ -24,6 +24,7 @@ public class ApplicationConfig
 	{
 		DataSource ds = new DataSource();
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		// TODO: Change the db location and password when placing the project on production
 		ds.setUrl("jdbc:mysql://localhost/comsTesting?autoReconnect=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC");
 		ds.setUsername("comsdbadmin");
 		ds.setPassword("Unlimited123!!");

@@ -21,6 +21,7 @@ public class ConditionL1
 	private String field;
 	private String cOperator;
 	private String value;
+	// Expects t for text or v for view
 	private char valueType;
 	
 	@ManyToOne

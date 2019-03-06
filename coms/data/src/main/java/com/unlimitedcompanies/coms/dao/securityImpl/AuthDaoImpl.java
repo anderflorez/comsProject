@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
@@ -16,12 +15,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
-import com.unlimitedcompanies.coms.domain.security.AndCondition;
-import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.OrCondition;
-import com.unlimitedcompanies.coms.domain.security.OrGroup;
-import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
+import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -331,12 +326,12 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public int getNumberOfPermissions()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleResourceIdentifier) FROM role_resource").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleResourceIdentifier) FROM permissions").getSingleResult();
 		return bigInt.intValue();
 	}
 
 	@Override
-	public void createResourcePermission(ResourcePermissions newPermission)
+	public void createResourcePermission(Permission newPermission)
 	{
 		try
 		{
@@ -350,68 +345,16 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public ResourcePermissions searchPermissionById(String id)
+	public Permission searchPermissionById(String id)
 	{
-		return em.find(ResourcePermissions.class, id);
+		return em.find(Permission.class, id);
 	}
 	
 	@Override
-	public List<ResourcePermissions> getAllRolePermissions(Role role)
+	public List<Permission> getAllRolePermissions(Role role)
 	{
-		return em.createQuery("select permissions from ResourcePermissions permissions where permissions.role = :role", ResourcePermissions.class)
+		return em.createQuery("select permissions from Permission permissions where permissions.role = :role", Permission.class)
 							  .setParameter("role", role)
-							  .getResultList();
-	}
-
-	@Override
-	public void createAndGroup(AndGroup andGroup)
-	{
-		em.persist(andGroup);
-	}
-
-	@Override
-	public AndGroup getAndGroupById(String andGroupId)
-	{
-		return em.find(AndGroup.class, andGroupId);
-	}
-
-	@Override
-	public void createAndCondition(AndCondition andCondition)
-	{
-		em.persist(andCondition);
-	}
-
-	@Override
-	public void createOrGroup(OrGroup orGroup)
-	{
-		em.persist(orGroup);		
-	}
-
-	@Override
-	public OrGroup getOrGroupById(String orGroupId)
-	{
-		return em.find(OrGroup.class, orGroupId);
-	}
-
-	@Override
-	public void createOrCondition(OrCondition orCondition)
-	{
-		em.persist(orCondition);
-	}
-
-	@Override
-	public List<AndGroup> getAssociatedAndGroups(OrGroup orGroup)
-	{
-		return em.createQuery("select a from AndGroup a where a.orGroups = :orGroup", AndGroup.class)
-							  .setParameter("orGroup", orGroup)
-							  .getResultList();
-	}
-
-	@Override
-	public List<OrGroup> getAssociatedOrGroups(AndGroup andGroup)
-	{
-		return em.createQuery("select o from OrGroup o where o.andGroups = :orGroup", OrGroup.class)
-							  .setParameter("andGroup", andGroup)
 							  .getResultList();
 	}
 

@@ -63,7 +63,7 @@ public class Client
 // TODO: Create unit tests for queries with single string results (select), joins and (where) conditions
 // TODO: Create integration tests for queries with single string results (select), joins and (where) conditions
 // TODO: Delete previous condition system and its classes
-// TODO: Create a relationship between the saved search system and the permissions to stored condition permissions
+// TODO: Create a relationship between the saved search system and the permissions to store condition permissions
 
 // TODO: Create service to store single string result saved searches with their view
 // TODO: Create service to store object result saved searches with their view

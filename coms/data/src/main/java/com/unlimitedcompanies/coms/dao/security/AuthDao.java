@@ -2,12 +2,8 @@ package com.unlimitedcompanies.coms.dao.security;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.domain.security.AndCondition;
-import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.OrCondition;
-import com.unlimitedcompanies.coms.domain.security.OrGroup;
-import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
+import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -47,18 +43,8 @@ public interface AuthDao
 	public void removeUserFromRole(int userId, int roleId);
 	
 	public int getNumberOfPermissions();
-	public void createResourcePermission(ResourcePermissions newPermission);
-	public ResourcePermissions searchPermissionById(String id);
-	public List<ResourcePermissions> getAllRolePermissions(Role role);
-	
-	public void createAndGroup(AndGroup condition);
-	public AndGroup getAndGroupById(String andGroupId);
-	public void createAndCondition(AndCondition condition);	
-	public void createOrGroup(OrGroup orGroup);
-	public OrGroup getOrGroupById(String orGroupId);
-//	public List<OrGroup> getOrGroups(int andGroupId);
-	public void createOrCondition(OrCondition orCondition);
-	public List<AndGroup> getAssociatedAndGroups(OrGroup orGroup);
-	public List<OrGroup> getAssociatedOrGroups(AndGroup andGroup);
+	public void createResourcePermission(Permission newPermission);
+	public Permission searchPermissionById(String id);
+	public List<Permission> getAllRolePermissions(Role role);
 
 }

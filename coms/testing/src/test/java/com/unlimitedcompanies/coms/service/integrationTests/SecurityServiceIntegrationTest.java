@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,16 +21,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
+import com.unlimitedcompanies.coms.data.query.COperator;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
-import com.unlimitedcompanies.coms.domain.search.Operator;
-import com.unlimitedcompanies.coms.domain.security.AndCondition;
-import com.unlimitedcompanies.coms.domain.security.AndGroup;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.OrCondition;
-import com.unlimitedcompanies.coms.domain.security.OrGroup;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.ResourcePermissions;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
@@ -777,234 +771,12 @@ class SecurityServiceIntegrationTest
 		assertEquals("Contact", resource.getResourceName(), "Find resource integration test failed");
 	}
 
-	@Test
-	void saveNewPermission() throws RecordNotCreatedException
-	{
-		setupService.checkAllResources();
-		Role role = authService.saveRole(new Role("Administrator"));
-		Resource resource = setupService.findResourceByName("Contact");
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		authService.savePermission(permission);
-		List<ResourcePermissions> foundPermissions = authService.searchAllRolePermissions(role);
-
-		assertTrue(foundPermissions.size() > 0, "Save permissions integration test failed");
-	}
-
-	@Test
-	void saveNewPermissionWithConditionsTest() throws RecordNotCreatedException
-	{
-		setupService.checkAllResources();
-		Role role = authService.saveRole(new Role("Administrator"));
-		Resource resource = setupService.findResourceByName("Contact");
-		AndGroup andGroup = authService.saveAndGroup(new AndGroup());
-		AndCondition condition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition condition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup.addAndConditionBidirectional(condition1);
-		andGroup.addAndConditionBidirectional(condition2);
-
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(andGroup);
-		authService.savePermission(permission);
-
-		List<ResourcePermissions> foundPermissions = authService.searchAllRolePermissions(role);
-		assertEquals(1, foundPermissions.size(), "Save permission with contact integration test failed");
-
-		for (ResourcePermissions rp : foundPermissions)
-		{
-			assertEquals(resource.getResourceName(), rp.getResource().getResourceName(),
-					"Save permission with contact integration test failed");
-			assertTrue(rp.getViewCondtitions().getConditions().contains(condition2),
-					"Save permission with contact integration test failed");
-		}
-
-	}
-
-	@Test
-	void savePermissionWithChainedIndividualConditionsTest() throws RecordNotCreatedException
-	{
-		setupService.checkAllResources();
-		Role role = authService.saveRole(new Role("Administrator"));
-		Resource resource = setupService.findResourceByName("Contact");
-
-		AndGroup andGroup1 = authService.saveAndGroup(new AndGroup());
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup1.addAndConditionBidirectional(andCondition1);
-		andGroup1.addAndConditionBidirectional(andCondition2);
-
-		OrGroup orGroup2 = authService.saveOrGroup(new OrGroup());
-		OrCondition orCondition1 = new OrCondition("roleName", "Administrator", Operator.NOT_EQUAL);
-		orGroup2.addOrConditionBidirectional(orCondition1);
-
-		OrGroup orGroup3 = authService.saveOrGroup(new OrGroup());
-		OrCondition orCondition2 = new OrCondition("userId", "5", Operator.LESS_THAN);
-		orGroup3.addOrConditionBidirectional(orCondition2);
-
-		AndGroup andGroup4 = authService.saveAndGroup(new AndGroup());
-		AndCondition andCondition3 = new AndCondition("contactId", "2", Operator.GRATER_THAN);
-		andGroup4.addAndConditionBidirectional(andCondition3);
-
-		andGroup1.addOrGroup(orGroup2);
-		andGroup1.addOrGroup(orGroup3);
-		orGroup2.addAndGroup(andGroup4);
-
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(andGroup1);
-		permission = authService.savePermission(permission);
-
-		assertEquals(permission.getViewCondtitions().getAndGroupId(),
-				authService.searchPermissionById(permission.getPermissionId()).getViewCondtitions().getAndGroupId(),
-				"Save permission with chained conditions integration test failed");
-
-		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getConditions().size() > 0);
-		assertTrue(authService.searchOrGroupById(orGroup3.getOrGroupId()).getConditions().size() > 0);
-		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getAndGroups().contains(andGroup4));
-
-	}
-
-	@Test
-	public void saveFullPermissionTest() throws RecordNotCreatedException
-	{
-		setupService.checkAllResources();
-		Role role = authService.saveRole(new Role("Administrator"));
-		Resource resource = setupService.findResourceByName("Contact");
-
-		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup1.addAndConditionBidirectional(andCondition1);
-		andGroup1.addAndConditionBidirectional(andCondition2);
-
-		OrGroup orGroup2 = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("roleName", "Administrator", Operator.NOT_EQUAL);
-		orGroup2.addOrConditionBidirectional(orCondition1);
-
-		OrGroup orGroup3 = new OrGroup();
-		OrCondition orCondition2 = new OrCondition("userId", "5", Operator.LESS_THAN);
-		orGroup3.addOrConditionBidirectional(orCondition2);
-
-		AndGroup andGroup4 = new AndGroup();
-		AndCondition andCondition3 = new AndCondition("contactId", "2", Operator.GRATER_THAN);
-		andGroup4.addAndConditionBidirectional(andCondition3);
-
-		andGroup1.addOrGroup(orGroup2);
-		andGroup1.addOrGroup(orGroup3);
-		orGroup2.addAndGroup(andGroup4);
-
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(andGroup1);
-		permission = authService.savePermission(permission);
-
-		assertEquals(permission.getViewCondtitions().getAndGroupId(),
-				authService.searchPermissionById(permission.getPermissionId()).getViewCondtitions().getAndGroupId(),
-				"Save permission with chained conditions integration test failed");
-
-		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getConditions().size() > 0,
-				"Save permission with chained conditions integration test failed");
-		assertTrue(authService.searchOrGroupById(orGroup3.getOrGroupId()).getConditions().size() > 0,
-				"Save permission with chained conditions integration test failed");
-		assertTrue(authService.searchOrGroupById(orGroup2.getOrGroupId()).getAndGroups().contains(andGroup4),
-				"Save permission with chained conditions integration test failed");
-	}
-
-	@Test
-	public void retrieveFullPermissionWithAllConditionsTest() throws RecordNotCreatedException
-	{
-		setupService.checkAllResources();
-		Role role = authService.saveRole(new Role("Administrator"));
-		Resource resource = setupService.findResourceByName("Contact");
-		AndGroup andGroup1 = new AndGroup();
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andGroup1.addAndConditionBidirectional(andCondition1);
-		andGroup1.addAndConditionBidirectional(andCondition2);
-		OrGroup orGroup2 = new OrGroup();
-		OrCondition orCondition1 = new OrCondition("roleName", "Administrator", Operator.NOT_EQUAL);
-		orGroup2.addOrConditionBidirectional(orCondition1);
-		OrGroup orGroup3 = new OrGroup();
-		OrCondition orCondition2 = new OrCondition("userId", "5", Operator.LESS_THAN);
-		orGroup3.addOrConditionBidirectional(orCondition2);
-		AndGroup andGroup4 = new AndGroup();
-		AndCondition andCondition3 = new AndCondition("contactId", "2", Operator.GRATER_THAN);
-		andGroup4.addAndConditionBidirectional(andCondition3);
-		andGroup1.addOrGroup(orGroup2);
-		andGroup1.addOrGroup(orGroup3);
-		orGroup2.addAndGroup(andGroup4);
-		ResourcePermissions permission = new ResourcePermissions(role, resource, true, true, true, false);
-		permission.setViewCondtitions(andGroup1);
-		authService.savePermission(permission);
-
-		ResourcePermissions foundPermission = authService.searchPermissionById(permission.getPermissionId());
-		assertEquals(permission.getViewCondtitions(), foundPermission.getViewCondtitions());
-		assertEquals(permission.getViewCondtitions().getOrGroups(), foundPermission.getViewCondtitions().getOrGroups());
-		if (foundPermission.getViewCondtitions().getOrGroups().get(0) == orGroup2)
-		{
-			assertTrue(foundPermission.getViewCondtitions().getOrGroups().get(0).getAndGroups().contains(andGroup4));
-		} else
-		{
-			assertTrue(foundPermission.getViewCondtitions().getOrGroups().get(1).getAndGroups().contains(andGroup4));
-		}
-	}
-
-	@Test
-	public void saveAndGroupTest()
-	{
-		AndGroup conditionGroup = new AndGroup();
-		authService.saveAndGroup(conditionGroup);
-		AndGroup foundCondition = authService.searchAndGroupById(conditionGroup.getAndGroupId());
-
-		assertEquals(conditionGroup, foundCondition, "Save andGroup test failed");
-	}
-
-	@Test
-	public void saveAndGroupWithAndConditionTest()
-	{
-		AndGroup andGroup = new AndGroup();
-
-		AndCondition andCondition1 = new AndCondition("firstName", "John", Operator.EQUALS);
-		AndCondition andCondition2 = new AndCondition("email", "johnd@example.com", Operator.EQUALS);
-		andCondition1.assignToGroupBidirectional(andGroup);
-		andCondition2.assignToGroupBidirectional(andGroup);
-
-		authService.saveAndGroup(andGroup);
-
-		AndGroup foundAndGroupWithConditions = authService.searchAndGroupById(andGroup.getAndGroupId());
-
-		for (AndCondition c : foundAndGroupWithConditions.getConditions())
-		{
-			assertTrue(c.getAndGroup().equals(andGroup), "Save AndGroup with conditions test for conditions failed");
-		}
-		assertTrue(foundAndGroupWithConditions.getConditions().size() > 0,
-				"Save AndGroup with conditions test for group failed");
-	}
-
-	@Test
-	public void saveOrGroupWithOrConditionTest()
-	{
-		OrGroup orGroup = new OrGroup();
-
-		OrCondition orCondition1 = new OrCondition("firstName", "John", Operator.EQUALS);
-		OrCondition orCondition2 = new OrCondition("email", "johnd@example.com", Operator.EQUALS);
-		orCondition1.assignToGroupBidirectional(orGroup);
-		orCondition2.assignToGroupBidirectional(orGroup);
-
-		authService.saveOrGroup(orGroup);
-
-		OrGroup foundOrGroup = authService.searchOrGroupById(orGroup.getOrGroupId());
-
-		for (OrCondition condition : foundOrGroup.getConditions())
-		{
-			assertTrue(condition.getOrGroup().equals(foundOrGroup),
-					"Save OrGroup with conditions test for conditions failed");
-		}
-		assertEquals(2, foundOrGroup.getConditions().size(), "Save OrGroup with conditions test for group failed");
-	}
-	
 	
 	// TESTING PROCESS OF THE STORED SEARCH QUERIES
+	// TODO: Extract to a new class
 	
 	@Test
-	public void saveStoredSearchQueryTestWithJoins()
+	public void saveObjectQueryWithJoinsTest()
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
@@ -1016,9 +788,53 @@ class SecurityServiceIntegrationTest
 		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
 		
 		searchService.storeSearchQuery(sq);
+
+		System.out.println();
+		System.out.println(sq.generateFullQuery());
 		
 		assertEquals(1, searchService.storedSearchQueriesNum());
 		assertEquals(3, searchService.storedSearchQueriesPathNum());
+	}
+	
+	@Test
+	public void saveSingleResultQueryWithJoinsTest()
+	{
+		setupService.checkAllResources();
+		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource roleResource = setupService.findResourceByNameWithFields("Role");
+		
+		SearchQuery sq = new SearchQuery(userResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
+		sq.assignSingleResultField("contact", "firstName");
+
+		searchService.storeSearchQuery(sq);
+		
+		String expectedQuery = "select contact.firstName from User as root left join fetch root.contact as contact left join fetch root.roles as role;";
+		SearchQuery foundQuery = searchService.findQueryById(sq.getSearchQueryId());
+		assertEquals(expectedQuery, foundQuery.generateFullQuery());
+	}
+	
+	@Test
+	public void saveSingleResultQueryWithConditionsTest()
+	{
+		setupService.checkAllResources();
+		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource roleResource = setupService.findResourceByNameWithFields("Role");
+		
+		SearchQuery sq = new SearchQuery(userResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		sq.leftJoinFetch(userResource.getResourceFieldByName("roles"), "role", roleResource);
+		sq.assignSingleResultField("contact", "firstName");
+		sq.where("role.roleName", COperator.EQUALS, "Administrator", 't');
+
+		searchService.storeSearchQuery(sq);
+		
+		String expectedQuery = "select contact.firstName from User as root left join fetch root.contact as contact left join fetch root.roles as role where role.roleName = 'Administrator';";
+		SearchQuery foundQuery = searchService.findQueryById(sq.getSearchQueryId());
+		assertEquals(expectedQuery, foundQuery.generateFullQuery());
 	}
 	
 	// This test method should expect to get an exception 
