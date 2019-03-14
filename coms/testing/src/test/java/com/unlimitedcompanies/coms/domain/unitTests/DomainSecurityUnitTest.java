@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
 import com.unlimitedcompanies.coms.data.query.COperator;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.security.Address;
@@ -207,7 +209,8 @@ class DomainSecurityUnitTest
 //	}
 	
 	@Test
-	public void searchQueryWithConditionsTest()
+	public void searchQueryWithConditionsTest() 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
@@ -234,7 +237,8 @@ class DomainSecurityUnitTest
 	}
 	
 	@Test
-	public void searchSingleResultQueryWithConditionsTest()
+	public void searchSingleResultQueryWithConditionsTest() 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
@@ -258,5 +262,27 @@ class DomainSecurityUnitTest
 		String obtainedResult = userSearch.generateFullQuery();
 		
 		assertEquals(expectedResult, obtainedResult);
+	}
+	
+	@Test
+	public void ConditionStructureTest() throws FieldNotInSearchException, IncorrectFieldFormatException
+	{
+		Resource userResource = new Resource("User");
+		userResource.addField(new ResourceField("userId", false, userResource));
+		userResource.addField(new ResourceField("username", false, userResource));
+		userResource.addField(new ResourceField("enabled", false, userResource));
+		userResource.addField(new ResourceField("contact", true, userResource));
+		userResource.addField(new ResourceField("roles", true, userResource));
+		
+		Resource contactResource = new Resource("Contact");
+		contactResource.addField(new ResourceField("contactId", false, contactResource));
+		contactResource.addField(new ResourceField("firstName", false, contactResource));
+		contactResource.addField(new ResourceField("lastName", false, contactResource));
+		contactResource.addField(new ResourceField("email", false, contactResource));
+		
+		SearchQuery userSearch = new SearchQuery(userResource);
+		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
+		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
+		userSearch.assignSingleResultField("root", "userId");
 	}
 }

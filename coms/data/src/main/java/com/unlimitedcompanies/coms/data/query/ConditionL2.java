@@ -9,6 +9,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+
 @Entity
 @Table(name = "conditionL2")
 public class ConditionL2
@@ -18,6 +21,7 @@ public class ConditionL2
 	private String field;
 	private String cOperator;
 	private String value;
+	// Expects t for text or v for view
 	private char valueType;
 	
 	@ManyToOne
@@ -28,12 +32,13 @@ public class ConditionL2
 	@JoinColumn(name = "searchId_FK")
 	private SearchQuery sqValue;
 
-	public ConditionL2()
+	protected ConditionL2()
 	{
 		this.conditionL2Id = UUID.randomUUID().toString();
 	}
 
-	public ConditionL2(ConditionGL2 containerGroup, String field, COperator cOperator, String value, char valueType)
+	protected ConditionL2(ConditionGL2 containerGroup, String field, COperator cOperator, String value, char valueType) 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
 		int i = field.indexOf('.');
 		if (i > 0)
@@ -44,20 +49,18 @@ public class ConditionL2
 				this.conditionL2Id = UUID.randomUUID().toString();
 				this.containerGroup = containerGroup;
 				this.field = field;
-				this.cOperator = cOperator.toString();
+				this.cOperator = cOperator.symbolOperator();
 				this.value = value;
 				this.valueType = valueType;			
 			}
 			else
 			{
-				// TODO: Throw an exception as the field does not exist in the search
-				System.out.println("ERROR: The field does not exist in the current search");
+				throw new FieldNotInSearchException();
 			}			
 		}
 		else
 		{
-			// TODO: Throw an exception as the field format is incorrect
-			System.out.println("ERROR: The field format entered is incorrect");
+			throw new IncorrectFieldFormatException();
 		}
 	}
 

@@ -16,8 +16,8 @@ module data
 	requires spring.security.core;
 	
 	exports com.unlimitedcompanies.coms.data.config;
-	exports com.unlimitedcompanies.coms.domain.search;
 	exports com.unlimitedcompanies.coms.data.query;
+	exports com.unlimitedcompanies.coms.data.exceptions;
 	exports com.unlimitedcompanies.coms.domain.security;
 	exports com.unlimitedcompanies.coms.domain.security.exen;
 	exports com.unlimitedcompanies.coms.dao.security;

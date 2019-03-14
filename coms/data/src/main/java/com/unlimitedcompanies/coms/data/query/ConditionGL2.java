@@ -13,6 +13,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+
 @Entity
 @Table(name = "conditionGroupL2")
 public class ConditionGL2 implements ConditionGroup
@@ -104,30 +107,26 @@ public class ConditionGL2 implements ConditionGroup
 
 	private void setConditions(List<ConditionL2> conditions)
 	{
+		// TODO: if there are existing conditions they must be deleted before inserting a new set
 		this.conditions = conditions;
 	}
 
-	private void addCondition(ConditionL2 condition)
+	protected ConditionGL2 addCondition(String field, COperator condOperator, String value, char valueType) 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
+		if (this.getConditions().size() > 0 && this.getOperator() == null)
+		{
+			// TODO: Throw an exception - Indicates there are existing conditions without an operator yet
+			System.out.println("ERROR: There are existing conditions without an operator yet in the ConditionGL2");
+		}
+		
+		ConditionL2 condition = new ConditionL2(this, field, condOperator, value, valueType);
 		this.conditions.add(condition);
 		if (condition.getContainerGroup() == null)
 		{
 			condition.setContainerGroup(this);
 		}
-	}
-	
-	protected ConditionGL2 addCondition(String field, COperator condOperator, String value, char valueType)
-	{
-		if (this.conditions.isEmpty())
-		{
-			ConditionL2 condition = new ConditionL2(this, field, condOperator, value, valueType);
-			// TODO: Make sure the next line adds the condition on both sides of the relationship
-			this.addCondition(condition);
-		}
-		else
-		{
-			// TODO: Throw an exception as this method should be used to add the first condition only
-		}
+		
 		return this;
 	}
 	
@@ -147,71 +146,124 @@ public class ConditionGL2 implements ConditionGroup
 	
 	private ConditionGL3 addConditionGroupL3()
 	{
+		// Verify there is no existing ConditionGL3 already
+		if (this.getConditionGroup() != null)
+		{
+			// TODO: Throw an exception - There is already a ConditionGL3, another one cannot be created
+			System.out.println("ERROR: A ConditionGL2 can only contain one ConditionGL3");
+		}
+		
 		ConditionGL3 conditionGL3 = new ConditionGL3();
 		this.setConditionGroup(conditionGL3);
 		return conditionGL3;
 	}
 	
 	@Override
-	public ConditionGroup and(String field, COperator cOperator, String value, char valueType)
+	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
 		// TODO: create a test for this
 		// TODO: check if LOperator needs an equals method
-		if (this.getlOperator() == null)
+		if (this.getOperator() == null)
 		{
 			this.setOperator(LOperator.AND);
+			this.addCondition(field, cOperator, value, valueType);
+			return this;
 		}
 		
-		if (this.getOperator().equals(LOperator.AND))
+		else if (this.getOperator().equals(LOperator.AND))
 		{
 			this.addCondition(field, cOperator, value, valueType);
 			return this;
 		}
+		
+		else if (this.getOperator().equals(LOperator.OR))
+		{
+			if (this.getConditionGroup() == null)
+			{
+				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
+				conditionGroupL3.setOperator(LOperator.AND);
+				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				return conditionGroupL3;
+			}
+			else 
+			{
+				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
+				// Assuming conditionGroupL2 has operator AND
+				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				return conditionGroupL3;
+			}
+		}
+		
 		else
 		{
-			// TODO: The next line should verify at some point that the groupL3 does not exist before creating it
-			ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
-			conditionGroupL3.setOperator(LOperator.AND);
-			// TODO: Check the next line does create a ConditionL3 and add it to the corresponding ConditionGL3
-			conditionGroupL3.addCondition(field, cOperator, value, valueType);
-			return conditionGroupL3;
+			return null;
 		}
 	}
 	
 	@Override
-	public ConditionGroup or(String field, COperator cOperator, String value, char valueType)
+	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
+		
+		// TODO: create a test for this
+		// TODO: check if LOperator needs an equals method
 		if (this.getlOperator() == null)
 		{
 			this.setOperator(LOperator.OR);
+			this.addCondition(field, cOperator, value, valueType);
+			return this;
 		}
 		
-		if (this.getOperator().equals(LOperator.OR))
+		else if (this.getOperator().equals(LOperator.OR))
 		{
 			this.addCondition(field, cOperator, value, valueType);
 			return this;
 		}
+		
+		else if (this.getOperator().equals(LOperator.AND))
+		{
+			if (this.getConditionGroup() == null)
+			{
+				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
+				conditionGroupL3.setOperator(LOperator.OR);
+				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				return conditionGroupL3;
+			}
+			else
+			{
+				// TODO: Test this situation
+				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
+				// Assuming conditionGroupL3 has operator OR
+				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				return conditionGroupL3;
+			}
+		}
+		
 		else
 		{
-			// TODO: The next line should verify at some point that the groupL2 does not exist before creating it
-			ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
-			conditionGroupL3.setOperator(LOperator.OR);
-			// TODO: Check the next line does create a ConditionL2 and add it to the corresponding ConditionGL2
-			conditionGroupL3.addCondition(field, cOperator, value, valueType);
-			return conditionGroupL3;
+			return null;
 		}
 	}
 	
 	protected StringBuilder conditionalGroupQuery()
 	{
 		StringBuilder sb = new StringBuilder();
-		for (ConditionL2 condition : this.conditions)
+		for (int i = 0; i < this.conditions.size(); i++)
 		{
-			sb.append(" " + condition.conditionalQuery());
+			if (i == 0)
+			{
+				sb.append(this.conditions.get(i).conditionalQuery());
+			}
+			else
+			{
+				sb.append(" " + this.getlOperator().toLowerCase() + " " + this.conditions.get(i).conditionalQuery());
+			}
 		}
+
 		if (this.getConditionGroup() != null)
 		{
-			sb.append(this.getConditionGroup().conditionalGroupQuery());			
+			sb.append(" " + this.getlOperator().toLowerCase() + " (" + this.getConditionGroup().conditionalGroupQuery() + ")");			
 		}
 		return sb;
 	}

@@ -109,8 +109,8 @@ public class Path
 		// TODO: Make sure that field belongs to the parent resource and it has an association
 		if (!field.getResource().equals(this.getResource()))
 		{
-			// TODO: Throw an exception
-			System.out.println("ERROR: The field does not belong to the parent resource");
+			// TODO: Throw an exception instead of a print error
+			System.out.println("ERROR: The field reference to the joining resource does not belong to the parent resource");
 		}
 		
 		Path branchPath = new Path(relationResource, joinAlias);

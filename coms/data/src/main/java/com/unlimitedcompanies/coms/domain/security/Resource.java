@@ -46,9 +46,7 @@ public class Resource
 	}
 	
 	public ResourceField getResourceFieldByName(String fieldName)
-	{
-		// TODO: need to improve possibly using lambda
-		
+	{		
 		if (this.resourceFields != null)
 		{
 			for (ResourceField next : this.resourceFields)

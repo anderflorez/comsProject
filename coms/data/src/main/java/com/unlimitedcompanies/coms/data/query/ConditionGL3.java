@@ -103,28 +103,22 @@ public class ConditionGL3 implements ConditionGroup
 	{
 		this.conditions = conditions;
 	}
-
-	private void addCondition(ConditionL3 condition)
+	
+	protected ConditionGL3 addCondition(String field, COperator condOperator, String value, char valueType)
 	{
+		if (this.getConditions().size() > 0 && this.getOperator() == null)
+		{
+			// TODO: Throw an exception - Indicates there are existing conditions without an operator yet
+			System.out.println("ERROR: There are existing conditions without an operator yet in the ConditionGL3");
+		}
+		
+		ConditionL3 condition = new ConditionL3(this, field, condOperator, value, valueType);
 		this.conditions.add(condition);
 		if (condition.getContainerGroup() == null)
 		{
 			condition.setContainerGroup(this);
-		}
-	}
-	
-	protected ConditionGL3 addCondition(String field, COperator condOperator, String value, char valueType)
-	{
-		if (this.conditions.isEmpty())
-		{
-			ConditionL3 condition = new ConditionL3(this, field, condOperator, value, valueType);
-			// TODO: Make sure the next line adds the condition on both sides of the relationship
-			this.addCondition(condition);
-		}
-		else
-		{
-			// TODO: Throw an exception as this method should be used to add the first condition only
-		}
+		}		
+		
 		return this;
 	}
 	
@@ -173,10 +167,18 @@ public class ConditionGL3 implements ConditionGroup
 	protected StringBuilder conditionalGroupQuery()
 	{
 		StringBuilder sb = new StringBuilder();
-		for (ConditionL3 condition : this.conditions)
+		for (int i = 0; i < this.conditions.size(); i++)
 		{
-			sb.append(" " + condition.conditionalQuery());
+			if (i == 0)
+			{
+				sb.append(this.conditions.get(i).conditionalQuery());
+			}
+			else
+			{
+				sb.append(" " + this.getlOperator().toLowerCase() + " " + this.conditions.get(i).conditionalQuery());
+			}
 		}
+		
 		return sb;
 	}
 

@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
@@ -87,6 +89,7 @@ public class SearchQuery
 		else
 		{
 			// TODO: Throw an exception or somehow provide an error as the search cannot return this single result
+			// TODO: Test this
 			System.out.println("ERROR: This field cannot be retrieved as it could not be found within the search resources");
 		}
 	}
@@ -108,38 +111,46 @@ public class SearchQuery
 
 	private void setConditionGL1(ConditionGL1 conditionGL1)
 	{
-		if (this.conditionGL1 == null || this.conditionGL1.equals(conditionGL1))
+		if (this.getConditionGL1() != null || (conditionGL1.getSearch() != null && conditionGL1.getSearch() != this))
 		{
-			this.conditionGL1 = conditionGL1;
-			// TODO: Create a unit test to make sure the search query equals method works as expected (based on id only)
-			if (conditionGL1.getSearch() == null) conditionGL1.setSearch(this);
+			// TODO: Throw an exception - There is already a ConditionGL1 in the search or the conditionGL1 already belongs to another search
 		}
-		else
-		{
-			// TODO: Throw an exception as the search already has a condition group setup
-		}
+		
+		this.conditionGL1 = conditionGL1;
+		conditionGL1.setSearch(this);
 	}
 	
-	// TODO: Future upgrades: There could be methods here to verify a condition field does belong to the search
+	private ConditionGL1 addConditionGroup()
+	{
+		if (this.getConditionGL1() != null)
+		{
+			// TODO: Throw an exception - There is already a ConditionGL1 in the search; only one should be created
+		}
+		
+		ConditionGL1 conditionGL1 = new ConditionGL1();
+		this.setConditionGL1(conditionGL1);
+		
+		return conditionGL1;
+	}
+	
+	// TODO: Future upgrades: There could be methods here to verify if a condition field does belong to the search
 
 	public Path leftJoinFetch(ResourceField field, String alias, Resource relationResource)
 	{
-		Path resultPath = this.queryResource.leftJoinFetch(field, alias, relationResource); 
+		Path resultPath = this.queryResource.leftJoinFetch(field, alias, relationResource);
 		return resultPath;
 	}
 	
 	// The logic operator should be set from the "and" and "or" methods in the condition group classes
 	// This method expects the condition the be the first and only; therefore, no logical operator will be used
-	public ConditionGL1 where(String field, COperator condOperator, String value, char valueType)
+	public ConditionGL1 where(String field, COperator condOperator, String value, char valueType) 
+			throws FieldNotInSearchException, IncorrectFieldFormatException
 	{
-		ConditionGL1 conditionGL1 = new ConditionGL1();
-		// TODO: Test this is being added in both sides of the relationship
-		this.setConditionGL1(conditionGL1);
+		ConditionGL1 conditionGL1 = this.addConditionGroup();
 		
 		// TODO: Check the next line does create a ConditionL1 and add it to the corresponding ConditionGL1
-		// TODO: Make sure the method called on the next line checks this is the first and only condition in the conditionGL1
 		conditionGL1.addCondition(field, condOperator, value, valueType);
-		
+
 		return conditionGL1;
 	}
 	
@@ -151,7 +162,7 @@ public class SearchQuery
 		StringBuilder sb = new StringBuilder();
 		if (this.getSingleResultField() == null)
 		{
-			sb.append("select root ");			
+			sb.append("select root ");
 		}
 		else 
 		{
@@ -192,6 +203,8 @@ public class SearchQuery
 	
 	public static boolean verifyField(String alias, String field, Path path)
 	{
+		// Verifies if a field belongs to a search based on a path and an alias
+		
 		if (path.getAlias().equals(alias))
 		{
 			Set<ResourceField> rfs = path.getResource().getResourceFields();
@@ -210,7 +223,7 @@ public class SearchQuery
 			{
 				for (Path nextPath : path.getBranches())
 				{
-					return verifyField(alias, field, nextPath);
+					if (verifyField(alias, field, nextPath)) return true;
 				}
 				return false;
 			}

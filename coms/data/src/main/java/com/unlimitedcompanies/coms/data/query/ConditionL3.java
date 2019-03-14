@@ -18,6 +18,7 @@ public class ConditionL3
 	private String field;
 	private String cOperator;
 	private String value;
+	// Expects t for text or v for view
 	private char valueType;
 	
 	@ManyToOne
@@ -44,7 +45,7 @@ public class ConditionL3
 				this.conditionL3Id = UUID.randomUUID().toString();
 				this.containerGroup = containerGroup;
 				this.field = field;
-				this.cOperator = cOperator.toString();
+				this.cOperator = cOperator.symbolOperator();
 				this.value = value;
 				this.valueType = valueType;			
 			}
