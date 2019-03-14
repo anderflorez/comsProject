@@ -13,6 +13,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.data.exceptions.ConditionMaxLevelException;
+import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
+
 @Entity
 @Table(name = "conditionGroupL3")
 public class ConditionGL3 implements ConditionGroup
@@ -104,12 +107,11 @@ public class ConditionGL3 implements ConditionGroup
 		this.conditions = conditions;
 	}
 	
-	protected ConditionGL3 addCondition(String field, COperator condOperator, String value, char valueType)
+	protected ConditionGL3 addCondition(String field, COperator condOperator, String value, char valueType) throws NoLogicalOperatorException
 	{
 		if (this.getConditions().size() > 0 && this.getOperator() == null)
 		{
-			// TODO: Throw an exception - Indicates there are existing conditions without an operator yet
-			System.out.println("ERROR: There are existing conditions without an operator yet in the ConditionGL3");
+			throw new NoLogicalOperatorException();
 		}
 		
 		ConditionL3 condition = new ConditionL3(this, field, condOperator, value, valueType);
@@ -123,10 +125,10 @@ public class ConditionGL3 implements ConditionGroup
 	}
 	
 	@Override
-	public ConditionGroup and(String field, COperator cOperator, String value, char valueType)
+	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) throws ConditionMaxLevelException, NoLogicalOperatorException
 	{
-		// TODO: create a test for this
-		// TODO: check if LOperator needs an equals method
+		// TODO: create a test for all cases in this method
+		
 		if (this.getlOperator() == null)
 		{
 			this.setOperator(LOperator.AND);
@@ -139,13 +141,12 @@ public class ConditionGL3 implements ConditionGroup
 		}
 		else
 		{
-			// TODO: Throw an exception since the app does not support more than three levels of conditions
-			return null;
+			throw new ConditionMaxLevelException();
 		}
 	}
 	
 	@Override
-	public ConditionGroup or(String field, COperator cOperator, String value, char valueType)
+	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) throws ConditionMaxLevelException
 	{
 		if (this.getlOperator() == null)
 		{
@@ -154,8 +155,7 @@ public class ConditionGL3 implements ConditionGroup
 		
 		if (this.getOperator().equals(LOperator.OR))
 		{
-			this.addCondition(field, cOperator, value, valueType);
-			return this;
+			throw new ConditionMaxLevelException();
 		}
 		else
 		{

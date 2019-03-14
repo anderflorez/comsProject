@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
 
 @Entity
@@ -38,7 +38,7 @@ public class ConditionL1
 	}
 
 	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, String value, char valueType) 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException
 	{
 		int i = field.indexOf('.');
 		if (i > 0)
@@ -55,7 +55,7 @@ public class ConditionL1
 			}
 			else
 			{
-				throw new FieldNotInSearchException();
+				throw new NonExistingFieldException("The field referenced in the condition does not exist in the current search");
 			}			
 		}
 		else

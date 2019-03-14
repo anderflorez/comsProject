@@ -11,8 +11,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.ConditionMaxLevelException;
+import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
 import com.unlimitedcompanies.coms.data.query.COperator;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.security.Resource;
@@ -32,7 +35,7 @@ public class SearchServiceIntegrationTest
 	SearchQueryService searchService;
 	
 	@Test
-	public void saveObjectQueryWithJoinsTest()
+	public void saveObjectQueryWithJoinsTest() throws NonExistingFieldException
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
@@ -52,7 +55,7 @@ public class SearchServiceIntegrationTest
 	}
 	
 	@Test
-	public void saveSingleResultQueryWithJoinsTest()
+	public void saveSingleResultQueryWithJoinsTest() throws NonExistingFieldException
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
@@ -73,7 +76,7 @@ public class SearchServiceIntegrationTest
 	
 	@Test
 	public void saveSingleResultQueryWithConditionsTest()
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
@@ -95,7 +98,7 @@ public class SearchServiceIntegrationTest
 	
 	@Test
 	public void saveObjectQueryWithMultiLevelConditionsTest()
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException, ConditionMaxLevelException
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");
@@ -136,7 +139,7 @@ public class SearchServiceIntegrationTest
 //	}
 	
 	@Test
-	public void findStoredSearchQueryTest()
+	public void findStoredSearchQueryTest() throws NonExistingFieldException
 	{
 		setupService.checkAllResources();
 		Resource userResource = setupService.findResourceByNameWithFields("User");

@@ -13,8 +13,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
+import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
 
 @Entity
 @Table(name = "conditionGroupL1")
@@ -106,18 +108,17 @@ public class ConditionGL1 implements ConditionGroup
 
 	private void setConditions(List<ConditionL1> conditions)
 	{
-		// TODO: if there are existing conditions they must be deleted before inserting a new set
+		this.conditions.clear();
 		this.conditions = conditions;
 	}
 	
 	protected ConditionGL1 addCondition(String field, COperator condOperator, String value, char valueType) 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException
 	{
 		// Make sure the ConditionGL1 has no other conditions without a Logical Operator
 		if (this.getConditions().size() > 0 && this.getOperator() == null)
 		{
-			// TODO: Throw an exception - Indicates there are existing conditions without an operator yet
-			System.out.println("ERROR: There are existing conditions without an operator yet in the ConditionGL1");
+			throw new NoLogicalOperatorException();
 		}
 		
 		ConditionL1 condition = new ConditionL1(this, field, condOperator, value, valueType);
@@ -145,13 +146,12 @@ public class ConditionGL1 implements ConditionGroup
 		}
 	}
 	
-	private ConditionGL2 addConditionGroupL2()
+	private ConditionGL2 addConditionGroupL2() throws ExistingConditionGroupException
 	{
 		// Verify there is no existing ConditionGL2 already
 		if (this.getConditionGroup() != null)
 		{
-			// TODO: Throw an exception - There is already a ConditionGL2, another one cannot be created
-			System.out.println("ERROR: A ConditionGL1 can only contain one ConditionGL2");
+			throw new ExistingConditionGroupException("There is already a ConditionGL2 referenced by the ConditionGL1");
 		}
 		ConditionGL2 conditionGL2 = new ConditionGL2();
 		this.setConditionGroup(conditionGL2);
@@ -160,10 +160,10 @@ public class ConditionGL1 implements ConditionGroup
 
 	@Override
 	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException
 	{
-		// TODO: create a test for this
-		// TODO: check if LOperator needs an equals method
+		// TODO: create a test for all cases in this method
+		
 		if (this.getOperator() == null)
 		{
 			this.setOperator(LOperator.AND);
@@ -183,7 +183,6 @@ public class ConditionGL1 implements ConditionGroup
 			{
 				ConditionGL2 conditionGroupL2 = this.addConditionGroupL2();
 				conditionGroupL2.setOperator(LOperator.AND);
-				// TODO: Check the next line does create a ConditionL2 and add it to the corresponding ConditionGL2
 				conditionGroupL2.addCondition(field, cOperator, value, valueType);
 				return conditionGroupL2;
 			}
@@ -204,10 +203,10 @@ public class ConditionGL1 implements ConditionGroup
 	
 	@Override
 	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException
 	{
-		// TODO: create a test for this
-		// TODO: check if LOperator needs an equals method
+		// TODO: create a test for all cases in this method
+		
 		if (this.getOperator() == null)
 		{
 			this.setOperator(LOperator.OR);
@@ -232,7 +231,6 @@ public class ConditionGL1 implements ConditionGroup
 			}
 			else 
 			{
-				// TODO: Test this situation
 				ConditionGL2 conditionGroupL2 = this.getConditionGroup();
 				// Assuming conditionGroupL2 has operator OR
 				conditionGroupL2.addCondition(field, cOperator, value, valueType);

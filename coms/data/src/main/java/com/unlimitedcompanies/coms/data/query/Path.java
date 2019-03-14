@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
@@ -104,20 +105,16 @@ public class Path
 		this.branches = branches;		
 	}
 	
-	public Path leftJoinFetch(ResourceField field, String joinAlias, Resource relationResource)
+	public Path leftJoinFetch(ResourceField field, String joinAlias, Resource relationResource) throws NonExistingFieldException
 	{
-		// TODO: Make sure that field belongs to the parent resource and it has an association
 		if (!field.getResource().equals(this.getResource()))
 		{
-			// TODO: Throw an exception instead of a print error
-			System.out.println("ERROR: The field reference to the joining resource does not belong to the parent resource");
+			throw new NonExistingFieldException("The indicated field to join the referenced resource was not found in the parent resource");
 		}
 		
 		Path branchPath = new Path(relationResource, joinAlias);
 		branchPath.setParentRelation(this.alias + "." + field.getResourceFieldName());
 		branchPath.setParent(this);
-		
-		// TODO: this needs to be tested
 		this.branches.add(branchPath);
 		
 		return branchPath;

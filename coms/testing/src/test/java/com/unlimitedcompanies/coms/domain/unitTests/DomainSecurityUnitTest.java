@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
 import com.unlimitedcompanies.coms.data.query.COperator;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.domain.security.Address;
@@ -141,7 +143,7 @@ class DomainSecurityUnitTest
 	// TODO: Extract to a new class
 	
 	@Test
-	public void searchChaininigTest()
+	public void searchChaininigTest() throws NonExistingFieldException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
@@ -210,7 +212,7 @@ class DomainSecurityUnitTest
 	
 	@Test
 	public void searchQueryWithConditionsTest() 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
@@ -238,7 +240,7 @@ class DomainSecurityUnitTest
 	
 	@Test
 	public void searchSingleResultQueryWithConditionsTest() 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));
@@ -265,7 +267,7 @@ class DomainSecurityUnitTest
 	}
 	
 	@Test
-	public void ConditionStructureTest() throws FieldNotInSearchException, IncorrectFieldFormatException
+	public void ConditionStructureTest() throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		Resource userResource = new Resource("User");
 		userResource.addField(new ResourceField("userId", false, userResource));

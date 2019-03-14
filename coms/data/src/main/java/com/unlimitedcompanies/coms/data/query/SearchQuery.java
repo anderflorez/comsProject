@@ -9,8 +9,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.FieldNotInSearchException;
+import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
@@ -22,7 +24,6 @@ public class SearchQuery
 	private String searchQueryId;
 	private String searchName;
 	
-	// TODO: complete the getters and setters for this field
 	private String singleResultField;
 	
 	@OneToOne
@@ -80,7 +81,7 @@ public class SearchQuery
 		this.singleResultField = singleResultField;
 	}
 
-	public void assignSingleResultField(String alias, String field)
+	public void assignSingleResultField(String alias, String field) throws NonExistingFieldException
 	{
 		if (verifyField(alias, field, this.getQueryResource()))
 		{
@@ -88,9 +89,7 @@ public class SearchQuery
 		}
 		else
 		{
-			// TODO: Throw an exception or somehow provide an error as the search cannot return this single result
-			// TODO: Test this
-			System.out.println("ERROR: This field cannot be retrieved as it could not be found within the search resources");
+			throw new NonExistingFieldException("The field referenced in the condition does not exist in the current search");
 		}
 	}
 
@@ -109,22 +108,22 @@ public class SearchQuery
 		return conditionGL1;
 	}
 
-	private void setConditionGL1(ConditionGL1 conditionGL1)
+	private void setConditionGL1(ConditionGL1 conditionGL1) throws ExistingConditionGroupException
 	{
 		if (this.getConditionGL1() != null || (conditionGL1.getSearch() != null && conditionGL1.getSearch() != this))
 		{
-			// TODO: Throw an exception - There is already a ConditionGL1 in the search or the conditionGL1 already belongs to another search
+			throw new ExistingConditionGroupException("There is already a ConditionGL1 in the search or the conditionGL1 belongs to another search");
 		}
 		
 		this.conditionGL1 = conditionGL1;
 		conditionGL1.setSearch(this);
 	}
 	
-	private ConditionGL1 addConditionGroup()
+	private ConditionGL1 addConditionGroup() throws ExistingConditionGroupException
 	{
 		if (this.getConditionGL1() != null)
 		{
-			// TODO: Throw an exception - There is already a ConditionGL1 in the search; only one should be created
+			throw new ExistingConditionGroupException("There is already a ConditionGL1 in the search and only one may be created");
 		}
 		
 		ConditionGL1 conditionGL1 = new ConditionGL1();
@@ -132,10 +131,8 @@ public class SearchQuery
 		
 		return conditionGL1;
 	}
-	
-	// TODO: Future upgrades: There could be methods here to verify if a condition field does belong to the search
 
-	public Path leftJoinFetch(ResourceField field, String alias, Resource relationResource)
+	public Path leftJoinFetch(ResourceField field, String alias, Resource relationResource) throws NonExistingFieldException
 	{
 		Path resultPath = this.queryResource.leftJoinFetch(field, alias, relationResource);
 		return resultPath;
@@ -144,11 +141,10 @@ public class SearchQuery
 	// The logic operator should be set from the "and" and "or" methods in the condition group classes
 	// This method expects the condition the be the first and only; therefore, no logical operator will be used
 	public ConditionGL1 where(String field, COperator condOperator, String value, char valueType) 
-			throws FieldNotInSearchException, IncorrectFieldFormatException
+			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		ConditionGL1 conditionGL1 = this.addConditionGroup();
 		
-		// TODO: Check the next line does create a ConditionL1 and add it to the corresponding ConditionGL1
 		conditionGL1.addCondition(field, condOperator, value, valueType);
 
 		return conditionGL1;
@@ -157,7 +153,6 @@ public class SearchQuery
 	public String generateFullQuery()
 	{
 		// TODO: Create some checking mechanism to make sure there are no repeated aliases in the same search query
-		// TODO: Update this method to include the where clause of the query
 		
 		StringBuilder sb = new StringBuilder();
 		if (this.getSingleResultField() == null)
