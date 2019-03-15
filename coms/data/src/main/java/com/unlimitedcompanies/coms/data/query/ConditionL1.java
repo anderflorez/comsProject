@@ -37,7 +37,7 @@ public class ConditionL1
 		this.conditionL1Id = UUID.randomUUID().toString();
 	}
 
-	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, String value, char valueType) 
+	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, String value) 
 			throws NonExistingFieldException, IncorrectFieldFormatException
 	{
 		int i = field.indexOf('.');
@@ -51,7 +51,36 @@ public class ConditionL1
 				this.field = field;
 				this.cOperator = cOperator.symbolOperator();
 				this.value = value;
-				this.valueType = valueType;
+				this.valueType = 't';
+				this.sqValue = null;
+			}
+			else
+			{
+				throw new NonExistingFieldException("The field referenced in the condition does not exist in the current search");
+			}			
+		}
+		else
+		{
+			throw new IncorrectFieldFormatException();
+		}
+	}
+	
+	protected ConditionL1(ConditionGL1 containerGroup, String field, COperator cOperator, SearchQuery value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException
+	{
+		int i = field.indexOf('.');
+		if (i > 0)
+		{
+			Path path = containerGroup.getSearch().getQueryResource();
+			if (SearchQuery.verifyField(field.substring(0, i), field.substring(i + 1), path))
+			{
+				this.conditionL1Id = UUID.randomUUID().toString();
+				this.containerGroup = containerGroup;		
+				this.field = field;
+				this.cOperator = cOperator.symbolOperator();
+				this.value = null;
+				this.valueType = 's';
+				this.sqValue = value;
 			}
 			else
 			{
@@ -165,9 +194,21 @@ public class ConditionL1
 		this.sqValue = sqValue;
 	}
 	
+	// TODO: All ConditionL1, ConditionL2, and ConditionL3 have this same method; create a superclass that has the method instead of having a copy
 	protected String conditionalQuery()
 	{
-		return this.field + " " + this.getOperator().symbolOperator() + " " + this.value;
+		if (this.valueType == 't')
+		{
+			return this.field + " " + this.getOperator().symbolOperator() + " " + this.value;			
+		}
+		else if (this.valueType == 's')
+		{
+			return this.field + " " + this.getOperator().symbolOperator() + " (" + this.getSqValue().generateFullQuery() + ")";
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override

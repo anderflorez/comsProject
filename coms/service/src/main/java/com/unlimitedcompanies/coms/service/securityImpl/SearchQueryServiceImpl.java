@@ -2,21 +2,22 @@ package com.unlimitedcompanies.coms.service.securityImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.StoredSearchDao;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 import com.unlimitedcompanies.coms.service.security.SearchQueryService;
 
 @Service
+@Transactional
 public class SearchQueryServiceImpl implements SearchQueryService
 {
 	@Autowired
 	private StoredSearchDao dao;
-
+	
 	@Override
 	public void storeSearchQuery(SearchQuery search)
 	{
-		// TODO: check that path has an existing resource assigned or verify and catch the possible exception
 		dao.createSearchQuery(search);
 	}
 
@@ -36,8 +37,13 @@ public class SearchQueryServiceImpl implements SearchQueryService
 	public SearchQuery findQueryById(String searchQueryId)
 	{
 		SearchQuery sq = dao.getSearchQueryById(searchQueryId);
-		
 		return sq;
 	}
 
+	@Override
+	public void deleteSearchQuery(String searchQueryId)
+	{
+		SearchQuery sq = this.findQueryById(searchQueryId);
+		
+	}
 }

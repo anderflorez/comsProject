@@ -140,12 +140,12 @@ public class SearchQuery
 	
 	// The logic operator should be set from the "and" and "or" methods in the condition group classes
 	// This method expects the condition the be the first and only; therefore, no logical operator will be used
-	public ConditionGL1 where(String field, COperator condOperator, String value, char valueType) 
+	public ConditionGL1 where(String field, COperator condOperator, String value) 
 			throws NonExistingFieldException, IncorrectFieldFormatException, ExistingConditionGroupException, NoLogicalOperatorException
 	{
 		ConditionGL1 conditionGL1 = this.addConditionGroup();
 		
-		conditionGL1.addCondition(field, condOperator, value, valueType);
+		conditionGL1.addCondition(field, condOperator, value);
 
 		return conditionGL1;
 	}
@@ -168,7 +168,6 @@ public class SearchQuery
 		{
 			sb.append(this.getConditionGL1().conditionalGroupQuery());
 		}
-		sb.append(';');
 		return sb.toString();
 	}
 

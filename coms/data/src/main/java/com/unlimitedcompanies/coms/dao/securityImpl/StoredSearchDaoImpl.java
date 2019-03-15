@@ -12,6 +12,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.StoredSearchDao;
+import com.unlimitedcompanies.coms.data.query.ConditionGL1;
+import com.unlimitedcompanies.coms.data.query.ConditionGL2;
+import com.unlimitedcompanies.coms.data.query.ConditionGL3;
+import com.unlimitedcompanies.coms.data.query.ConditionL1;
+import com.unlimitedcompanies.coms.data.query.ConditionL2;
+import com.unlimitedcompanies.coms.data.query.ConditionL3;
 import com.unlimitedcompanies.coms.data.query.Path;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
 
@@ -31,15 +37,40 @@ public class StoredSearchDaoImpl implements StoredSearchDao
 		{
 			em.persist(sortedPathList.get(i));
 		}
+
 		em.persist(search);
-	}
-	
-	private static void findSearchQueryPath(List<Path> sortedPath, Path path)
-	{
-		sortedPath.add(path);
-		for (int i = 0; i < path.getBranches().size(); i++)
+
+		// Save condition group level 1 and its conditions if there are any
+		ConditionGL1 cgl1 = search.getConditionGL1();
+		if (cgl1 != null)
 		{
-			findSearchQueryPath(sortedPath, path.getBranches().get(i));
+			em.persist(cgl1);
+			for (ConditionL1 next : cgl1.getConditions())
+			{
+				em.persist(next);
+			}
+			
+			// Save condition group level 2 and its conditions if there are any
+			ConditionGL2 cgl2 = cgl1.getConditionGroup();
+			if (cgl2 != null)
+			{
+				em.persist(cgl2);
+				for (ConditionL2 next : cgl2.getConditions())
+				{
+					em.persist(next);
+				}
+				
+				// Save condition group level 3 and its conditions if there are any
+				ConditionGL3 cgl3 = cgl2.getConditionGroup();
+				if (cgl3 != null)
+				{
+					em.persist(cgl3);
+					for (ConditionL3 next : cgl3.getConditions())
+					{
+						em.persist(next);
+					}
+				}
+			}
 		}
 	}
 
@@ -65,6 +96,15 @@ public class StoredSearchDaoImpl implements StoredSearchDao
 		StoredSearchDaoImpl.findAllPaths(sq.getQueryResource());
 		
 		return sq;
+	}
+	
+	private static void findSearchQueryPath(List<Path> sortedPath, Path path)
+	{
+		sortedPath.add(path);
+		for (int i = 0; i < path.getBranches().size(); i++)
+		{
+			findSearchQueryPath(sortedPath, path.getBranches().get(i));
+		}
 	}
 	
 	private static void findAllPaths(Path path)

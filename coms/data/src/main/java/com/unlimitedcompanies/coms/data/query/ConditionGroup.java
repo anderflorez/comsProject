@@ -8,8 +8,12 @@ import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
 
 public interface ConditionGroup
 {
-	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) 
+	public ConditionGroup and(String field, COperator cOperator, String value) 
 			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException, ConditionMaxLevelException;
-	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) 
+	public ConditionGroup and(String field, COperator cOperator, SearchQuery value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException, ConditionMaxLevelException;
+	public ConditionGroup or(String field, COperator cOperator, String value)
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException, ConditionMaxLevelException;
+	public ConditionGroup or(String field, COperator cOperator, SearchQuery value) 
 			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException, ConditionMaxLevelException;
 }

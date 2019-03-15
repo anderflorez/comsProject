@@ -175,7 +175,7 @@ class DomainSecurityUnitTest
 		String expectedResult = "select root from User as root "
 									+ "left join fetch root.contact as contact "
 									+ "left join fetch root.roles as role "
-									+ "left join fetch role.permission as perm;";
+									+ "left join fetch role.permission as perm";
 		
 		assertTrue(userSearch.generateFullQuery().equals(expectedResult));
 	}
@@ -229,9 +229,11 @@ class DomainSecurityUnitTest
 		
 		SearchQuery userSearch = new SearchQuery(userResource);
 		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
-		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
+		userSearch.where("root.username", COperator.EQUALS, "administrator");
 		
-		String expectedResult = "select root from User as root left join fetch root.contact as contact where root.username = administrator;";
+		String expectedResult = "select root from User as root "
+				+ "left join fetch root.contact as contact "
+				+ "where root.username = administrator";
 		String obtainedResult = userSearch.generateFullQuery();
 		
 		assertEquals(expectedResult, obtainedResult);
@@ -257,10 +259,12 @@ class DomainSecurityUnitTest
 		
 		SearchQuery userSearch = new SearchQuery(userResource);
 		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
-		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
+		userSearch.where("root.username", COperator.EQUALS, "administrator");
 		userSearch.assignSingleResultField("root", "userId");
 		
-		String expectedResult = "select root.userId from User as root left join fetch root.contact as contact where root.username = administrator;";
+		String expectedResult = "select root.userId from User as root "
+				+ "left join fetch root.contact as contact "
+				+ "where root.username = administrator";
 		String obtainedResult = userSearch.generateFullQuery();
 		
 		assertEquals(expectedResult, obtainedResult);
@@ -284,7 +288,7 @@ class DomainSecurityUnitTest
 		
 		SearchQuery userSearch = new SearchQuery(userResource);
 		userSearch.leftJoinFetch(userResource.getResourceFieldByName("contact"), "contact", contactResource);
-		userSearch.where("root.username", COperator.EQUALS, "administrator", 't');
+		userSearch.where("root.username", COperator.EQUALS, "administrator");
 		userSearch.assignSingleResultField("root", "userId");
 	}
 }

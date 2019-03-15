@@ -102,7 +102,7 @@ public class ConditionGL2 implements ConditionGroup
 		}
 	}
 
-	protected List<ConditionL2> getConditions()
+	public List<ConditionL2> getConditions()
 	{
 		return Collections.unmodifiableList(conditions);
 	}
@@ -113,7 +113,7 @@ public class ConditionGL2 implements ConditionGroup
 		this.conditions = conditions;
 	}
 
-	protected ConditionGL2 addCondition(String field, COperator condOperator, String value, char valueType) 
+	protected ConditionGL2 addCondition(String field, COperator condOperator, String value) 
 			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException
 	{
 		if (this.getConditions().size() > 0 && this.getOperator() == null)
@@ -121,7 +121,7 @@ public class ConditionGL2 implements ConditionGroup
 			throw new NoLogicalOperatorException();
 		}
 		
-		ConditionL2 condition = new ConditionL2(this, field, condOperator, value, valueType);
+		ConditionL2 condition = new ConditionL2(this, field, condOperator, value);
 		this.conditions.add(condition);
 		if (condition.getContainerGroup() == null)
 		{
@@ -131,7 +131,25 @@ public class ConditionGL2 implements ConditionGroup
 		return this;
 	}
 	
-	protected ConditionGL3 getConditionGroup()
+	protected ConditionGL2 addCondition(String field, COperator condOperator, SearchQuery value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException
+	{
+		if (this.getConditions().size() > 0 && this.getOperator() == null)
+		{
+			throw new NoLogicalOperatorException();
+		}
+		
+		ConditionL2 condition = new ConditionL2(this, field, condOperator, value);
+		this.conditions.add(condition);
+		if (condition.getContainerGroup() == null)
+		{
+			condition.setContainerGroup(this);
+		}
+		
+		return this;
+	}
+	
+	public ConditionGL3 getConditionGroup()
 	{
 		return conditionGroup;
 	}
@@ -159,21 +177,22 @@ public class ConditionGL2 implements ConditionGroup
 	}
 	
 	@Override
-	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) 
-			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException
+	public ConditionGroup and(String field, COperator cOperator, String value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, 
+				   NoLogicalOperatorException, ExistingConditionGroupException
 	{
 		// TODO: create a test for all cases in this method
 		
 		if (this.getOperator() == null)
 		{
 			this.setOperator(LOperator.AND);
-			this.addCondition(field, cOperator, value, valueType);
+			this.addCondition(field, cOperator, value);
 			return this;
 		}
 		
 		else if (this.getOperator().equals(LOperator.AND))
 		{
-			this.addCondition(field, cOperator, value, valueType);
+			this.addCondition(field, cOperator, value);
 			return this;
 		}
 		
@@ -183,14 +202,14 @@ public class ConditionGL2 implements ConditionGroup
 			{
 				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
 				conditionGroupL3.setOperator(LOperator.AND);
-				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				conditionGroupL3.addCondition(field, cOperator, value);
 				return conditionGroupL3;
 			}
 			else 
 			{
 				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
 				// Assuming conditionGroupL2 has operator AND
-				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				conditionGroupL3.addCondition(field, cOperator, value);
 				return conditionGroupL3;
 			}
 		}
@@ -202,8 +221,53 @@ public class ConditionGL2 implements ConditionGroup
 	}
 	
 	@Override
-	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) 
-			throws NonExistingFieldException, IncorrectFieldFormatException, NoLogicalOperatorException, ExistingConditionGroupException
+	public ConditionGroup and(String field, COperator cOperator, SearchQuery value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, 
+				   NoLogicalOperatorException, ExistingConditionGroupException
+	{
+		// TODO: create a test for all cases in this method
+		
+		if (this.getOperator() == null)
+		{
+			this.setOperator(LOperator.AND);
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		else if (this.getOperator().equals(LOperator.AND))
+		{
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		else if (this.getOperator().equals(LOperator.OR))
+		{
+			if (this.getConditionGroup() == null)
+			{
+				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
+				conditionGroupL3.setOperator(LOperator.AND);
+				conditionGroupL3.addCondition(field, cOperator, value);
+				return conditionGroupL3;
+			}
+			else 
+			{
+				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
+				// Assuming conditionGroupL2 has operator AND
+				conditionGroupL3.addCondition(field, cOperator, value);
+				return conditionGroupL3;
+			}
+		}
+		
+		else
+		{
+			return null;
+		}
+	}
+	
+	@Override
+	public ConditionGroup or(String field, COperator cOperator, String value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, 
+				   NoLogicalOperatorException, ExistingConditionGroupException
 	{
 		
 		// TODO: create a test for all cases in this method
@@ -211,13 +275,13 @@ public class ConditionGL2 implements ConditionGroup
 		if (this.getlOperator() == null)
 		{
 			this.setOperator(LOperator.OR);
-			this.addCondition(field, cOperator, value, valueType);
+			this.addCondition(field, cOperator, value);
 			return this;
 		}
 		
 		else if (this.getOperator().equals(LOperator.OR))
 		{
-			this.addCondition(field, cOperator, value, valueType);
+			this.addCondition(field, cOperator, value);
 			return this;
 		}
 		
@@ -227,14 +291,59 @@ public class ConditionGL2 implements ConditionGroup
 			{
 				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
 				conditionGroupL3.setOperator(LOperator.OR);
-				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				conditionGroupL3.addCondition(field, cOperator, value);
 				return conditionGroupL3;
 			}
 			else
 			{
 				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
 				// Assuming conditionGroupL3 has operator OR
-				conditionGroupL3.addCondition(field, cOperator, value, valueType);
+				conditionGroupL3.addCondition(field, cOperator, value);
+				return conditionGroupL3;
+			}
+		}
+		
+		else
+		{
+			return null;
+		}
+	}
+	
+	@Override
+	public ConditionGroup or(String field, COperator cOperator, SearchQuery value) 
+			throws NonExistingFieldException, IncorrectFieldFormatException, 
+				   NoLogicalOperatorException, ExistingConditionGroupException
+	{
+		
+		// TODO: create a test for all cases in this method
+
+		if (this.getlOperator() == null)
+		{
+			this.setOperator(LOperator.OR);
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		else if (this.getOperator().equals(LOperator.OR))
+		{
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		else if (this.getOperator().equals(LOperator.AND))
+		{
+			if (this.getConditionGroup() == null)
+			{
+				ConditionGL3 conditionGroupL3 = this.addConditionGroupL3();
+				conditionGroupL3.setOperator(LOperator.OR);
+				conditionGroupL3.addCondition(field, cOperator, value);
+				return conditionGroupL3;
+			}
+			else
+			{
+				ConditionGL3 conditionGroupL3 = this.getConditionGroup();
+				// Assuming conditionGroupL3 has operator OR
+				conditionGroupL3.addCondition(field, cOperator, value);
 				return conditionGroupL3;
 			}
 		}

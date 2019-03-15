@@ -97,7 +97,7 @@ public class ConditionGL3 implements ConditionGroup
 		}
 	}
 
-	protected List<ConditionL3> getConditions()
+	public List<ConditionL3> getConditions()
 	{
 		return Collections.unmodifiableList(conditions);
 	}
@@ -107,14 +107,31 @@ public class ConditionGL3 implements ConditionGroup
 		this.conditions = conditions;
 	}
 	
-	protected ConditionGL3 addCondition(String field, COperator condOperator, String value, char valueType) throws NoLogicalOperatorException
+	protected ConditionGL3 addCondition(String field, COperator condOperator, String value) throws NoLogicalOperatorException
 	{
 		if (this.getConditions().size() > 0 && this.getOperator() == null)
 		{
 			throw new NoLogicalOperatorException();
 		}
 		
-		ConditionL3 condition = new ConditionL3(this, field, condOperator, value, valueType);
+		ConditionL3 condition = new ConditionL3(this, field, condOperator, value);
+		this.conditions.add(condition);
+		if (condition.getContainerGroup() == null)
+		{
+			condition.setContainerGroup(this);
+		}		
+		
+		return this;
+	}
+	
+	protected ConditionGL3 addCondition(String field, COperator condOperator, SearchQuery value) throws NoLogicalOperatorException
+	{
+		if (this.getConditions().size() > 0 && this.getOperator() == null)
+		{
+			throw new NoLogicalOperatorException();
+		}
+		
+		ConditionL3 condition = new ConditionL3(this, field, condOperator, value);
 		this.conditions.add(condition);
 		if (condition.getContainerGroup() == null)
 		{
@@ -125,18 +142,21 @@ public class ConditionGL3 implements ConditionGroup
 	}
 	
 	@Override
-	public ConditionGroup and(String field, COperator cOperator, String value, char valueType) throws ConditionMaxLevelException, NoLogicalOperatorException
+	public ConditionGroup and(String field, COperator cOperator, String value) 
+			throws ConditionMaxLevelException, NoLogicalOperatorException
 	{
 		// TODO: create a test for all cases in this method
 		
 		if (this.getlOperator() == null)
 		{
 			this.setOperator(LOperator.AND);
+			this.addCondition(field, cOperator, value);
+			return this;
 		}
 		
 		if (this.getOperator().equals(LOperator.AND))
 		{
-			this.addCondition(field, cOperator, value, valueType);
+			this.addCondition(field, cOperator, value);
 			return this;
 		}
 		else
@@ -146,21 +166,74 @@ public class ConditionGL3 implements ConditionGroup
 	}
 	
 	@Override
-	public ConditionGroup or(String field, COperator cOperator, String value, char valueType) throws ConditionMaxLevelException
+	public ConditionGroup and(String field, COperator cOperator, SearchQuery value) 
+			throws ConditionMaxLevelException, NoLogicalOperatorException
 	{
+		// TODO: create a test for all cases in this method
+		
+		if (this.getlOperator() == null)
+		{
+			this.setOperator(LOperator.AND);
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		if (this.getOperator().equals(LOperator.AND))
+		{
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		else
+		{
+			throw new ConditionMaxLevelException();
+		}
+	}
+	
+	@Override
+	public ConditionGroup or(String field, COperator cOperator, String value) 
+			throws ConditionMaxLevelException, NoLogicalOperatorException
+	{
+		// TODO: create a test for all cases in this method
+		
 		if (this.getlOperator() == null)
 		{
 			this.setOperator(LOperator.OR);
+			this.addCondition(field, cOperator, value);
+			return this;
 		}
 		
 		if (this.getOperator().equals(LOperator.OR))
 		{
-			throw new ConditionMaxLevelException();
+			this.addCondition(field, cOperator, value);
+			return this;
 		}
 		else
 		{
-			// TODO: Throw an exception since the app does not support more than three levels of conditions
-			return null;
+			throw new ConditionMaxLevelException();
+		}
+	}
+	
+	@Override
+	public ConditionGroup or(String field, COperator cOperator, SearchQuery value) 
+			throws ConditionMaxLevelException, NoLogicalOperatorException
+	{
+		// TODO: create a test for all cases in this method
+		
+		if (this.getlOperator() == null)
+		{
+			this.setOperator(LOperator.OR);
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		
+		if (this.getOperator().equals(LOperator.OR))
+		{
+			this.addCondition(field, cOperator, value);
+			return this;
+		}
+		else
+		{
+			throw new ConditionMaxLevelException();
 		}
 	}
 	

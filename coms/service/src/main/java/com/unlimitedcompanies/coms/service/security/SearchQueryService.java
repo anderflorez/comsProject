@@ -8,4 +8,5 @@ public interface SearchQueryService
 	public int storedSearchQueriesNum();
 	public int storedSearchQueriesPathNum();
 	public SearchQuery findQueryById(String searchQueryId);
+	public void deleteSearchQuery(String searchQueryId);
 }

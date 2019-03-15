@@ -8,5 +8,4 @@ public interface StoredSearchDao
 	public int getSearchQueriesTotal();
 	public int getSearchQueriesPathTotal();
 	public SearchQuery getSearchQueryById(String searchQueryId);
-	//public SearchQuery updateSearchQuery(String id, SearchQuery query);
 }
