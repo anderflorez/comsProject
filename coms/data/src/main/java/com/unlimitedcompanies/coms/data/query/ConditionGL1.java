@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,10 +14,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
 import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 
 @Entity
 @Table(name = "conditionGroupL1")
@@ -31,10 +35,12 @@ public class ConditionGL1 implements ConditionGroup
 	@JoinColumn(name = "searchId_FK")
 	private SearchQuery search;
 	
-	@OneToMany(mappedBy = "containerGroup")
+	@OneToMany(mappedBy = "containerGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<ConditionL1> conditions;
 	
-	@OneToOne(mappedBy = "parentGroup")
+	@OneToOne(mappedBy = "parentGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private ConditionGL2 conditionGroup;
 
 	public ConditionGL1() 

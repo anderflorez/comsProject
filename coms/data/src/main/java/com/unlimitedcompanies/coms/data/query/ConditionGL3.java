@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.unlimitedcompanies.coms.data.exceptions.ConditionMaxLevelException;
 import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
@@ -29,7 +33,8 @@ public class ConditionGL3 implements ConditionGroup
 	@JoinColumn(name = "conditionGroupL2_FK")
 	private ConditionGL2 parentGroup;
 
-	@OneToMany(mappedBy = "containerGroup")
+	@OneToMany(mappedBy = "containerGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<ConditionL3> conditions;
 	
 	public ConditionGL3()

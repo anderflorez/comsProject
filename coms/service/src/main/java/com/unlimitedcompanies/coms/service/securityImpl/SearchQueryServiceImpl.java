@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.StoredSearchDao;
 import com.unlimitedcompanies.coms.data.query.SearchQuery;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.SearchQueryService;
 
 @Service
@@ -32,18 +33,29 @@ public class SearchQueryServiceImpl implements SearchQueryService
 	{
 		return dao.getSearchQueriesPathTotal();
 	}
+	
+	@Override
+	public boolean storedSearchearchHasCGL1(String searchQueryId)
+	{
+		int cgl1Num = dao.getStoredSearchCG1Num(searchQueryId);
+		return cgl1Num > 0 ? true : false;
+	}
 
 	@Override
-	public SearchQuery findQueryById(String searchQueryId)
+	public SearchQuery findQueryById(String searchQueryId) throws RecordNotFoundException
 	{
 		SearchQuery sq = dao.getSearchQueryById(searchQueryId);
+		if (sq ==  null)
+		{
+			throw new RecordNotFoundException("The requested stored search could not be found");
+		}
 		return sq;
 	}
 
 	@Override
-	public void deleteSearchQuery(String searchQueryId)
+	public void deleteSearchQuery(String searchQueryId) throws RecordNotFoundException
 	{
-		SearchQuery sq = this.findQueryById(searchQueryId);
-		
+		SearchQuery searchQuery = this.findQueryById(searchQueryId);
+		dao.deleteSearchQuery(searchQuery);
 	}
 }

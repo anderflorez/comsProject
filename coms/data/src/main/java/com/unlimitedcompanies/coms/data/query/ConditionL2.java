@@ -2,6 +2,7 @@ package com.unlimitedcompanies.coms.data.query;
 
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -9,8 +10,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 
 @Entity
 @Table(name = "conditionL2")
@@ -24,12 +28,13 @@ public class ConditionL2
 	// Expects t for text or v for view
 	private char valueType;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name = "conditionGroupL2_FK")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private ConditionGL2 containerGroup;
 	
 	@OneToOne
-	@JoinColumn(name = "searchId_FK")
+	@JoinColumn(name = "search_FK")
 	private SearchQuery sqValue;
 
 	protected ConditionL2()

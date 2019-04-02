@@ -2,12 +2,16 @@ package com.unlimitedcompanies.coms.data.query;
 
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Table(name = "conditionL3")
@@ -21,12 +25,13 @@ public class ConditionL3
 	// Expects t for text or v for view
 	private char valueType;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name = "conditionGroupL3_FK")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private ConditionGL3 containerGroup;
 	
 	@OneToOne
-	@JoinColumn(name = "searchId_FK")
+	@JoinColumn(name = "search_FK")
 	private SearchQuery sqValue;
 
 	public ConditionL3()

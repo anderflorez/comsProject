@@ -2,6 +2,7 @@ package com.unlimitedcompanies.coms.domain.security;
 
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotEmpty;
 public class Contact
 {
 	@Id
+	@Column(unique=true, nullable=false)
 	private Integer contactId;
 	
 	@NotEmpty

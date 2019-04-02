@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
@@ -34,7 +38,8 @@ public class Path
 	@JoinColumn(name = "parent_FK")
 	private Path parent;
 
-	@OneToMany(mappedBy = "parent")
+	@OneToMany(mappedBy = "parent", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Path> branches;
 
 	public Path()
@@ -153,6 +158,21 @@ public class Path
 		return sb.toString();
 	}
 
+	public String getFullSQLQuery()
+	{
+		StringBuilder sb = new StringBuilder();
+		if (this.parentRelation.equals("root"))
+		{
+			sb.append("FROM " + this.resource.getResourceName() + " AS root");
+		}
+		else
+		{
+			sb.append(" ");
+		}
+		
+		return sb.toString();
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -176,5 +196,6 @@ public class Path
 		else if (!pathId.equals(other.pathId)) return false;
 		return true;
 	}
+
 	
 }

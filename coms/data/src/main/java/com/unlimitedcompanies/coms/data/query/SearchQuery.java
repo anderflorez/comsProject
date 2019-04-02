@@ -3,16 +3,20 @@ package com.unlimitedcompanies.coms.data.query;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.unlimitedcompanies.coms.data.exceptions.ExistingConditionGroupException;
-import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.data.exceptions.IncorrectFieldFormatException;
 import com.unlimitedcompanies.coms.data.exceptions.NoLogicalOperatorException;
+import com.unlimitedcompanies.coms.data.exceptions.NonExistingFieldException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
@@ -26,11 +30,13 @@ public class SearchQuery
 	
 	private String singleResultField;
 	
-	@OneToOne
+	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name = "path_FK")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private Path queryResource;
 	
-	@OneToOne(mappedBy = "search")
+	@OneToOne(mappedBy = "search", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private ConditionGL1 conditionGL1;
 
 	public SearchQuery() 
@@ -168,6 +174,22 @@ public class SearchQuery
 		{
 			sb.append(this.getConditionGL1().conditionalGroupQuery());
 		}
+		return sb.toString();
+	}
+	
+	public String generateFullSQLQuery()
+	{
+		StringBuilder sb = new StringBuilder();
+		if (this.getSingleResultField() == null)
+		{
+			sb.append("SELECT root.* ");
+		}
+		else
+		{
+			sb.append("SELECT " + this.getSingleResultField() + " ");
+		}
+		sb.append(this.queryResource.getFullSQLQuery());
+		
 		return sb.toString();
 	}
 
