@@ -1,12 +1,17 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 
 @Entity
 @Table(name = "resource")
@@ -16,16 +21,27 @@ public class Resource
 	private Integer resourceId;
 	private String resourceName;
 	
-	@OneToMany(mappedBy = "resource")
-	private Set<ResourceField> resourceFields = new HashSet<>();
+	@OneToMany(mappedBy="resource")
+	private Set<ResourceField> resourceFields;
 	
-	@OneToMany(mappedBy = "resource")
-	private Set<Permission> permissions = new HashSet<>();
+	@OneToMany(mappedBy="resource")
+	private Set<Permission> permissions;
+	
+	@OneToMany(mappedBy="resource")
+	private List<ABACPolicy> policies;
 
-	public Resource() {}
+	public Resource() 
+	{
+		this.resourceFields = new HashSet<>();
+		this.permissions = new HashSet<>();
+		this.policies = new ArrayList<>(); 
+	}	
 
 	public Resource(String resourceName)
 	{
+		this.resourceFields = new HashSet<>();
+		this.permissions = new HashSet<>();
+		this.policies = new ArrayList<>(); 
 		this.resourceId = null;
 		this.resourceName = resourceName;
 	}
@@ -76,6 +92,44 @@ public class Resource
 			this.permissions.add(permission);
 			permission.assignResource(this);
 		}
+	}
+
+	public List<ABACPolicy> getPolicies()
+	{
+		return policies;
+	}
+
+	protected void setPolicies(List<ABACPolicy> policies)
+	{
+		this.policies = policies;
+	}
+	
+	public void addPolicy(ABACPolicy policy) throws DuplicatedResourcePolicyException
+	{
+		if (!this.verifyExistingPolicy(policy))
+		{
+			this.policies.add(policy);
+			if (policy.getResource() != this)
+			{
+				policy.setResource(this);
+			}
+		}
+		else
+		{
+			throw new DuplicatedResourcePolicyException();
+		}
+	}
+	
+	private boolean verifyExistingPolicy(ABACPolicy policy)
+	{
+		for (ABACPolicy next : this.policies)
+		{
+			if (next.getType() == policy.getType())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

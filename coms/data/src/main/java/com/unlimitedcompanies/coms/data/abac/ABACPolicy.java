@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.data.abac;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -9,6 +10,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.security.Resource;
 
 @Entity
 @Table(name = "abacPolicy")
@@ -21,30 +25,40 @@ public class ABACPolicy
 	private String policyName;
 	
 	@Column(unique=false, nullable=false)
-	private String logicOperator;
+	private PolicyType policyType;
+	
+	@Column(unique=false, nullable=false)
+	private LogicOperator logicOperator;
 	
 	@ManyToOne
-	@JoinColumn(name = "parentABACPolicyId_FK")
-	@Column(unique=false, nullable=true)
-	private ABACPolicy parentABACPolicy;
+	@JoinColumn(name="resourceId_FK")
+	@Column(unique=false, nullable=false)
+	private Resource resource;
 	
-	@OneToMany(mappedBy="parentABACPolicy")
-	private List<ABACPolicy> subPolicies;
+	@OneToMany(mappedBy="abacPolicy")
+	private List<ConditionGroup> conditionGroups;
 	
-	protected ABACPolicy() {}
-	
-	public ABACPolicy(String name, String operator)
+	protected ABACPolicy() 
 	{
-		this.policyName = name;
-		this.logicOperator = operator;
+		this.conditionGroups = new ArrayList<>();
 	}
 	
-	protected int getAbacPolicyId()
+	public ABACPolicy(String name, PolicyType policyType, Resource resource) throws DuplicatedResourcePolicyException
+	{
+		this.policyName = name;
+		this.policyType = policyType;
+		this.logicOperator = LogicOperator.AND;
+		this.resource = resource;
+		resource.addPolicy(this);
+		this.conditionGroups = new ArrayList<>();
+	}
+
+	public Integer getAbacPolicyId()
 	{
 		return abacPolicyId;
 	}
 
-	protected void setAbacPolicyId(int abacPolicyId)
+	protected void setAbacPolicyId(Integer abacPolicyId)
 	{
 		this.abacPolicyId = abacPolicyId;
 	}
@@ -59,46 +73,81 @@ public class ABACPolicy
 		this.policyName = policyName;
 	}
 
+	protected String getPolicyType()
+	{
+		return policyType.toString();
+	}
+	
+	public PolicyType getType()
+	{
+		return policyType;
+	}
+
+	protected void setPolicyType(String policyType)
+	{
+		this.policyType = PolicyType.valueOf(policyType.toUpperCase());
+	}
+	
+	public void setPolicyType(PolicyType policyType)
+	{
+		this.policyType = policyType;
+	}
+
 	protected String getLogicOperator()
+	{
+		return logicOperator.toString();
+	}
+	
+	public LogicOperator getOperator()
 	{
 		return logicOperator;
 	}
 
 	protected void setLogicOperator(String logicOperator)
 	{
+		this.logicOperator = LogicOperator.valueOf(logicOperator.toUpperCase());
+	}
+	
+	public void setLogicOperator(LogicOperator logicOperator)
+	{
 		this.logicOperator = logicOperator;
 	}
 
-	protected ABACPolicy getParentABACPolicy()
+	public Resource getResource()
 	{
-		return parentABACPolicy;
+		return resource;
 	}
 
-	protected void setParentABACPolicy(ABACPolicy parentABACPolicy)
+	public void setResource(Resource resource) throws DuplicatedResourcePolicyException
 	{
-		this.parentABACPolicy = parentABACPolicy;
+		this.resource = resource;
+		if (!resource.getPolicies().contains(this))
+		{
+			resource.addPolicy(this);
+		}
 	}
 
-	protected List<ABACPolicy> getSubPolicies()
+	public List<ConditionGroup> getConditionGroups()
 	{
-		return subPolicies;
+		return this.conditionGroups;
 	}
 
-	protected void setSubPolicies(List<ABACPolicy> subPolicies)
+	protected void setConditionGroups(List<ConditionGroup> conditionGroups)
 	{
-		this.subPolicies = subPolicies;
-	}
-
-	private void assignParentPolicy(ABACPolicy parentPolicy)
-	{
-		this.parentABACPolicy = parentPolicy;
+		this.conditionGroups = conditionGroups;
 	}
 	
-	public ABACPolicy addASubPolicy(String name, String operator)
+	public ConditionGroup addConditionGroup()
 	{
-		ABACPolicy subpolicy = new ABACPolicy(name, operator);
-		this.subPolicies.add(subpolicy);
-		subpolicy.assignParentPolicy(this);
-		return subpolicy;
+		ConditionGroup conditionGroup = new ConditionGroup(this);
+		this.conditionGroups.add(conditionGroup);
+		return conditionGroup;
+	}
+	
+	public ConditionGroup addConditionGroup(LogicOperator logicOperator)
+	{
+		ConditionGroup conditionGroup = new ConditionGroup(this, logicOperator);
+		this.conditionGroups.add(conditionGroup);
+		return conditionGroup;
 	}
 }
