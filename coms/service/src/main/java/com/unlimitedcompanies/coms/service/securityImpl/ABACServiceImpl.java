@@ -5,8 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
-import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.domain.security.UserAttributes;
+import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 
 @Service
@@ -15,13 +14,24 @@ public class ABACServiceImpl implements ABACService
 {
 	@Autowired
 	private ABACDao abacDao;
-	
+
 	@Override
-	public UserAttributes getUserAttributes()
+	public int getNumberOfPolicies()
 	{
-		User user = abacDao.getUserWithAttributes();
-		UserAttributes userAttributes = new UserAttributes(user);
-		return userAttributes;
+		return abacDao.getNumberOfPolicies();
 	}
 
+	@Override
+	public void savePolicy(ABACPolicy policy)
+	{
+		abacDao.savePolicy(policy);
+//		return this.findPolicyByName(policy.getPolicyName());
+	}
+
+	@Override
+	public ABACPolicy findPolicyByName(String policyName)
+	{
+		return abacDao.findPolicyByName(policyName);
+	}
+	
 }

@@ -25,7 +25,6 @@ public class RecordCondition
 	
 	@ManyToOne
 	@JoinColumn(name="conditionGroupId_FK")
-	@Column(unique=false, nullable=false)
 	private ConditionGroup parentConditionGroup;
 	
 	protected RecordCondition() {}

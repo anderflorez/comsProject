@@ -28,11 +28,10 @@ public class ABACPolicy
 	private PolicyType policyType;
 	
 	@Column(unique=false, nullable=false)
-	private LogicOperator logicOperator;
+	private String logicOperator;
 	
 	@ManyToOne
 	@JoinColumn(name="resourceId_FK")
-	@Column(unique=false, nullable=false)
 	private Resource resource;
 	
 	@OneToMany(mappedBy="abacPolicy")
@@ -47,7 +46,8 @@ public class ABACPolicy
 	{
 		this.policyName = name;
 		this.policyType = policyType;
-		this.logicOperator = LogicOperator.AND;
+//		this.logicOperator = LogicOperator.AND;
+		this.logicOperator = "AND";
 		this.resource = resource;
 		resource.addPolicy(this);
 		this.conditionGroups = new ArrayList<>();
@@ -63,7 +63,7 @@ public class ABACPolicy
 		this.abacPolicyId = abacPolicyId;
 	}
 
-	protected String getPolicyName()
+	public String getPolicyName()
 	{
 		return policyName;
 	}
@@ -73,7 +73,7 @@ public class ABACPolicy
 		this.policyName = policyName;
 	}
 
-	protected String getPolicyType()
+	private String getPolicyType()
 	{
 		return policyType.toString();
 	}
@@ -100,17 +100,20 @@ public class ABACPolicy
 	
 	public LogicOperator getOperator()
 	{
-		return logicOperator;
+//		return logicOperator;
+		return LogicOperator.valueOf(this.logicOperator.toUpperCase());
 	}
 
-	protected void setLogicOperator(String logicOperator)
+	public void setLogicOperator(String logicOperator)
 	{
-		this.logicOperator = LogicOperator.valueOf(logicOperator.toUpperCase());
+//		this.logicOperator = LogicOperator.valueOf(logicOperator.toUpperCase());
+		this.logicOperator = logicOperator.toUpperCase();
 	}
 	
 	public void setLogicOperator(LogicOperator logicOperator)
 	{
-		this.logicOperator = logicOperator;
+//		this.logicOperator = logicOperator;
+		this.logicOperator = logicOperator.toString();
 	}
 
 	public Resource getResource()

@@ -23,12 +23,10 @@ public class ConditionGroup
 	
 	@ManyToOne
 	@JoinColumn(name="abacPolicyId_FK")
-	@Column(unique=false, nullable=true)
 	private ABACPolicy abacPolicy;
 	
 	@ManyToOne
 	@JoinColumn(name="parentConditionGroupId_FK")
-	@Column(unique=false, nullable=true)
 	private ConditionGroup parentConditionGroup;
 	
 	@OneToMany(mappedBy="parentConditionGroup")
