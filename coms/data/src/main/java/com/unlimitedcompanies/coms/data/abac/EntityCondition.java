@@ -1,5 +1,8 @@
 package com.unlimitedcompanies.coms.data.abac;
 
+import java.util.UUID;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,10 +15,10 @@ import javax.persistence.Table;
 public class EntityCondition
 {
 	@Id
-	private Integer entityConditionId;
+	private String entityConditionId;
 	
 	@Column(unique=false, nullable=false)
-	private UserAttribute userAttribute;
+	private String userAttribute;
 	
 	@Column(unique=false, nullable=false)
 	private String value;
@@ -23,18 +26,22 @@ public class EntityCondition
 	@Column(unique=false, nullable=false)
 	private ComparisonOperator comparison;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name="conditionGroupId_FK")
 	private ConditionGroup parentConditionGroup;
 	
-	protected EntityCondition() {}
+	protected EntityCondition() 
+	{
+		this.entityConditionId = UUID.randomUUID().toString();
+	}
 	
 	protected EntityCondition(ConditionGroup conditionGroup, 
 							  UserAttribute userAttribute,
 							  ComparisonOperator comparison, 
 							  String value)
 	{
-		this.userAttribute = userAttribute;
+		this.entityConditionId = UUID.randomUUID().toString();
+		this.userAttribute = userAttribute.toString();
 		this.value = value;
 		this.comparison = comparison;
 		this.parentConditionGroup = conditionGroup;
@@ -44,34 +51,14 @@ public class EntityCondition
 		}
 	}
 
-	public Integer getEntityConditionId()
+	public String getEntityConditionId()
 	{
 		return entityConditionId;
 	}
 
-	private void setEntityConditionId(Integer entityConditionId)
+	public UserAttribute getUserAttribute()
 	{
-		this.entityConditionId = entityConditionId;
-	}
-
-	private String getUserAttribute()
-	{
-		return userAttribute.toString();
-	}
-	
-	public UserAttribute getUserEnumAttribute()
-	{
-		return userAttribute;
-	}
-
-	private void setUserAttribute(UserAttribute userAttribute)
-	{
-		this.userAttribute = userAttribute;
-	}
-	
-	private void setUserAttribute(String userAttribute)
-	{
-		this.userAttribute = UserAttribute.valueOf(userAttribute.toUpperCase());
+		return UserAttribute.valueOf(this.userAttribute.toUpperCase());
 	}
 
 	public String getValue()
@@ -79,19 +66,9 @@ public class EntityCondition
 		return value;
 	}
 
-	private void setValue(String value)
-	{
-		this.value = value;
-	}
-
 	public ComparisonOperator getComparison()
 	{
 		return comparison;
-	}
-
-	private void setComparison(ComparisonOperator comparison)
-	{
-		this.comparison = comparison;
 	}
 
 	public ConditionGroup getParentConditionGroup()

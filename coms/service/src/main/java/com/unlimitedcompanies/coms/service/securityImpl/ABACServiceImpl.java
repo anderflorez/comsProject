@@ -22,10 +22,28 @@ public class ABACServiceImpl implements ABACService
 	}
 
 	@Override
-	public void savePolicy(ABACPolicy policy)
+	public int getNumberOfConditionGroups()
+	{
+		return abacDao.getNumberOfConditionGroups();
+	}
+	
+	@Override
+	public int getNumberOfEntityConditions()
+	{
+		return abacDao.getNumberOfEntityConditions();
+	}
+	
+	@Override
+	public int getNumberOfRecordConditions()
+	{
+		return abacDao.getNumberOfRecordConditions();
+	}
+
+	@Override
+	public ABACPolicy savePolicy(ABACPolicy policy)
 	{
 		abacDao.savePolicy(policy);
-//		return this.findPolicyByName(policy.getPolicyName());
+		return this.findPolicyByName(policy.getPolicyName());
 	}
 
 	@Override
@@ -33,5 +51,6 @@ public class ABACServiceImpl implements ABACService
 	{
 		return abacDao.findPolicyByName(policyName);
 	}
+
 	
 }

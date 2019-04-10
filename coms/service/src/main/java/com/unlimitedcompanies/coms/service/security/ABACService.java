@@ -5,6 +5,10 @@ import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
 public interface ABACService
 {
 	public int getNumberOfPolicies();
-	public void savePolicy(ABACPolicy policy);
+	public int getNumberOfConditionGroups();
+	public int getNumberOfEntityConditions();
+	public int getNumberOfRecordConditions();
+
+	public ABACPolicy savePolicy(ABACPolicy policy);
 	public ABACPolicy findPolicyByName(String policyName);
 }

@@ -4,9 +4,7 @@ import java.math.BigInteger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,30 +25,32 @@ public class ABACDaoImpl implements ABACDao
 		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(abacPolicyId) FROM abacPolicy").getSingleResult();
 		return bigInt.intValue();
 	}
+	
+	@Override
+	public int getNumberOfConditionGroups()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(conditionGroupId) FROM conditionGroup").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public int getNumberOfEntityConditions()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(entityConditionId) FROM entityCondition").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public int getNumberOfRecordConditions()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(recordConditionId) FROM recordCondition").getSingleResult();
+		return bigInt.intValue();
+	}
 
 	@Override
 	public void savePolicy(ABACPolicy policy)
 	{
-		try
-		{
-			em.createNativeQuery("INSERT INTO abacPolicy (policyName, policyType, logicOperator, resourceId_FK) VALUES (:name, :type, :operator, :resource)")
-			  .setParameter("name", policy.getPolicyName())
-			  .setParameter("type", policy.getType().toString())
-			  .setParameter("operator", policy.getOperator().toString())
-			  .setParameter("resource", policy.getResource().getResourceId())
-			  .executeUpdate();
-		}
-		catch (PersistenceException e)
-		{
-			if (e.getCause() instanceof ConstraintViolationException)
-			{
-				throw (ConstraintViolationException)e.getCause();
-			}
-			else
-			{
-				throw e;
-			}
-		}
+		em.persist(policy);
 	}
 
 	@Override

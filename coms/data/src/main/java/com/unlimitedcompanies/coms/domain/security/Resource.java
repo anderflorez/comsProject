@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 
 @Entity
@@ -120,11 +121,16 @@ public class Resource
 		}
 	}
 	
+	public void addPolicy(String policyName, PolicyType policyType) throws DuplicatedResourcePolicyException
+	{
+		new ABACPolicy(policyName, policyType, this);
+	}
+	
 	private boolean verifyExistingPolicy(ABACPolicy policy)
 	{
 		for (ABACPolicy next : this.policies)
 		{
-			if (next.getType() == policy.getType())
+			if (next.equals(policy))
 			{
 				return true;
 			}

@@ -2,7 +2,9 @@ package com.unlimitedcompanies.coms.data.abac;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -11,35 +13,45 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 @Entity
 @Table(name = "conditionGroup")
 public class ConditionGroup
 {
 	@Id
-	private Integer conditionGroupId;
+	private String conditionGroupId;
 	
 	@Column(unique=false, nullable=false)
-	private LogicOperator logicOperator;
+	private String logicOperator;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name="abacPolicyId_FK")
 	private ABACPolicy abacPolicy;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name="parentConditionGroupId_FK")
 	private ConditionGroup parentConditionGroup;
 	
-	@OneToMany(mappedBy="parentConditionGroup")
+	@OneToMany(mappedBy="parentConditionGroup", 
+			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<ConditionGroup> conditionGroups;
 	
-	@OneToMany(mappedBy="parentConditionGroup")
+	@OneToMany(mappedBy="parentConditionGroup", 
+			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<EntityCondition> entityConditions;
 	
-	@OneToMany(mappedBy="parentConditionGroup")
+	@OneToMany(mappedBy="parentConditionGroup", 
+			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<RecordCondition> recordConditions;
 	
 	protected ConditionGroup() 
 	{
+		this.conditionGroupId = UUID.randomUUID().toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
 		this.recordConditions = new ArrayList<>();
@@ -47,9 +59,10 @@ public class ConditionGroup
 	
 	protected ConditionGroup(ABACPolicy policy)
 	{
+		this.conditionGroupId = UUID.randomUUID().toString();
 		this.abacPolicy = policy;
 		this.parentConditionGroup = null;
-		this.logicOperator = LogicOperator.AND;
+		this.logicOperator = "AND";
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
 		this.recordConditions = new ArrayList<>();
@@ -57,9 +70,10 @@ public class ConditionGroup
 	
 	protected ConditionGroup(ABACPolicy policy, LogicOperator operator)
 	{
+		this.conditionGroupId = UUID.randomUUID().toString();
 		this.abacPolicy = policy;
 		this.parentConditionGroup = null;
-		this.logicOperator = operator;
+		this.logicOperator = operator.toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
 		this.recordConditions = new ArrayList<>();
@@ -67,9 +81,10 @@ public class ConditionGroup
 	
 	private ConditionGroup(ConditionGroup parentConditionGroup)
 	{
+		this.conditionGroupId = UUID.randomUUID().toString();
 		this.abacPolicy = null;
 		this.parentConditionGroup = parentConditionGroup;
-		this.logicOperator = LogicOperator.AND;
+		this.logicOperator = "AND";
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
 		this.recordConditions = new ArrayList<>();
@@ -77,42 +92,28 @@ public class ConditionGroup
 	
 	private ConditionGroup(ConditionGroup parentConditionGroup, LogicOperator operator)
 	{
+		this.conditionGroupId = UUID.randomUUID().toString();
 		this.abacPolicy = null;
 		this.parentConditionGroup = parentConditionGroup;
-		this.logicOperator = operator;
+		this.logicOperator = operator.toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
 		this.recordConditions = new ArrayList<>();
 	}
 
-	public Integer getConditionGroupId()
+	public String getConditionGroupId()
 	{
 		return conditionGroupId;
 	}
 
-	protected void setConditionGroupId(Integer conditionGroupId)
+	public LogicOperator getLogicOperator()
 	{
-		this.conditionGroupId = conditionGroupId;
+		return LogicOperator.valueOf(this.logicOperator.toUpperCase());
 	}
 
-	protected String getLogicOperator()
-	{
-		return logicOperator.toString();
-	}
-	
-	public LogicOperator getOperator()
-	{
-		return logicOperator;
-	}
-
-	protected void setLogicOperator(String logicOperator)
-	{
-		this.logicOperator = LogicOperator.valueOf(logicOperator.toUpperCase());
-	}
-	
 	public void setLogicOperator(LogicOperator logicOperator)
 	{
-		this.logicOperator = logicOperator;
+		this.logicOperator = logicOperator.toString();
 	}
 
 	public ABACPolicy getAbacPolicy()
@@ -139,7 +140,7 @@ public class ConditionGroup
 		}
 	}
 
-	protected List<ConditionGroup> getConditionGroups()
+	public List<ConditionGroup> getConditionGroups()
 	{
 		return conditionGroups;
 	}
@@ -194,11 +195,6 @@ public class ConditionGroup
 	public List<RecordCondition> getRecordConditions()
 	{
 		return recordConditions;
-	}
-
-	private void setRecordConditions(List<RecordCondition> recordConditions)
-	{
-		this.recordConditions = recordConditions;
 	}
 	
 	protected void addRecordCondition(RecordCondition recordCondition)

@@ -54,6 +54,7 @@ public class User
 	}
 	
 	// Constructor intended for existing users in the db to be updated
+	// TODO: This constructor must be improved as it allows the userId to be set
 	public User(Integer userId, String username, boolean enabled)
 	{
 		this.userId = userId;
