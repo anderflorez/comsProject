@@ -11,11 +11,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "recordCondition")
-public class RecordCondition
+@Table(name = "attributeCondition")
+public class AttributeCondition
 {
 	@Id
-	private String recordConditionId;
+	private String attributeConditionId;
 	
 	@Column(unique=false, nullable=false)
 	private String userAttribute;
@@ -30,30 +30,30 @@ public class RecordCondition
 	@JoinColumn(name="conditionGroupId_FK")
 	private ConditionGroup parentConditionGroup;
 	
-	protected RecordCondition() 
+	protected AttributeCondition() 
 	{
-		this.recordConditionId = UUID.randomUUID().toString();
+		this.attributeConditionId = UUID.randomUUID().toString();
 	}
 	
-	protected RecordCondition(ConditionGroup conditionGroup, 
-							  UserAttribute userAttribute, 
-							  ComparisonOperator comparisonOperator, 
-							  ResourceAttribute resourceAttribute)
+	protected AttributeCondition(ConditionGroup conditionGroup, 
+							     UserAttribute userAttribute, 
+							     ComparisonOperator comparisonOperator, 
+							     ResourceAttribute resourceAttribute)
 	{
-		this.recordConditionId = UUID.randomUUID().toString();
+		this.attributeConditionId = UUID.randomUUID().toString();
 		this.userAttribute = userAttribute.toString();
 		this.comparison = comparisonOperator;
 		this.resourceAttribute = resourceAttribute.toString();
 		this.parentConditionGroup = conditionGroup;
-		if (!conditionGroup.getRecordConditions().contains(this))
+		if (!conditionGroup.getAttributeConditions().contains(this))
 		{
-			conditionGroup.addRecordCondition(this);
+			conditionGroup.addAttributeCondition(this);
 		}
 	}
 
-	public String getRecordConditionId()
+	public String getAttributeConditionId()
 	{
-		return recordConditionId;
+		return attributeConditionId;
 	}
 
 	public UserAttribute getUserAttribute()
@@ -79,9 +79,9 @@ public class RecordCondition
 	protected void setParentConditionGroup(ConditionGroup parentConditionGroup)
 	{
 		this.parentConditionGroup = parentConditionGroup;
-		if (!parentConditionGroup.getRecordConditions().contains(this))
+		if (!parentConditionGroup.getAttributeConditions().contains(this))
 		{
-			parentConditionGroup.addRecordCondition(this);
+			parentConditionGroup.addAttributeCondition(this);
 		}
 	}
 	

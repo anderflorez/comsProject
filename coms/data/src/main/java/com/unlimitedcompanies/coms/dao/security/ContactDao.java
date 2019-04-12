@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.dao.security;
 
 import java.util.List;
+import java.util.Map;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 
@@ -9,12 +10,14 @@ public interface ContactDao
 	public void createContact(Contact contact);
 	public int getNumberOfContacts();
 	boolean existingContact(int contactId);
+	public Contact getOneContact(Map<String, String> conditions);
+	public List<Contact> getMultipleContacts();
 	public List<Contact> getAllContacts();
 //	public List<Contact> getAllContacts(User loggedUser);
 	public List<Contact> getContactsByRange(int page, int elements);
 	public Contact getContactById(int id);
 	public Contact getContactByCharId(String contactCharId);
-	public Contact getContactByEmail(String contactEmail);
+	public Contact getContactByEmail(String email);
 	public void updateContact(Contact updatedContact);
 	public void deleteContact(int contactId);
 	

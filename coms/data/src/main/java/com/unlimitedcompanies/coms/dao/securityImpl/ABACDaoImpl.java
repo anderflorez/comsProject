@@ -41,9 +41,9 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
-	public int getNumberOfRecordConditions()
+	public int getNumberOfAttributeConditions()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(recordConditionId) FROM recordCondition").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(attributeConditionId) FROM attributeCondition").getSingleResult();
 		return bigInt.intValue();
 	}
 
@@ -56,9 +56,11 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public ABACPolicy findPolicyByName(String policyName)
 	{
-		return em.createQuery("select policy from ABACPolicy as policy where policy.policyName = :name", ABACPolicy.class)
+		ABACPolicy policy = em.createQuery("select policy from ABACPolicy as policy where policy.policyName = :name", ABACPolicy.class)
 				 .setParameter("name", policyName)
 				 .getSingleResult();
+		
+		return policy;
 	}
 
 }

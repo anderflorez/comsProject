@@ -13,9 +13,11 @@ public interface ContactService
 	public int findNumberOfContacts();
 	public boolean hasNextContact(int page, int elements);
 	public List<Contact> searchAllContacts();
+	public List<Contact> searchAllContacts(String username);
 	public List<Contact> searchContactsByRange(int page, int elements);
 	public Contact searchContactById(int id) throws RecordNotFoundException;
 	public Contact searchContactByEmail(String email);
+	public Contact searchContactByEmail(String email, String username);
 	public Contact updateContact(Contact updatedContact) throws RecordNotFoundException;
 	public void deleteContact(int contactId) throws RecordNotFoundException, RecordNotDeletedException;
 //	

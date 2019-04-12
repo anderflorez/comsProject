@@ -7,7 +7,7 @@ public interface ABACDao
 	public int getNumberOfPolicies();
 	public int getNumberOfConditionGroups();
 	public int getNumberOfEntityConditions();
-	public int getNumberOfRecordConditions();
+	public int getNumberOfAttributeConditions();
 
 	public void savePolicy(ABACPolicy policy);
 	public ABACPolicy findPolicyByName(String policyName);

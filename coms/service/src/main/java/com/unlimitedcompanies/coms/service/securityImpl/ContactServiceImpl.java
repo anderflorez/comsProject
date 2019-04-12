@@ -1,6 +1,8 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NoResultException;
 
@@ -11,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
+import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 
 @Service
@@ -22,10 +27,13 @@ import com.unlimitedcompanies.coms.service.security.ContactService;
 public class ContactServiceImpl implements ContactService
 {
 	@Autowired
-	ContactDao dao;
+	private ContactDao dao;
 	
 	@Autowired
-	AuthDao authenticationDao;
+	private AuthDao authenticationDao;
+	
+	@Autowired
+	private ABACService abacService;
 
 	@Override
 	@Transactional(rollbackFor = {DuplicateRecordException.class})
@@ -73,6 +81,23 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
+	public List<Contact> searchAllContacts(String username)
+	{
+		User user = authenticationDao.getFullUserByUsername(username);
+		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
+		if (contactPolicy.entityPoliciesGrant(user))
+		{
+			return dao.getMultipleContacts();
+		}
+		else
+		{
+			// TODO: throw an exception as the user is not authorize to access the resource
+			
+			return null;
+		}
+	}
+	
+	@Override
 	public List<Contact> searchContactsByRange(int page, int elements)
 	{
 		return dao.getContactsByRange(page - 1, elements);
@@ -108,11 +133,30 @@ public class ContactServiceImpl implements ContactService
 		}
 		return contact;
 	}
-
+	
 	@Override
 	public Contact searchContactByEmail(String email)
 	{
 		return dao.getContactByEmail(email);
+	}
+
+	@Override
+	public Contact searchContactByEmail(String email, String username)
+	{
+		User user = authenticationDao.getFullUserByUsername(username);
+		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
+		if (contactPolicy.entityPoliciesGrant(user))
+		{
+			Map<String, String> conditions = new HashMap<>();
+			conditions.put("email", email);
+			return dao.getOneContact(conditions);
+		}
+		else
+		{
+			// TODO: throw an exception as the user is not authorize to access the resource
+			
+			return null;
+		}
 	}
 	
 	@Override

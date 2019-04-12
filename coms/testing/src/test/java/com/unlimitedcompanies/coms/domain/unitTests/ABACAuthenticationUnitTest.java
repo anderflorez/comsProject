@@ -13,6 +13,7 @@ import com.unlimitedcompanies.coms.data.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
 public class ABACAuthenticationUnitTest
 {
@@ -93,8 +94,8 @@ public class ABACAuthenticationUnitTest
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		policy.setPolicyType(PolicyType.CREATE);
-		assertEquals(PolicyType.CREATE, policy.getPolicyType(), "Conversion to read policy type to string failed");
+		policy.setPolicyType(PolicyType.UPDATE);
+		assertEquals(PolicyType.UPDATE, policy.getPolicyType(), "Conversion to read policy type to string failed");
 	}
 	
 	// This test will work only if the method getLogicOperator() from ConditionGrup.java is set to public
@@ -124,11 +125,9 @@ public class ABACAuthenticationUnitTest
 		Resource userResource = new Resource("UserResource");
 		
 		userResource.addPolicy("UserRead", PolicyType.READ);
-		userResource.addPolicy("UserCreate", PolicyType.CREATE);
 		userResource.addPolicy("UserUpdate", PolicyType.UPDATE);
-		userResource.addPolicy("UserDelete", PolicyType.DELETE);
 		
-		assertEquals(4, userResource.getPolicies().size(), "Creating a multiple resource policy test failed");
+		assertEquals(2, userResource.getPolicies().size(), "Creating a multiple resource policy test failed");
 	}
 	
 	@Test
@@ -137,11 +136,9 @@ public class ABACAuthenticationUnitTest
 		Resource userResource = new Resource("UserResource");
 		
 		userResource.addPolicy("UserRead", PolicyType.READ);
-		userResource.addPolicy("UserCreate", PolicyType.CREATE);
 		userResource.addPolicy("UserUpdate", PolicyType.UPDATE);
-		userResource.addPolicy("UserDelete", PolicyType.DELETE);
 		
-		assertThrows(DuplicatedResourcePolicyException.class, () -> userResource.addPolicy("TestCreate", PolicyType.CREATE));
+		assertThrows(DuplicatedResourcePolicyException.class, () -> userResource.addPolicy("TestCreate", PolicyType.UPDATE));
 	}
 	
 	@Test
@@ -227,22 +224,53 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void addingRecordConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
+	public void addingAttributeConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
 		policy.setLogicOperator(LogicOperator.OR);
 		ConditionGroup groupA = policy.addConditionGroup();
 		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
-		groupA.addRecordCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
-		groupB.addRecordCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		groupB.addRecordCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
-		groupB.addRecordCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);		
+		groupA.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
+		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
+		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
+		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);		
 		
-		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getRecordConditions().size(), 
-					 "Adding entity condition to condition group test failed");
-		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getRecordConditions().size(), 
-					 "Adding entity condition to condition group test failed");
+		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getAttributeConditions().size(), 
+					 "Adding attribute condition to condition group test failed");
+		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getAttributeConditions().size(), 
+					 "Adding attribute condition to condition group test failed");
+	}
+	
+	@Test
+	public void addingFieldConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
+	{
+		
+		
+		// TODO: This test is producing a double checking of the fields in the class ConditionGroup.java
+		// TODO: This issue must be solved
+		fail();
+		
+		
+		Resource testResource = new Resource("TestingResource");
+		new ResourceField("TestField1", false, testResource);
+		new ResourceField("TestField2", false, testResource);
+		new ResourceField("TestField3", false, testResource);
+		new ResourceField("TestField4", false, testResource);
+		
+		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
+		policy.setLogicOperator(LogicOperator.OR);
+		ConditionGroup groupA = policy.addConditionGroup();
+		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
+		groupA.addFieldConditions("TestField1", ComparisonOperator.EQUALS, "Field1Value");
+		groupB.addFieldConditions("TestField2", ComparisonOperator.NOT_EQUALS, "Field2Value");
+		groupB.addFieldConditions("TestField3", ComparisonOperator.EQUALS, "Field3Value");
+		groupB.addFieldConditions("TestField4", ComparisonOperator.EQUALS, "Field4Value");
+		
+		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getFieldConditions().size(), 
+					 "Adding field condition to condition group test failed");
+		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getFieldConditions().size(), 
+					 "Adding field condition to condition group test failed");
 	}
 
 }

@@ -34,9 +34,9 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public int getNumberOfRecordConditions()
+	public int getNumberOfAttributeConditions()
 	{
-		return abacDao.getNumberOfRecordConditions();
+		return abacDao.getNumberOfAttributeConditions();
 	}
 
 	@Override

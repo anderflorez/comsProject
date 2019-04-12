@@ -2,6 +2,7 @@ package com.unlimitedcompanies.coms.data.abac;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -15,6 +16,9 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+
+import com.unlimitedcompanies.coms.domain.security.ResourceField;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
 @Table(name = "conditionGroup")
@@ -34,27 +38,29 @@ public class ConditionGroup
 	@JoinColumn(name="parentConditionGroupId_FK")
 	private ConditionGroup parentConditionGroup;
 	
-	@OneToMany(mappedBy="parentConditionGroup", 
-			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="parentConditionGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<ConditionGroup> conditionGroups;
 	
-	@OneToMany(mappedBy="parentConditionGroup", 
-			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="parentConditionGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<EntityCondition> entityConditions;
 	
-	@OneToMany(mappedBy="parentConditionGroup", 
-			   cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="parentConditionGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<RecordCondition> recordConditions;
+	private List<AttributeCondition> attributeConditions;
+	
+	@OneToMany(mappedBy="parentConditionGroup", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private List<FieldCondition> fieldConditions;
 	
 	protected ConditionGroup() 
 	{
 		this.conditionGroupId = UUID.randomUUID().toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
-		this.recordConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
 	}
 	
 	protected ConditionGroup(ABACPolicy policy)
@@ -65,7 +71,8 @@ public class ConditionGroup
 		this.logicOperator = "AND";
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
-		this.recordConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
 	}
 	
 	protected ConditionGroup(ABACPolicy policy, LogicOperator operator)
@@ -76,7 +83,8 @@ public class ConditionGroup
 		this.logicOperator = operator.toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
-		this.recordConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
 	}
 	
 	private ConditionGroup(ConditionGroup parentConditionGroup)
@@ -87,7 +95,8 @@ public class ConditionGroup
 		this.logicOperator = "AND";
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
-		this.recordConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
 	}
 	
 	private ConditionGroup(ConditionGroup parentConditionGroup, LogicOperator operator)
@@ -98,7 +107,8 @@ public class ConditionGroup
 		this.logicOperator = operator.toString();
 		this.conditionGroups = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
-		this.recordConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
 	}
 
 	public String getConditionGroupId()
@@ -192,26 +202,98 @@ public class ConditionGroup
 		}
 	}
 
-	public List<RecordCondition> getRecordConditions()
+	public List<AttributeCondition> getAttributeConditions()
 	{
-		return recordConditions;
+		return attributeConditions;
 	}
 	
-	protected void addRecordCondition(RecordCondition recordCondition)
+	protected void addAttributeCondition(AttributeCondition attributeCondition)
 	{
-		this.recordConditions.add(recordCondition);
-		if (!recordCondition.getParentConditionGroup().equals(this))
+		this.attributeConditions.add(attributeCondition);
+		if (!attributeCondition.getParentConditionGroup().equals(this))
 		{
-			recordCondition.setParentConditionGroup(this);
+			attributeCondition.setParentConditionGroup(this);
 		}
 	}
 	
-	public void addRecordCondition(UserAttribute userAttribute, ComparisonOperator comparison, ResourceAttribute resourceAttribute)
+	public void addAttributeCondition(UserAttribute userAttribute, ComparisonOperator comparison, ResourceAttribute resourceAttribute)
 	{
-		RecordCondition recordCondition = new RecordCondition(this, userAttribute, comparison, resourceAttribute);
-		if (!this.recordConditions.contains(recordCondition))
+		AttributeCondition attributeCondition = new AttributeCondition(this, userAttribute, comparison, resourceAttribute);
+		if (!this.attributeConditions.contains(attributeCondition))
 		{
-			this.recordConditions.add(recordCondition);
+			this.attributeConditions.add(attributeCondition);
+		}
+	}
+	
+	public List<FieldCondition> getFieldConditions()
+	{
+		return fieldConditions;
+	}
+
+	protected void addFieldConditions(FieldCondition fieldCondition)
+	{
+		Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
+		for (ResourceField next : resourceFields)
+		{
+			if (!next.getAssociation() && next.getResourceFieldName().equals(fieldCondition.getFieldName()))
+			{
+				this.fieldConditions.add(fieldCondition);
+				if (!fieldCondition.getParentConditionGroup().equals(this))
+				{
+					fieldCondition.setParentConditionGroup(this);
+				}				
+			}
+		}
+		// TODO: throw an exception as the fieldName is not part of the resource
+		System.out.println("ERROR: The referenced field does not belong to the intended resource");
+		
+	}
+	
+	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value)
+	{
+		Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
+		for (ResourceField next : resourceFields)
+		{
+			if (!next.getAssociation() && next.getResourceFieldName().equals(fieldName))
+			{
+				FieldCondition fieldCondition = new FieldCondition(fieldName, comparison, value, this);
+				if (!this.fieldConditions.contains(fieldCondition))
+				{
+					this.fieldConditions.add(fieldCondition);
+				}				
+				return;
+			}
+		}
+		// TODO: throw an exception as the fieldName is not part of the resource
+		System.out.println("ERROR: The referenced field does not belong to the intended resource");
+		
+	}
+
+	public boolean entityPoliciesGrant(User user)
+	{
+		if (this.logicOperator.equals("AND"))
+		{
+			for (EntityCondition next : this.entityConditions)
+			{
+				if (!next.entityPolicyGrant(user)) return false;
+			}
+			for (ConditionGroup next : this.conditionGroups)
+			{
+				if (!next.entityPoliciesGrant(user)) return false;
+			}
+			return true;
+		}
+		else // if logicOperator equals OR
+		{
+			for (EntityCondition next : this.entityConditions)
+			{
+				if (next.entityPolicyGrant(user)) return true;
+			}
+			for (ConditionGroup next : this.conditionGroups)
+			{
+				if (next.entityPoliciesGrant(user)) return true;
+			}
+			return false;
 		}
 	}
 }

@@ -2,6 +2,8 @@ package com.unlimitedcompanies.coms.service.integrationTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,10 @@ import com.unlimitedcompanies.coms.data.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -38,13 +43,13 @@ class ABACAuthenticationIntegrationTests
 	private ABACService abacService;
 	
 	@Autowired
-	SecuritySetupService setupService;
+	private SecuritySetupService setupService;
 	
 	@Autowired
-	ContactService contactService;
+	private ContactService contactService;
 	
 	@Autowired
-	AuthService authService;
+	private AuthService authService;
 
 	@Test
 	public void numberOfPolicieTest()
@@ -67,7 +72,7 @@ class ABACAuthenticationIntegrationTests
 	@Test
 	public void numberOfRecordConditionTest()
 	{
-		assertEquals(0, abacService.getNumberOfRecordConditions(), "Number of record conditions found in the db failed");
+		assertEquals(0, abacService.getNumberOfAttributeConditions(), "Number of record conditions found in the db failed");
 	}
 	
 	@Test
@@ -91,17 +96,13 @@ class ABACAuthenticationIntegrationTests
 		Resource userResource = setupService.findResourceByNameWithFields("User");
 		Resource contactResource = setupService.findResourceByName("Contact");
 		
-		ABACPolicy policyA1 = new ABACPolicy("UserRead", PolicyType.READ, userResource);
-		ABACPolicy policyA2 = new ABACPolicy("UserCreate", PolicyType.CREATE, userResource);
-		ABACPolicy policyB1 = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
-		ABACPolicy policyB2 = new ABACPolicy("ContactDelete", PolicyType.DELETE, contactResource);
+		ABACPolicy policyA = new ABACPolicy("UserRead", PolicyType.READ, userResource);
+		ABACPolicy policyB = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
 		
-		abacService.savePolicy(policyA1);
-		abacService.savePolicy(policyA2);
-		abacService.savePolicy(policyB1);
-		abacService.savePolicy(policyB2);
+		abacService.savePolicy(policyA);
+		abacService.savePolicy(policyB);
 		
-		assertEquals(4, abacService.getNumberOfPolicies(), "Saving multiple resource policy test failed");
+		assertEquals(2, abacService.getNumberOfPolicies(), "Saving multiple resource policy test failed");
 	}
 	
 	@Test
@@ -163,18 +164,81 @@ class ABACAuthenticationIntegrationTests
 		
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		ConditionGroup group = policy.addConditionGroup();
-		group.addRecordCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
-		group.addRecordCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
+		group.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
+		group.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
 		
 		abacService.savePolicy(policy);
 		
-		assertTrue(abacService.getNumberOfRecordConditions() == 2, 
+		assertTrue(abacService.getNumberOfAttributeConditions() == 2, 
 				"Saving policy with multiple entity condition integration test failed");
 	}
 	
 	@Test
-	public void initialPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
+	public void simpleReadPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
 	{
-		fail();
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Administrator"));		
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		abacService.savePolicy(policy);
+		
+		Contact foundContact = contactService.searchContactByEmail("jane@example.com", user.getUsername());
+		assertTrue(foundContact.getFirstName().equals("Jane"), "Simple read permission integration test failed");
 	}
+	
+	@Test
+	public void multipleRecordReadPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Administrator"));		
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		abacService.savePolicy(policy);
+		
+		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
+		assertEquals(3, foundContacts.size(), "Multiple record read permission integration test failed");
+	}
+	
+//	@Test
+//	public void multipleRecordReadPermissionWithRecordConditionTest() 
+//			throws DuplicateRecordException, RecordNotFoundException, 
+//				   RecordNotCreatedException, DuplicatedResourcePolicyException
+//	{
+//		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+//		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+//		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+//		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact1));
+//		Role role = authService.saveRole(new Role("Administrator"));		
+//		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+//		
+//		setupService.checkAllResources();
+//		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+//		
+//		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+//		ConditionGroup group = policy.addConditionGroup();
+//		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+//		group.addAttributeCondition(userAttribute, comparison, resourceAttribute);
+//		abacService.savePolicy(policy);
+//		
+//		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
+//		assertEquals(3, foundContacts.size(), "Multiple record read permission integration test failed");
+//	}
 }

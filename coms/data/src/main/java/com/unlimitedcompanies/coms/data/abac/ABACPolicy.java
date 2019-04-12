@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
 @Table(name = "abacPolicy")
@@ -33,6 +34,9 @@ public class ABACPolicy
 	
 	@Column(unique=false, nullable=false)
 	private String logicOperator;
+	
+	@OneToMany(mappedBy="policy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	private List<CdPolicy> cdPolicies;
 	
 	@ManyToOne()
 	@JoinColumn(name="resourceId_FK")
@@ -94,6 +98,17 @@ public class ABACPolicy
 		this.logicOperator = logicOperator.toString();
 	}
 
+	public List<CdPolicy> getCdPolicy()
+	{
+		return cdPolicies;
+	}
+
+	public void addCdPolicy(boolean create, boolean delete)
+	{
+		CdPolicy cdPolicy = new CdPolicy(create, delete, this);
+		this.cdPolicies.add(cdPolicy);		
+	}
+
 	public Resource getResource()
 	{
 		return resource;
@@ -130,6 +145,26 @@ public class ABACPolicy
 		ConditionGroup conditionGroup = new ConditionGroup(this, logicOperator);
 		this.conditionGroups.add(conditionGroup);
 		return conditionGroup;
+	}
+	
+	public boolean entityPoliciesGrant(User user)
+	{
+		if (this.logicOperator.equals("AND"))
+		{
+			for (ConditionGroup next : this.conditionGroups)
+			{
+				if (!next.entityPoliciesGrant(user)) return false;
+			}
+			return true;
+		}
+		else // if logicOperator equals OR
+		{
+			for (ConditionGroup next : this.conditionGroups)
+			{
+				if (next.entityPoliciesGrant(user)) return true;
+			}
+			return false;
+		}
 	}
 
 	@Override

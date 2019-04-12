@@ -34,6 +34,10 @@ public class ResourceField
 		this.resourceFieldName = resourceFieldName;
 		this.association = (byte) (association == true ? 1 : 0);
 		this.resource = resource;
+		if (!resource.getResourceFields().contains(this))
+		{
+			resource.addField(this);
+		}
 	}
 
 	public Integer getResourceFieldId()

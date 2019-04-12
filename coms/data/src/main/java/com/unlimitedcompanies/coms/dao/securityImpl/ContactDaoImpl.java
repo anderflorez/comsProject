@@ -2,11 +2,13 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
@@ -61,6 +63,36 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
+	public Contact getOneContact(Map<String, String> conditions)
+	{
+		String stringQuery = "select contact from Contact as contact";
+		if (conditions.size() > 0)
+		{
+			stringQuery += " where ";
+			for (String next : conditions.keySet())
+			{
+				stringQuery += "contact." + next + "=:" + next;
+			}
+		}
+		
+		System.out.println(stringQuery);
+		TypedQuery<Contact> query = em.createQuery(stringQuery, Contact.class);
+		for (String next : conditions.keySet())
+		{
+			query.setParameter(next, conditions.get(next));
+		}
+		
+		return query.getSingleResult();
+	}
+	
+	@Override
+	public List<Contact> getMultipleContacts()
+	{
+		return em.createQuery("select contact from Contact as contact order by contact.firstName", Contact.class)
+				  .getResultList();
+	}
+	
+	@Override
 	public List<Contact> getAllContacts()
 	{
 		return em.createQuery("select contact from Contact as contact order by contact.firstName", Contact.class)
@@ -94,13 +126,13 @@ public class ContactDaoImpl implements ContactDao
 							  .setParameter("charId", contactCharId)
 							  .getSingleResult();
 	}
-
+	
 	@Override
 	public Contact getContactByEmail(String contactEmail)
 	{
 		return em.createQuery("select contact from Contact as contact where contact.email = :email", Contact.class)
-							  .setParameter("email", contactEmail)
-							  .getSingleResult();
+		  .setParameter("email", contactEmail)
+		  .getSingleResult();
 	}
 
 	@Override
