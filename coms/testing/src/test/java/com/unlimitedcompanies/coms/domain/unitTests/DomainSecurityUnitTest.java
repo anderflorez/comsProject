@@ -43,9 +43,17 @@ class DomainSecurityUnitTest
 	@Test
 	public void contactEqualsTest()
 	{
+		// TODO: This test must be improved
 		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
 		Contact contact2 = new Contact("John", null, "", "john@example.com");
 		assertEquals(contact1, contact2, "The equal contact test failed");
+	}
+	
+	@Test
+	public void bidirectionalContactAndUserRelationshipTest()
+	{
+		Contact contact = new Contact("John", null, "Doe");
+//		User user = new User();
 	}
 	
 	@Test

@@ -1,18 +1,14 @@
 package com.unlimitedcompanies.coms.dao.security;
 
 import java.util.List;
-import java.util.Map;
 
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.User;
 
 public interface ContactDao
 {
 	public void createContact(Contact contact);
 	public int getNumberOfContacts();
 	boolean existingContact(int contactId);
-	public List<Contact> getAllContacts();
 	public List<Contact> getAllContacts(String policyAccessConditions);
 	public List<Contact> getContactsByRange(int page, int elements);
 	public Contact getContactById(int id);

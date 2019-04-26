@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
@@ -32,15 +33,18 @@ public class AuthDaoImpl implements AuthDao
 	{
 		try
 		{
-			em.createNativeQuery(
-					"INSERT INTO users (username, password, enabled, dateAdded, lastAccess, contactId_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
-					.setParameter("username", user.getUsername())
-					.setParameter("password", user.getPassword())
-					.setParameter("enabled", user.isEnabled())
-					.setParameter("dateAdded", user.getDateAdded())
-					.setParameter("lastAccess", user.getLastAccess())
-					.setParameter("contact", user.getContact())
-					.executeUpdate();
+//			Query query = em.createNativeQuery(
+//					"INSERT INTO users (username, password, enabled, dateAdded, lastAccess, contactId_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
+//					.setParameter("username", user.getUsername())
+//					.setParameter("password", user.getPassword())
+//					.setParameter("enabled", user.isEnabled())
+//					.setParameter("dateAdded", user.getDateAdded())
+//					.setParameter("lastAccess", user.getLastAccess())
+//					.setParameter("contact", user.getContact());
+//					
+//			query.executeUpdate();
+			
+			em.persist(user);
 		} 
 		catch (PersistenceException e)
 		{

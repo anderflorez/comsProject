@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -14,6 +16,7 @@ import javax.validation.constraints.NotEmpty;
 public class Contact
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(unique=true, nullable=false)
 	private Integer contactId;
 	
@@ -24,12 +27,21 @@ public class Contact
 	private String email;
 	private String contactCharId;
 	
-	@OneToOne(mappedBy="contact")
+	@OneToOne(mappedBy = "contact")
 	private User user;
 	
 	protected Contact()
 	{
 		this.contactCharId = UUID.randomUUID().toString();
+	}
+	
+	public Contact(String firstName, String middleName, String lastName)
+	{
+		this.contactCharId = UUID.randomUUID().toString();
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.email = null;
 	}
 	
 	public Contact(String firstName, String middleName, String lastName, String email)
@@ -39,16 +51,6 @@ public class Contact
 		this.middleName = middleName;
 		this.lastName = lastName;
 		this.email = email;
-	}
-	
-	public Contact(Contact contact)
-	{
-		this.contactId = contact.getContactId();
-		this.contactCharId = UUID.randomUUID().toString();
-		this.firstName = contact.firstName;
-		this.middleName = contact.middleName;
-		this.lastName = contact.lastName;
-		this.email = contact.email;
 	}
 	
 	public Integer getContactId()
@@ -110,6 +112,15 @@ public class Contact
 	{
 		return user;
 	}
+	
+	public void setUser(User user)
+	{
+		this.user = user;
+		if (user.getContact() == null || !user.getContact().equals(this))
+		{
+			user.setContact(this);
+		}
+	}
 
 	@Override
 	public int hashCode()
@@ -125,34 +136,31 @@ public class Contact
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Contact other = (Contact) obj;
 		if (email == null)
 		{
-			if (other.email != null)
+			if (other.email != null) 
+			{
 				return false;
-		} else if (!email.equals(other.email))
-		{
-			return false;			
+			}
+			else
+			{
+				if (firstName == null)
+				{
+					if (other.firstName != null) return false;
+				}
+				else if (!firstName.equals(other.firstName)) return false;
+				if (lastName == null)
+				{
+					if (other.lastName != null) return false;
+				}
+				else if (!lastName.equals(other.lastName)) return false;
+			}
 		}
-		else return true;
-		if (firstName == null)
-		{
-			if (other.firstName != null)
-				return false;
-		} else if (!firstName.equals(other.firstName))
-			return false;
-		if (lastName == null)
-		{
-			if (other.lastName != null)
-				return false;
-		} else if (!lastName.equals(other.lastName))
-			return false;
+		else if (!email.equals(other.email)) return false;
 		return true;
 	}
 

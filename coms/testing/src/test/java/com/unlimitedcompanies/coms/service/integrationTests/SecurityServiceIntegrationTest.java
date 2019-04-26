@@ -20,6 +20,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.abac.ComparisonOperator;
+import com.unlimitedcompanies.coms.data.abac.ConditionGroup;
+import com.unlimitedcompanies.coms.data.abac.PolicyType;
+import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
@@ -32,6 +37,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.service.security.SearchQueryService;
@@ -54,6 +60,9 @@ class SecurityServiceIntegrationTest
 	
 	@Autowired
 	SearchQueryService searchService;
+	
+	@Autowired
+	ABACService abacService;
 
 	@Test
 	public void numberOfContactsIntegrationTest()
@@ -113,14 +122,27 @@ class SecurityServiceIntegrationTest
 	}
 	
 	@Test
-	public void findAllContacts() throws DuplicateRecordException
+	public void findAllContacts() throws Exception
 	{
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		abacService.savePolicy(policy);
+		
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
 		contactService.saveContact(new Contact("Ella", null, null, "ella@example.com"));
 		contactService.saveContact(new Contact("Catherine", null, null, "catherine@example.com"));
 		contactService.saveContact(new Contact("marcela", null, null, "marcela@example.com"));
 		
-		assertEquals(4, contactService.searchAllContacts().size());
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Project Manager"));
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		assertEquals(5, contactService.searchAllContacts(user.getUsername()).size());
 	}
 
 	@Test
@@ -146,14 +168,16 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void updateContactTest() throws DuplicateRecordException, RecordNotFoundException
 	{
+		// TODO: This test is not practical as it does not need a method to update the record; hibernate will update the persistent object
 		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
-		Contact correctedContact = new Contact(initialContact);
-		correctedContact.setFirstName("Jane");
-		correctedContact.setEmail("jane@example.com");
 
-		Contact foundContact = contactService.updateContact(correctedContact);
+		initialContact.setFirstName("Jane");
+		initialContact.setEmail("jane@example.com");
 
-		assertEquals(correctedContact, foundContact, "Service test for updating contact failed");
+		Contact foundContact = contactService.searchContactById(initialContact.getContactId());
+
+		assertEquals("Jane", foundContact.getFirstName(), "Service test for updating contact failed");
+		assertEquals("jane@example.com", foundContact.getEmail(), "Service test for updating contact failed");
 	}
 
 	 @Test

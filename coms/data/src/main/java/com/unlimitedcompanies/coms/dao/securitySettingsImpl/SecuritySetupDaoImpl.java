@@ -173,7 +173,9 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 	{
 		em.createNativeQuery(
 				"INSERT INTO resourceFields (resourceFieldName, association, resourceId_FK) VALUES (:field, :association, :resource)")
-				.setParameter("field", resourceField.getResourceFieldName()).setParameter("association", resourceField.getAssociation())
-				.setParameter("resource", resourceField.getResource()).executeUpdate();
+				.setParameter("field", resourceField.getResourceFieldName())
+				.setParameter("association", resourceField.getAssociation())
+				.setParameter("resource", resourceField.getResource())
+				.executeUpdate();
 	}
 }

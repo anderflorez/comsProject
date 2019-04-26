@@ -1,8 +1,6 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.NoResultException;
 
@@ -15,7 +13,6 @@ import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.data.abac.PolicyResponse;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
@@ -75,12 +72,6 @@ public class ContactServiceImpl implements ContactService
 		{
 			return true;
 		}
-	}
-	
-	@Override
-	public List<Contact> searchAllContacts()
-	{
-		return dao.getAllContacts();
 	}
 	
 	@Override

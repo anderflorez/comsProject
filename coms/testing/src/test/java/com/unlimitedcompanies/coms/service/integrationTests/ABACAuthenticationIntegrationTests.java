@@ -218,13 +218,12 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 	@Test
-	public void multipleRecordReadForEntityPermissionTest() 
-			throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, 
-				   DuplicatedResourcePolicyException, NoResourceAccessException
+	public void multipleRecordReadForEntityPermissionTest() throws Exception
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
 		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		System.out.println("==============> Saved contact id: " + contact.getContactId());
 		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
 		Role role = authService.saveRole(new Role("Administrator"));		
 		authService.assignUserToRole(user.getUserId(), role.getRoleId());
@@ -290,7 +289,6 @@ class ABACAuthenticationIntegrationTests
 		abacService.savePolicy(policy);
 		
 		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
-		foundContacts.forEach(n -> System.out.println(n.getFirstName() + " " + n.getLastName()));
 		assertEquals(2, foundContacts.size(), "Multiple record read permission integration test failed");
 	}
 	

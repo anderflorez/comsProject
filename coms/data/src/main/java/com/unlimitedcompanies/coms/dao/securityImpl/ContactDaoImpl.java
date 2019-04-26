@@ -28,14 +28,15 @@ public class ContactDaoImpl implements ContactDao
 	{	
 		try
 		{
-			em.createNativeQuery(
-					"INSERT INTO contacts (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
-					.setParameter("charId", contact.getContactCharId())
-					.setParameter("fname", contact.getFirstName())
-					.setParameter("mname", contact.getMiddleName())
-					.setParameter("lname", contact.getLastName())
-					.setParameter("email", contact.getEmail())
-					.executeUpdate();
+//			em.createNativeQuery(
+//					"INSERT INTO contacts (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
+//					.setParameter("charId", contact.getContactCharId())
+//					.setParameter("fname", contact.getFirstName())
+//					.setParameter("mname", contact.getMiddleName())
+//					.setParameter("lname", contact.getLastName())
+//					.setParameter("email", contact.getEmail())
+//					.executeUpdate();
+			em.persist(contact);
 		} 
 		catch (PersistenceException e)
 		{
@@ -44,6 +45,7 @@ public class ContactDaoImpl implements ContactDao
 				throw (ConstraintViolationException)e.getCause();
 			}
 		}
+		
 	}
 	
 	@Override
@@ -72,13 +74,6 @@ public class ContactDaoImpl implements ContactDao
 		stringQuery += " order by contact.firstName";
 				
 		return em.createQuery(stringQuery, Contact.class)
-							  .getResultList();
-	}
-	
-	@Override
-	public List<Contact> getAllContacts()
-	{
-		return em.createQuery("select contact from Contact as contact order by contact.firstName", Contact.class)
 							  .getResultList();
 	}
 	

@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -20,7 +23,9 @@ import javax.persistence.Table;
 public class User
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer userId;
+	
 	private String username;
 	private char[] password;
 	private boolean enabled;
@@ -28,8 +33,8 @@ public class User
 	private ZonedDateTime dateAdded;
 	private ZonedDateTime lastAccess;
 	
-	@OneToOne
-	@JoinColumn(name="contactId_FK")
+	@OneToOne(cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "contactId_FK")
 	private Contact contact;
 	
 	@ManyToMany
@@ -44,11 +49,14 @@ public class User
 	// Constructor intended for new users to be saved in the db
 	public User(String username, char[] password, Contact contact)
 	{
-		this.userId = null;
 		this.username = username;
 		this.password = password;
 		this.enabled = true;
 		this.contact = contact;
+		if (contact.getUser() == null || !contact.getUser().equals(this))
+		{
+			contact.setUser(this);
+		}
 		this.dateAdded = ZonedDateTime.now(ZoneId.of("UTC"));
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
@@ -172,6 +180,10 @@ public class User
 	public void setContact(Contact contact)
 	{
 		this.contact = contact;
+		if (contact.getUser() == null || !contact.getUser().equals(this))
+		{
+			contact.setUser(this);
+		}
 	}
 	
 	public List<Role> getRoles()

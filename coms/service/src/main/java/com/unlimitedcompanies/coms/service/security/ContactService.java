@@ -13,7 +13,6 @@ public interface ContactService
 	public Contact saveContact(Contact Contact) throws DuplicateRecordException;
 	public int findNumberOfContacts();
 	public boolean hasNextContact(int page, int elements);
-	public List<Contact> searchAllContacts();
 	public List<Contact> searchAllContacts(String username) throws NoResourceAccessException;
 	public List<Contact> searchContactsByRange(int page, int elements);
 	public Contact searchContactById(int id) throws RecordNotFoundException;
