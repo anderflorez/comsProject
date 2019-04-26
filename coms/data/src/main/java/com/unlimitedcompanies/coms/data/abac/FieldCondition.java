@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "fieldCondition")
+@Table(name = "fieldConditions")
 public class FieldCondition
 {
 	@Id
@@ -81,6 +81,11 @@ public class FieldCondition
 		{
 			parentConditionGroup.addFieldConditions(this);
 		}
-	}	
+	}
+	
+	protected String getReadPolicy(String resourceEntityName)
+	{
+		return resourceEntityName + "." + this.fieldName + " " + this.getComparison().getOperator() + " '" + this.value + "'";
+	}
 	
 }

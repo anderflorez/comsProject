@@ -15,7 +15,7 @@ import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 
 @Entity
-@Table(name = "resource")
+@Table(name = "resources")
 public class Resource
 {
 	@Id
@@ -28,7 +28,7 @@ public class Resource
 	@OneToMany(mappedBy="resource")
 	private Set<Permission> permissions;
 	
-	@OneToMany(mappedBy="resource")
+	@OneToMany(mappedBy = "resource")
 	private List<ABACPolicy> policies;
 
 	public Resource() 

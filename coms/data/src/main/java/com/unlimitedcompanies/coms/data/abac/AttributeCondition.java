@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.data.abac;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -10,8 +11,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.domain.security.User;
+
 @Entity
-@Table(name = "attributeCondition")
+@Table(name = "attributeConditions")
 public class AttributeCondition
 {
 	@Id
@@ -85,4 +88,20 @@ public class AttributeCondition
 		}
 	}
 	
+	protected String getReadPolicy(User user, String resourceEntityName)
+	{
+		String attributePart = "project." + this.getResourceAttribute().getProjectField() + 
+							   " " + this.getComparison().getOperator() + " ";
+		
+		List<String> userAttributes = this.getUserAttribute().getUserField(user);
+		
+		String result = "";
+		for (int i = 0; i < userAttributes.size(); i++)
+		{
+			if (i > 0) result += " OR ";
+			result += attributePart + userAttributes.get(i);
+		}
+		
+		return result;
+	}
 }

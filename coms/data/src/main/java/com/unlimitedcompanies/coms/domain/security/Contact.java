@@ -5,11 +5,12 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name="contact")
+@Table(name="contacts")
 public class Contact
 {
 	@Id
@@ -22,6 +23,9 @@ public class Contact
 	private String lastName;
 	private String email;
 	private String contactCharId;
+	
+	@OneToOne(mappedBy="contact")
+	private User user;
 	
 	protected Contact()
 	{
@@ -45,6 +49,21 @@ public class Contact
 		this.middleName = contact.middleName;
 		this.lastName = contact.lastName;
 		this.email = contact.email;
+	}
+	
+	public Integer getContactId()
+	{
+		return contactId;
+	}
+	
+	public String getContactCharId()
+	{
+		return contactCharId;
+	}
+	
+	public void setContactCharId(String contactCharId)
+	{
+		this.contactCharId = contactCharId;
 	}
 	
 	public String getFirstName()
@@ -86,28 +105,10 @@ public class Contact
 	{
 		this.email = email;
 	}
-
-	public String getContactCharId()
+	
+	public User getUser()
 	{
-		return contactCharId;
-	}
-
-	public void setContactCharId(String contactCharId)
-	{
-		this.contactCharId = contactCharId;
-	}
-
-	public Integer getContactId()
-	{
-		return contactId;
-	}
-
-	public void copyContact(Contact contact)
-	{
-		this.firstName = contact.getFirstName();
-		this.middleName = contact.getMiddleName();
-		this.lastName = contact.getLastName();
-		this.email = contact.getEmail();
+		return user;
 	}
 
 	@Override

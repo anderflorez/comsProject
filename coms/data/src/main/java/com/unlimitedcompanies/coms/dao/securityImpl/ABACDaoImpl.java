@@ -22,28 +22,28 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public int getNumberOfPolicies()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(abacPolicyId) FROM abacPolicy").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(abacPolicyId) FROM abacPolicies").getSingleResult();
 		return bigInt.intValue();
 	}
 	
 	@Override
 	public int getNumberOfConditionGroups()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(conditionGroupId) FROM conditionGroup").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(conditionGroupId) FROM conditionGroups").getSingleResult();
 		return bigInt.intValue();
 	}
 	
 	@Override
 	public int getNumberOfEntityConditions()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(entityConditionId) FROM entityCondition").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(entityConditionId) FROM entityConditions").getSingleResult();
 		return bigInt.intValue();
 	}
 	
 	@Override
 	public int getNumberOfAttributeConditions()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(attributeConditionId) FROM attributeCondition").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(attributeConditionId) FROM attributeConditions").getSingleResult();
 		return bigInt.intValue();
 	}
 

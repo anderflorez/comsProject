@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
 
 @Entity
-@Table(name="phone")
+@Table(name="phones")
 public class Phone
 {
 	@Id
@@ -19,7 +19,7 @@ public class Phone
 	private String phoneType;
 	
 	@ManyToOne
-	@JoinColumn(name="contact_FK")
+	@JoinColumn(name="contactId_FK")
 	private Contact contact;
 	
 	protected Phone() {}

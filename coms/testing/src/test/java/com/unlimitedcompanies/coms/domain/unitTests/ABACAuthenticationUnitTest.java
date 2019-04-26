@@ -12,8 +12,11 @@ import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.data.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
+import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 public class ABACAuthenticationUnitTest
 {
@@ -224,6 +227,28 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
+	public void entityPolicyReturnTest() throws DuplicatedResourcePolicyException
+	{
+		Resource testResource = new Resource("TestingResource");
+		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
+		policy.setLogicOperator(LogicOperator.OR);
+		ConditionGroup groupA = policy.addConditionGroup(LogicOperator.OR);
+		ConditionGroup groupB = policy.addConditionGroup();
+		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Management");
+		groupB.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		groupB.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
+		
+		Contact contact = new Contact("John", null, "Doe", "jdoe@example.com");
+		User user = new User("jdoe", "123".toCharArray(), contact);
+		Role role = new Role("Management");
+		user.addRole(role);
+
+		assertTrue(policy.getQueryPolicy(user, testResource.getResourceName()).isAccessGranted(), 
+				"Entity policy return test failed");
+	}
+	
+	@Test
 	public void addingAttributeConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
@@ -232,26 +257,54 @@ public class ABACAuthenticationUnitTest
 		ConditionGroup groupA = policy.addConditionGroup();
 		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
 		groupA.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
-		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
-		groupB.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);		
+		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
+		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
+		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);
 		
 		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getAttributeConditions().size(), 
 					 "Adding attribute condition to condition group test failed");
 		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getAttributeConditions().size(), 
 					 "Adding attribute condition to condition group test failed");
 	}
+
+	@Test
+	public void attributePoliciesReturnTest() throws DuplicatedResourcePolicyException
+	{
+		Resource testResource = new Resource("test");
+		
+		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
+		ConditionGroup group = policy.addConditionGroup(LogicOperator.OR);
+		ConditionGroup groupA = group.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);
+		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
+		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.P_MANAGERS);
+		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.SUPERINTENDENTS);
+		
+		Contact contact = new Contact("Test", null, null, "test@example.com");
+		User user = new User("testUsername", "123".toCharArray(), contact);
+		Role role1 = new Role("Project Manager");
+		Role role2 = new Role("Administrator");
+		user.addRole(role1);
+		user.addRole(role2);
+		
+		String expectedConditions = "project.manager = testUsername OR "
+				+ "project.superintendent = testUsername OR "
+				+ "project.forman = testUsername OR "
+				+ "("
+				+ "project.manager != testUsername "
+				+ "AND project.superintendent != testUsername"
+				+ ")";
+		
+		assertEquals(expectedConditions, policy.getQueryPolicy(user, "test").getAccessConditions(), 
+					"Attribute policies return test failed");
+	}
 	
 	@Test
 	public void addingFieldConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
 	{
-		
-		
-		// TODO: This test is producing a double checking of the fields in the class ConditionGroup.java
-		// TODO: This issue must be solved
-		fail();
-		
-		
 		Resource testResource = new Resource("TestingResource");
 		new ResourceField("TestField1", false, testResource);
 		new ResourceField("TestField2", false, testResource);
@@ -272,5 +325,5 @@ public class ABACAuthenticationUnitTest
 		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getFieldConditions().size(), 
 					 "Adding field condition to condition group test failed");
 	}
-
+	
 }

@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
@@ -19,7 +20,7 @@ import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
-@Table(name = "abacPolicy")
+@Table(name = "abacPolicies")
 public class ABACPolicy
 {
 	@Id
@@ -35,10 +36,10 @@ public class ABACPolicy
 	@Column(unique=false, nullable=false)
 	private String logicOperator;
 	
-	@OneToMany(mappedBy="policy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	private List<CdPolicy> cdPolicies;
+	@OneToOne(mappedBy="policy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	private CdPolicy cdPolicy;
 	
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="resourceId_FK")
 	private Resource resource;
 	
@@ -98,15 +99,15 @@ public class ABACPolicy
 		this.logicOperator = logicOperator.toString();
 	}
 
-	public List<CdPolicy> getCdPolicy()
+	public CdPolicy getCdPolicy()
 	{
-		return cdPolicies;
+		return cdPolicy;
 	}
 
-	public void addCdPolicy(boolean create, boolean delete)
+	public void setCdPolicy(boolean create, boolean delete)
 	{
 		CdPolicy cdPolicy = new CdPolicy(create, delete, this);
-		this.cdPolicies.add(cdPolicy);		
+		this.cdPolicy = cdPolicy;
 	}
 
 	public Resource getResource()
@@ -147,24 +148,79 @@ public class ABACPolicy
 		return conditionGroup;
 	}
 	
-	public boolean entityPoliciesGrant(User user)
+	public PolicyResponse getQueryPolicy(User user, String resourceEntityName)
+	{		
+		return ABACPolicy.unifyConditionGroupPolicies(user, 
+													resourceEntityName, 
+													this.conditionGroups, 
+													getLogicOperator());
+		
+	}
+	
+	protected static PolicyResponse unifyConditionGroupPolicies(User user, 
+													  String resourceEntityName, 
+													  List<ConditionGroup> conditionGroups,
+													  LogicOperator logicOperator)
 	{
-		if (this.logicOperator.equals("AND"))
+		if (conditionGroups.size() == 0)
 		{
-			for (ConditionGroup next : this.conditionGroups)
+			return null;
+		}
+		
+		PolicyResponse policyResponse = new PolicyResponse();
+
+		List<PolicyResponse> allGroupPolicies = new ArrayList<>();
+		for (ConditionGroup next : conditionGroups)
+		{
+			allGroupPolicies.add(next.getConditionGroupPolicies(user, resourceEntityName));
+		}		
+		
+		if (logicOperator == LogicOperator.AND)
+		{
+			policyResponse.setAccessGranted(true);
+			for (int i = 0; i < allGroupPolicies.size(); i++)
 			{
-				if (!next.entityPoliciesGrant(user)) return false;
+				if (allGroupPolicies.get(i).isAccessGranted()) 
+				{
+					if (policyResponse.getAccessConditions().isEmpty())
+					{
+						policyResponse.setAccessConditions(allGroupPolicies.get(i).getAccessConditions());					
+					}
+					else
+					{
+						policyResponse.addAccessConditions(logicOperator, allGroupPolicies.get(i).getAccessConditions());
+					}
+				}
+				else
+				{
+					policyResponse.setAccessGranted(false);
+					policyResponse.setAccessConditions(null);
+					return policyResponse;
+				}
+				
 			}
-			return true;
 		}
 		else // if logicOperator equals OR
 		{
-			for (ConditionGroup next : this.conditionGroups)
+			policyResponse.setAccessGranted(false);
+			for (int i = 0; i < allGroupPolicies.size(); i++)
 			{
-				if (next.entityPoliciesGrant(user)) return true;
+				if (allGroupPolicies.get(i).isAccessGranted()) 
+				{
+					policyResponse.setAccessGranted(true);
+					if (policyResponse.getAccessConditions().isEmpty())
+					{
+						policyResponse.setAccessConditions(allGroupPolicies.get(i).getAccessConditions());
+					}
+					else
+					{
+						policyResponse.addAccessConditions(logicOperator, allGroupPolicies.get(i).getAccessConditions());
+					}
+				}
 			}
-			return false;
 		}
+		
+		return policyResponse;
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
@@ -79,7 +80,7 @@ class ABACAuthenticationIntegrationTests
 	public void saveResourcePolicyIntegrationTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		
 		System.out.println(policy.getAbacPolicyId() + " policy id length is " + policy.getAbacPolicyId().length());
@@ -93,8 +94,8 @@ class ABACAuthenticationIntegrationTests
 	public void saveMultipleResourcePolicyIntegrationTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
 		
 		ABACPolicy policyA = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		ABACPolicy policyB = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
@@ -109,7 +110,7 @@ class ABACAuthenticationIntegrationTests
 	public void findABACPolicyByNameTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		abacService.savePolicy(policy);
 		
@@ -120,7 +121,7 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithMultipleConditionGroupTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
 		
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		policy.setLogicOperator(LogicOperator.OR);
@@ -143,7 +144,7 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithEntityConditionTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
 		
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		ConditionGroup group = policy.addConditionGroup();
@@ -160,12 +161,12 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithRecordConditionTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();
-		Resource userResource = setupService.findResourceByNameWithFields("User");
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
 		
 		ABACPolicy policy = new ABACPolicy("UserRead", PolicyType.READ, userResource);
 		ConditionGroup group = policy.addConditionGroup();
 		group.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
-		group.addAttributeCondition(UserAttribute.FULL_NAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
 		
 		abacService.savePolicy(policy);
 		
@@ -174,17 +175,17 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 	@Test
-	public void simpleReadPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
+	public void simpleReadForEntityPermissionTest() throws Exception
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
 		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
 		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
-		Role role = authService.saveRole(new Role("Administrator"));		
+		Role role = authService.saveRole(new Role("Administrator"));
 		authService.assignUserToRole(user.getUserId(), role.getRoleId());
 		
 		setupService.checkAllResources();
-		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
 		
 		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
 		ConditionGroup group = policy.addConditionGroup();
@@ -196,7 +197,30 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 	@Test
-	public void multipleRecordReadPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
+	public void simpleReadForEntityNoPermissionTest() throws Exception
+	{
+		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Manager"));
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		abacService.savePolicy(policy);
+		
+		assertThrows(NoResourceAccessException.class, () -> contactService.searchContactByEmail("jane@example.com", user.getUsername()));
+	}
+	
+	@Test
+	public void multipleRecordReadForEntityPermissionTest() 
+			throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, 
+				   DuplicatedResourcePolicyException, NoResourceAccessException
 	{
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
@@ -206,7 +230,7 @@ class ABACAuthenticationIntegrationTests
 		authService.assignUserToRole(user.getUserId(), role.getRoleId());
 		
 		setupService.checkAllResources();
-		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
 		
 		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
 		ConditionGroup group = policy.addConditionGroup();
@@ -218,27 +242,106 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 //	@Test
-//	public void multipleRecordReadPermissionWithRecordConditionTest() 
-//			throws DuplicateRecordException, RecordNotFoundException, 
-//				   RecordNotCreatedException, DuplicatedResourcePolicyException
+//	public void multipleRecordReadForAttributeConditionPermissionTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, DuplicatedResourcePolicyException
 //	{
-//		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+//		// TODO: Activate this test when projects is available
+//		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 //		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
 //		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
-//		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact1));
-//		Role role = authService.saveRole(new Role("Administrator"));		
+//		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact));
+//		Role role = authService.saveRole(new Role("Project Manager"));		
 //		authService.assignUserToRole(user.getUserId(), role.getRoleId());
 //		
 //		setupService.checkAllResources();
-//		Resource contactResource = setupService.findResourceByNameWithFields("Contact");
+//		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
 //		
 //		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
 //		ConditionGroup group = policy.addConditionGroup();
-//		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
-//		group.addAttributeCondition(userAttribute, comparison, resourceAttribute);
+//		group.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
+//
 //		abacService.savePolicy(policy);
 //		
+//		// TODO: Activate this test when projects is available 
+//		fail();
 //		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
 //		assertEquals(3, foundContacts.size(), "Multiple record read permission integration test failed");
+//		
 //	}
+	
+	@Test
+	public void multipleRecordReadForFieldConditionPermissionTest() 
+			throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, 
+				   DuplicatedResourcePolicyException, NoResourceAccessException
+	{
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact1));
+		Role role = authService.saveRole(new Role("Project Manager"));		
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		group.addFieldConditions("lastName", ComparisonOperator.EQUALS, "Doe");
+		abacService.savePolicy(policy);
+		
+		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
+		foundContacts.forEach(n -> System.out.println(n.getFirstName() + " " + n.getLastName()));
+		assertEquals(2, foundContacts.size(), "Multiple record read permission integration test failed");
+	}
+	
+	@Test
+	public void multipleRecordReadForFieldConditionNotEnoughPermissionTest() 
+			throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, 
+				   DuplicatedResourcePolicyException, NoResourceAccessException
+	{
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact1));
+		Role role = authService.saveRole(new Role("Project Manager"));		
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		group.addFieldConditions("lastName", ComparisonOperator.EQUALS, "Tales");
+		abacService.savePolicy(policy);
+
+		List<Contact> foundContacts = contactService.searchAllContacts(user.getUsername());
+		foundContacts.forEach(n -> System.out.println(n.getFirstName() + " " + n.getLastName()));
+		assertFalse(foundContacts.size() > 0, "Multiple record read permission integration test failed");
+	}
+	
+	@Test
+	public void multipleRecordReadForFieldConditionNoPermissionTest() 
+			throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException, 
+				   DuplicatedResourcePolicyException, NoResourceAccessException
+	{
+		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		contactService.saveContact(new Contact("Jane", null, "Doe", "jane@example.com"));
+		contactService.saveContact(new Contact("Richard", null, "Roe", "rich@example.com"));
+		User user = authService.saveUser(new User("usertest", "mypass".toCharArray(), contact1));
+		Role role = authService.saveRole(new Role("Project Manager"));		
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
+		
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+		
+		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		group.addFieldConditions("lastName", ComparisonOperator.EQUALS, "Doe");
+		abacService.savePolicy(policy);
+		
+		assertThrows(NoResourceAccessException.class, ()-> contactService.searchAllContacts(user.getUsername()), 
+				"Multiple record read permission integration test failed");
+	}
 }

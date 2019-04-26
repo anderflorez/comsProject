@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="address")
+@Table(name="addresses")
 public class Address
 {
 	@Id
@@ -18,7 +18,7 @@ public class Address
 	private String zipCode;
 	
 	@ManyToOne
-	@JoinColumn(name="contact_FK")
+	@JoinColumn(name="contactId_FK")
 	private Contact contact;
 	
 	protected Address() {}

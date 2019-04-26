@@ -15,7 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="role")
+@Table(name="roles")
 public class Role
 {
 	@Id
@@ -29,7 +29,7 @@ public class Role
 	private Set<Permission> permissions = new HashSet<>();
 	
 	@ManyToMany
-	@JoinTable(name = "role_resourceField", 
+	@JoinTable(name = "restrictedFields", 
 			   joinColumns = {@JoinColumn(name = "roleId_FK")}, 
 			   inverseJoinColumns = {@JoinColumn(name = "resourceFieldId_FK")})
 	private List<ResourceField> restrictedFields = new ArrayList<>();

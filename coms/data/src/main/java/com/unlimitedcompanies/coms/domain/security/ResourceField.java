@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "resourceField")
+@Table(name = "resourceFields")
 public class ResourceField
 {
 	@Id

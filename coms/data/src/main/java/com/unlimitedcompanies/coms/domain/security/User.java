@@ -16,7 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="user")
+@Table(name="users")
 public class User
 {
 	@Id
@@ -29,13 +29,13 @@ public class User
 	private ZonedDateTime lastAccess;
 	
 	@OneToOne
-	@JoinColumn(name="contact_FK")
+	@JoinColumn(name="contactId_FK")
 	private Contact contact;
 	
 	@ManyToMany
-	@JoinTable(name = "user_role", 
-				joinColumns = {@JoinColumn(name = "user_FK")}, 
-				inverseJoinColumns = {@JoinColumn(name = "role_FK")})
+	@JoinTable(name = "users_roles", 
+				joinColumns = {@JoinColumn(name = "userId_FK")}, 
+				inverseJoinColumns = {@JoinColumn(name = "roleId_FK")})
 	private List<Role> roles = new ArrayList<>();
 	
 	// Constructor not to be used - intended for persistence only
@@ -55,6 +55,7 @@ public class User
 	
 	// Constructor intended for existing users in the db to be updated
 	// TODO: This constructor must be improved as it allows the userId to be set
+	// TODO: Eliminate this constructor - userId must not be allowed to be set
 	public User(Integer userId, String username, boolean enabled)
 	{
 		this.userId = userId;

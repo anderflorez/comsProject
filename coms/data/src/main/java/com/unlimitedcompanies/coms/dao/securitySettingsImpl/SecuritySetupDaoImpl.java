@@ -153,11 +153,18 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
+	
+	@Override
+	public Resource findResourceByNameWithFieldsAndPolicy(String name)
+	{
+		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields left join fetch resource.policies where resource.resourceName = :name",
+				Resource.class).setParameter("name", name).getSingleResult();
+	}
 
 	@Override
 	public void registerResource(String resourceName)
 	{
-		em.createNativeQuery("INSERT INTO resource (resourceName) VALUES (:resourceName)")
+		em.createNativeQuery("INSERT INTO resources (resourceName) VALUES (:resourceName)")
 				.setParameter("resourceName", resourceName).executeUpdate();
 	}
 
@@ -165,7 +172,7 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 	public void registerResourceField(ResourceField resourceField)
 	{
 		em.createNativeQuery(
-				"INSERT INTO resourceField (resourceFieldName, association, resourceId_FK) VALUES (:field, :association, :resource)")
+				"INSERT INTO resourceFields (resourceFieldName, association, resourceId_FK) VALUES (:field, :association, :resource)")
 				.setParameter("field", resourceField.getResourceFieldName()).setParameter("association", resourceField.getAssociation())
 				.setParameter("resource", resourceField.getResource()).executeUpdate();
 	}

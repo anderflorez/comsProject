@@ -33,7 +33,7 @@ public class AuthDaoImpl implements AuthDao
 		try
 		{
 			em.createNativeQuery(
-					"INSERT INTO user (username, password, enabled, dateAdded, lastAccess, contact_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
+					"INSERT INTO users (username, password, enabled, dateAdded, lastAccess, contactId_FK) VALUES (:username, :password, :enabled, :dateAdded, :lastAccess, :contact)")
 					.setParameter("username", user.getUsername())
 					.setParameter("password", user.getPassword())
 					.setParameter("enabled", user.isEnabled())
@@ -58,7 +58,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public int getNumberOfUsers()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM user").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM users").getSingleResult();
 		return bigInt.intValue();
 	}
 	
@@ -204,7 +204,7 @@ public class AuthDaoImpl implements AuthDao
 		try
 		{
 			em.createNativeQuery(
-					"INSERT INTO role (roleName) VALUES (:rolename)")
+					"INSERT INTO roles (roleName) VALUES (:rolename)")
 					.setParameter("rolename", roleName)
 					.executeUpdate();
 		}
@@ -224,7 +224,7 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public int getNumberOfRoles()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleId) FROM role").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleId) FROM roles").getSingleResult();
 		return bigInt.intValue();
 	}
 	

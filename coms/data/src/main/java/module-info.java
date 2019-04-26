@@ -21,6 +21,8 @@ module data
 	exports com.unlimitedcompanies.coms.data.exceptions;
 	exports com.unlimitedcompanies.coms.domain.security;
 	exports com.unlimitedcompanies.coms.domain.security.exen;
+	exports com.unlimitedcompanies.coms.domain.employees;
+	exports com.unlimitedcompanies.coms.domain.projects;
 	exports com.unlimitedcompanies.coms.dao.security;
 	exports com.unlimitedcompanies.coms.dao.securitySettings;
 	exports com.unlimitedcompanies.coms.dao.security.exceptions;

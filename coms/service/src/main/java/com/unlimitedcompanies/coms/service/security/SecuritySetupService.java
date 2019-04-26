@@ -13,4 +13,5 @@ public interface SecuritySetupService
 	public List<ResourceField> findAllResourceFieldsWithResources();
 	public Resource findResourceByName(String name);
 	public Resource findResourceByNameWithFields(String name);
+	public Resource findResourceByNameWithFieldsAndPolicy(String name);
 }

@@ -2,13 +2,11 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
@@ -31,7 +29,7 @@ public class ContactDaoImpl implements ContactDao
 		try
 		{
 			em.createNativeQuery(
-					"INSERT INTO contact (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
+					"INSERT INTO contacts (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
 					.setParameter("charId", contact.getContactCharId())
 					.setParameter("fname", contact.getFirstName())
 					.setParameter("mname", contact.getMiddleName())
@@ -51,7 +49,7 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public int getNumberOfContacts()
 	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contact").getSingleResult();
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contacts").getSingleResult();
 		return bigInt.intValue();
 	}
 	
@@ -63,33 +61,18 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public Contact getOneContact(Map<String, String> conditions)
+	public List<Contact> getAllContacts(String policyAccessConditions)
 	{
 		String stringQuery = "select contact from Contact as contact";
-		if (conditions.size() > 0)
-		{
-			stringQuery += " where ";
-			for (String next : conditions.keySet())
-			{
-				stringQuery += "contact." + next + "=:" + next;
-			}
-		}
 		
-		System.out.println(stringQuery);
-		TypedQuery<Contact> query = em.createQuery(stringQuery, Contact.class);
-		for (String next : conditions.keySet())
+		if (!policyAccessConditions.isEmpty())
 		{
-			query.setParameter(next, conditions.get(next));
+			stringQuery += " where " + policyAccessConditions;
 		}
-		
-		return query.getSingleResult();
-	}
-	
-	@Override
-	public List<Contact> getMultipleContacts()
-	{
-		return em.createQuery("select contact from Contact as contact order by contact.firstName", Contact.class)
-				  .getResultList();
+		stringQuery += " order by contact.firstName";
+				
+		return em.createQuery(stringQuery, Contact.class)
+							  .getResultList();
 	}
 	
 	@Override
@@ -128,11 +111,25 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public Contact getContactByEmail(String contactEmail)
+	public Contact getContactByEmail(String email)
 	{
 		return em.createQuery("select contact from Contact as contact where contact.email = :email", Contact.class)
-		  .setParameter("email", contactEmail)
+		  .setParameter("email", email)
 		  .getSingleResult();
+	}
+	
+	@Override
+	public Contact getContactByEmail(String email, String policyConditions)
+	{
+		String stringQuery = "select contact from Contact as contact where contact.email = :email";
+		if (!policyConditions.isEmpty())
+		{
+			stringQuery += " " + policyConditions;
+		}
+
+		return em.createQuery(stringQuery, Contact.class)
+				.setParameter("email", email)
+				.getSingleResult();
 	}
 
 	@Override
@@ -155,14 +152,14 @@ public class ContactDaoImpl implements ContactDao
 //	@Override
 //	public int getNumberOfAddresses()
 //	{
-//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM address").getSingleResult();
+//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM addresses").getSingleResult();
 //		return bigInt.intValue();
 //	}
 //
 //	@Override
 //	public void createContactAddress(Address address, int contactId)
 //	{
-//		em.createNativeQuery("INSERT INTO address (street, city, state, zipCode, contact_FK) VALUES (:street, :city, :state, :zipCode, :contact)")
+//		em.createNativeQuery("INSERT INTO addresses (street, city, state, zipCode, contactId_FK) VALUES (:street, :city, :state, :zipCode, :contact)")
 //							 .setParameter("street", address.getStreet())
 //							 .setParameter("city", address.getCity())
 //							 .setParameter("state", address.getState())
@@ -188,14 +185,14 @@ public class ContactDaoImpl implements ContactDao
 //	@Override
 //	public int getNumberOfContactPhones()
 //	{
-//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(phoneId) FROM phone").getSingleResult();
+//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(phoneId) FROM phones").getSingleResult();
 //		return bigInt.intValue();
 //	}
 //
 //	@Override
 //	public void createContactPhone(Phone phone, int contactId)
 //	{
-//		em.createNativeQuery("INSERT INTO phone (phoneNumber, extention, phoneType, contact_FK) VALUES (:phoneNumber, :extention, :phoneType, :contact)")
+//		em.createNativeQuery("INSERT INTO phones (phoneNumber, extention, phoneType, contactId_FK) VALUES (:phoneNumber, :extention, :phoneType, :contact)")
 //							 .setParameter("phoneNumber", phone.getPhoneNumber())
 //							 .setParameter("extention", phone.getExtention())
 //							 .setParameter("phoneType", phone.getPhoneType())

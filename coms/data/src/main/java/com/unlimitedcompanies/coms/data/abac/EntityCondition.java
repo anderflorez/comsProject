@@ -14,7 +14,7 @@ import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
-@Table(name = "entityCondition")
+@Table(name = "entityConditions")
 public class EntityCondition
 {
 	@Id
@@ -84,15 +84,25 @@ public class EntityCondition
 		this.parentConditionGroup = parentConditionGroup;
 	}
 	
-	public boolean entityPolicyGrant(User user)
-	{		
-		if (this.getComparison() == ComparisonOperator.EQUALS)
+	protected boolean entityConditionAccessGranted(User user)
+	{
+		if (this.comparison == ComparisonOperator.EQUALS)
 		{
-			
-			if (this.userAttribute.equals(UserAttribute.FULL_NAME.toString()))
+			if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
 			{
-				// TODO: Write the actual code when the attribute is available
+				if (this.value.equals("ANY"))
+				{
+					return true;
+				}
 				
+				for (Role next : user.getRoles())
+				{
+					if (next.getRoleName().equals(this.value))
+					{
+						return true;
+					}
+				}
+
 				return false;
 			}
 			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
@@ -100,15 +110,7 @@ public class EntityCondition
 				// TODO: Write the actual code when the attribute is available
 				
 				return false;
-			}
-			else if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
-			{
-				for (Role next : user.getRoles())
-				{
-					if (next.getRoleName().equals(value)) return true;
-				}
-				return false;
-			}
+			} 
 			else // USERNAME being the only option left here
 			{
 				if (user.getUsername().equals(value)) return true;
@@ -117,26 +119,20 @@ public class EntityCondition
 		}
 		else // In the case it is not EQUALS
 		{
-			if (this.userAttribute.equals(UserAttribute.FULL_NAME.toString()))
+			if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
 			{
-				// TODO: Write the actual code when the attribute is available
-				
-				return false;
+				for (Role next : user.getRoles())
+				{
+					if (next.getRoleName().equals(value)) return false;
+				}
+				return true;
 			}
 			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
 			{
 				// TODO: Write the actual code when the attribute is available
 				
 				return false;
-			}
-			else if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
-			{
-				for (Role next : user.getRoles())
-				{
-					if (!next.getRoleName().equals(value)) return true;
-				}
-				return false;
-			}
+			} 
 			else // USERNAME being the only option left here
 			{
 				if (!user.getUsername().equals(value)) return true;

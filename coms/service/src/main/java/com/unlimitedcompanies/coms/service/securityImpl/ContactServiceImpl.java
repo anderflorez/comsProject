@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.abac.PolicyResponse;
+import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
@@ -81,28 +84,21 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public List<Contact> searchAllContacts(String username)
+	public List<Contact> searchAllContacts(String username) throws NoResourceAccessException
 	{
 		User user = authenticationDao.getFullUserByUsername(username);
 		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
-		if (contactPolicy.entityPoliciesGrant(user))
+		PolicyResponse policyResponse = contactPolicy.getQueryPolicy(user, "contact");
+		
+		if (policyResponse.isAccessGranted())
 		{
-			return dao.getMultipleContacts();
+			return dao.getAllContacts(policyResponse.getAccessConditions());
 		}
 		else
 		{
-			// TODO: throw an exception as the user is not authorize to access the resource
-			
-			return null;
+			throw new NoResourceAccessException();
 		}
 	}
-	
-	@Override
-	public List<Contact> searchContactsByRange(int page, int elements)
-	{
-		return dao.getContactsByRange(page - 1, elements);
-	}
-	
 	
 	// TODO check this method functionality
 //	@Override
@@ -117,7 +113,13 @@ public class ContactServiceImpl implements ContactService
 //		}
 //		return dao.getAllContacts(loggedUser);
 //	}
-	
+
+	@Override
+	public List<Contact> searchContactsByRange(int page, int elements)
+	{
+		return dao.getContactsByRange(page - 1, elements);
+	}
+		
 	@Override
 	@Transactional(rollbackFor = {RecordNotFoundException.class})
 	public Contact searchContactById(int id) throws RecordNotFoundException
@@ -141,21 +143,19 @@ public class ContactServiceImpl implements ContactService
 	}
 
 	@Override
-	public Contact searchContactByEmail(String email, String username)
+	public Contact searchContactByEmail(String email, String username) throws NoResourceAccessException
 	{
 		User user = authenticationDao.getFullUserByUsername(username);
 		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
-		if (contactPolicy.entityPoliciesGrant(user))
+		PolicyResponse policyResponse = contactPolicy.getQueryPolicy(user, "contact");
+		
+		if (policyResponse.isAccessGranted())
 		{
-			Map<String, String> conditions = new HashMap<>();
-			conditions.put("email", email);
-			return dao.getOneContact(conditions);
+			return dao.getContactByEmail(email, policyResponse.getAccessConditions());
 		}
 		else
 		{
-			// TODO: throw an exception as the user is not authorize to access the resource
-			
-			return null;
+			throw new NoResourceAccessException();
 		}
 	}
 	

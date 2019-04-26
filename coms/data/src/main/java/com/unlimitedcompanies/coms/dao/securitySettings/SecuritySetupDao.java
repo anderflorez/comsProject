@@ -15,6 +15,7 @@ public interface SecuritySetupDao
 	public List<ResourceField> findAllResourceFieldsWithResources();
 	public Resource findResourceByName(String name);
 	public Resource findResourceByNameWithFields(String name);
+	public Resource findResourceByNameWithFieldsAndPolicy(String name);
 	public void registerResource(String resourceName);
 	public void registerResourceField(ResourceField resourceField);
 

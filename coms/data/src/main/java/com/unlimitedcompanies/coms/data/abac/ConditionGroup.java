@@ -21,7 +21,7 @@ import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
-@Table(name = "conditionGroup")
+@Table(name = "conditionGroups")
 public class ConditionGroup
 {
 	@Id
@@ -241,7 +241,8 @@ public class ConditionGroup
 				if (!fieldCondition.getParentConditionGroup().equals(this))
 				{
 					fieldCondition.setParentConditionGroup(this);
-				}				
+				}
+				return;
 			}
 		}
 		// TODO: throw an exception as the fieldName is not part of the resource
@@ -256,11 +257,7 @@ public class ConditionGroup
 		{
 			if (!next.getAssociation() && next.getResourceFieldName().equals(fieldName))
 			{
-				FieldCondition fieldCondition = new FieldCondition(fieldName, comparison, value, this);
-				if (!this.fieldConditions.contains(fieldCondition))
-				{
-					this.fieldConditions.add(fieldCondition);
-				}				
+				new FieldCondition(fieldName, comparison, value, this);
 				return;
 			}
 		}
@@ -269,17 +266,25 @@ public class ConditionGroup
 		
 	}
 
-	public boolean entityPoliciesGrant(User user)
+	private boolean entityAccessGranted(User user)
 	{
+		if (this.entityConditions.isEmpty())
+		{
+			if (!this.attributeConditions.isEmpty() || !this.fieldConditions.isEmpty())
+			{
+				return true;				
+			}
+			else
+			{
+				return false;
+			}
+		}		
+		
 		if (this.logicOperator.equals("AND"))
 		{
 			for (EntityCondition next : this.entityConditions)
 			{
-				if (!next.entityPolicyGrant(user)) return false;
-			}
-			for (ConditionGroup next : this.conditionGroups)
-			{
-				if (!next.entityPoliciesGrant(user)) return false;
+				if (!next.entityConditionAccessGranted(user)) return false;
 			}
 			return true;
 		}
@@ -287,13 +292,119 @@ public class ConditionGroup
 		{
 			for (EntityCondition next : this.entityConditions)
 			{
-				if (next.entityPolicyGrant(user)) return true;
-			}
-			for (ConditionGroup next : this.conditionGroups)
-			{
-				if (next.entityPoliciesGrant(user)) return true;
+				if (next.entityConditionAccessGranted(user)) return true;
 			}
 			return false;
 		}
 	}
+
+	private String getAttributePolicies(User user, String resourceEntityName)
+	{
+		String policy = "";
+		for (int i = 0; i < this.attributeConditions.size(); i++)
+		{
+			if (i > 0) policy += " " + this.logicOperator + " ";
+			policy += this.attributeConditions.get(i).getReadPolicy(user, resourceEntityName);
+		}
+		return policy;
+	}
+	
+	private String getFieldPolicies(String resourceEntityName)
+	{
+		String policy = "";
+		for (int i = 0; i < this.fieldConditions.size(); i++)
+		{
+			if (i > 0) policy += " " + this.logicOperator + " ";
+			policy += this.fieldConditions.get(i).getReadPolicy(resourceEntityName);
+		}
+		return policy;
+	}
+	
+	protected PolicyResponse getConditionGroupPolicies(User user, String resourceEntityName)
+	{
+
+		boolean entityPolicy = this.entityAccessGranted(user);
+		PolicyResponse subGroupPolicies = ABACPolicy.unifyConditionGroupPolicies(user, 
+																		resourceEntityName, 
+																		this.conditionGroups, 
+																		this.getLogicOperator());
+			
+		PolicyResponse policyResponse = new PolicyResponse();
+		
+		if (this.getLogicOperator() == LogicOperator.AND)
+		{
+			if (entityPolicy && (subGroupPolicies == null || subGroupPolicies.isAccessGranted()))
+			{
+				policyResponse.setAccessGranted(true);
+
+				String queryPolicyConditions = this.unifyConditionQueries(user, resourceEntityName, subGroupPolicies);
+				
+				policyResponse.setAccessConditions(queryPolicyConditions);
+				
+				return policyResponse;
+			}
+			else
+			{
+				return new PolicyResponse(false, null);
+			}
+		}
+		else // When logic operator is OR
+		{
+			if (entityPolicy || (subGroupPolicies != null && subGroupPolicies.isAccessGranted()))
+			{
+				policyResponse.setAccessGranted(true);
+
+				String queryPolicyConditions = this.unifyConditionQueries(user, resourceEntityName, subGroupPolicies);
+				
+				policyResponse.setAccessConditions(queryPolicyConditions);
+				
+				return policyResponse;
+			}
+			else 
+			{
+				return new PolicyResponse(false, null);
+			}
+		}
+
+	}
+	
+	private String unifyConditionQueries(User user, String resourceEntityName, PolicyResponse subGroupPolicies)
+	{
+		String attributePolicyConditions = this.getAttributePolicies(user, resourceEntityName);
+		String fieldPolicyConditions = this.getFieldPolicies(resourceEntityName);
+		
+		String queryPolicyConditions = "";
+		if (!attributePolicyConditions.isEmpty() && !fieldPolicyConditions.isEmpty())
+		{
+			if (this.getLogicOperator() == LogicOperator.OR)
+			{
+				queryPolicyConditions = attributePolicyConditions + " " + 
+										this.getLogicOperator() + " " + 
+										fieldPolicyConditions;
+			}
+			else
+			{
+				queryPolicyConditions = "(" + attributePolicyConditions + ") " + 
+										this.getLogicOperator() + 
+										" (" + fieldPolicyConditions + ")";
+			}
+			
+		}
+		else if (!attributePolicyConditions.isEmpty() && fieldPolicyConditions.isEmpty())
+		{
+			queryPolicyConditions = attributePolicyConditions;
+		}
+		else if (attributePolicyConditions.isEmpty() && !fieldPolicyConditions.isEmpty())
+		{
+			queryPolicyConditions = fieldPolicyConditions;
+		}
+		
+		if (subGroupPolicies != null && subGroupPolicies.isAccessGranted())
+		{
+			queryPolicyConditions += " " + this.getLogicOperator() + " (" + subGroupPolicies.getAccessConditions() + ")";
+		}
+		
+		return queryPolicyConditions;
+	}
+	
 }
