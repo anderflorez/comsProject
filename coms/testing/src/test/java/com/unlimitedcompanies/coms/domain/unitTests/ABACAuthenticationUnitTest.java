@@ -145,6 +145,19 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
+	public void ResourceCreateAndDeletePolicyTest() throws Exception
+	{
+		Resource userResource = new Resource("UserResource");
+		
+		ABACPolicy policy = new ABACPolicy("userCreate", PolicyType.UPDATE, userResource);
+		policy.getCdPolicy().setCreatePolicy(true);
+		policy.getCdPolicy().setDeletePolicy(true);
+		
+		assertTrue(userResource.getPolicies().get(0).getCdPolicy().isCreatePolicy(), "Resource create policy test failed");
+		assertTrue(userResource.getPolicies().get(0).getCdPolicy().isDeletePolicy(), "Resource delete policy test failed");
+	}
+	
+	@Test
 	public void getConditionGroupLogicOperatorTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");

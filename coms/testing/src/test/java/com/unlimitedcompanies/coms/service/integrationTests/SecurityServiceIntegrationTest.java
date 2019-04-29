@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import com.unlimitedcompanies.coms.data.abac.ConditionGroup;
 import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -166,18 +168,34 @@ class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void updateContactTest() throws DuplicateRecordException, RecordNotFoundException
+	public void updateContactTest() throws Exception
 	{
-		// TODO: This test is not practical as it does not need a method to update the record; hibernate will update the persistent object
+		setupService.checkAllResources();
+		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+
+		ABACPolicy policy = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		ConditionGroup group = policy.addConditionGroup();
+		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		abacService.savePolicy(policy);		
+		
+		Contact contact = contactService.saveContact(new Contact("Richard", null, "Roe", "rick@example.com"));
 		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
+		
+		User user = authService.saveUser(new User("john", "mypass".toCharArray(), contact));
+		Role role = authService.saveRole(new Role("Project Manager"));
+		authService.assignUserToRole(user.getUserId(), role.getRoleId());
 
-		initialContact.setFirstName("Jane");
-		initialContact.setEmail("jane@example.com");
-
-		Contact foundContact = contactService.searchContactById(initialContact.getContactId());
-
-		assertEquals("Jane", foundContact.getFirstName(), "Service test for updating contact failed");
-		assertEquals("jane@example.com", foundContact.getEmail(), "Service test for updating contact failed");
+		contactService.updateContact(initialContact.getContactId(), 
+																"Jane", 
+																initialContact.getMiddleName(), 
+																initialContact.getLastName(), 
+																"jane@example.com", 
+																user.getUsername());
+		
+		assertEquals("Jane", contactService.searchContactById(initialContact.getContactId()).getFirstName(), 
+				"Service test for updating contact failed");
+		assertEquals("jane@example.com", contactService.searchContactById(initialContact.getContactId()).getEmail(), 
+				"Service test for updating contact failed");
 	}
 
 	 @Test

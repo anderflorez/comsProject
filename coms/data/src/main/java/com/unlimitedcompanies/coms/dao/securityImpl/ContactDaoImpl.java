@@ -28,6 +28,7 @@ public class ContactDaoImpl implements ContactDao
 	{	
 		try
 		{
+			// TODO: Clean this method
 //			em.createNativeQuery(
 //					"INSERT INTO contacts (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
 //					.setParameter("charId", contact.getContactCharId())
@@ -127,6 +128,7 @@ public class ContactDaoImpl implements ContactDao
 				.getSingleResult();
 	}
 
+	// TODO: Delete this method
 	@Override
 	public void updateContact(Contact updatedContact)
 	{
@@ -135,6 +137,16 @@ public class ContactDaoImpl implements ContactDao
 		foundContact.setMiddleName(updatedContact.getMiddleName());
 		foundContact.setLastName(updatedContact.getLastName());
 		foundContact.setEmail(updatedContact.getEmail());
+	}
+	
+	@Override
+	public void updateContact(int contactId, String firstName, String middleName, String lastName, String email)
+	{
+		Contact contact = this.getContactById(contactId);
+		contact.setFirstName(firstName);
+		contact.setMiddleName(middleName);
+		contact.setLastName(lastName);
+		contact.setEmail(email);
 	}
 
 	@Override

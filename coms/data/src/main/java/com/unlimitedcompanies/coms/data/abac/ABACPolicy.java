@@ -36,7 +36,7 @@ public class ABACPolicy
 	@Column(unique=false, nullable=false)
 	private String logicOperator;
 	
-	@OneToOne(mappedBy="policy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToOne(mappedBy="policy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	private CdPolicy cdPolicy;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -58,6 +58,11 @@ public class ABACPolicy
 		this.abacPolicyId = UUID.randomUUID().toString();
 		this.policyName = name;
 		this.policyType = policyType.toString();
+		if (policyType == PolicyType.UPDATE)
+		{
+			CdPolicy cdPolicy = new CdPolicy(false, false, this);
+			this.cdPolicy = cdPolicy;
+		}
 		this.logicOperator = "AND";
 		this.resource = resource;
 		resource.addPolicy(this);
@@ -87,6 +92,10 @@ public class ABACPolicy
 	public void setPolicyType(PolicyType policyType)
 	{
 		this.policyType = policyType.toString();
+		if (policyType == PolicyType.UPDATE)
+		{
+			this.setCdPolicy(false, false);
+		}
 	}
 
 	public LogicOperator getLogicOperator()

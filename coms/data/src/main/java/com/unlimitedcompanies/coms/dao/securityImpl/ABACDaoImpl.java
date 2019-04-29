@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.security.Resource;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -51,6 +53,18 @@ public class ABACDaoImpl implements ABACDao
 	public void savePolicy(ABACPolicy policy)
 	{
 		em.persist(policy);
+	}
+	
+	@Override
+	public ABACPolicy findPolicy(Resource resource, PolicyType policyType)
+	{
+		return em.createQuery("select policy from ABACPolicy as policy "
+								+ "where policy.resource = :resource "
+								+ "and policy.policyType = :policyType", 
+								ABACPolicy.class)
+									.setParameter("resource", resource)
+									.setParameter("policyType", policyType.toString())
+									.getSingleResult();
 	}
 
 	@Override

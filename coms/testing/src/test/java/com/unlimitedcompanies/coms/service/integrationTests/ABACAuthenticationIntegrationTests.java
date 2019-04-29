@@ -91,6 +91,23 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 	@Test
+	public void saveResourceCreateAndDeletePolicyIntegrationTest() throws DuplicatedResourcePolicyException
+	{
+		setupService.checkAllResources();
+		Resource userResource = setupService.findResourceByNameWithFieldsAndPolicy("User");
+		ABACPolicy policy = new ABACPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		policy.getCdPolicy().setCreatePolicy(true);
+		policy.getCdPolicy().setDeletePolicy(true);
+		
+		abacService.savePolicy(policy);
+		
+		assertTrue(abacService.findPolicy(userResource, PolicyType.UPDATE).getCdPolicy().isCreatePolicy(), 
+				"Resource create policy test failed");
+		assertTrue(abacService.findPolicy(userResource, PolicyType.UPDATE).getCdPolicy().isDeletePolicy(), 
+				"Resource delete policy test failed");
+	}
+	
+	@Test
 	public void saveMultipleResourcePolicyIntegrationTest() throws DuplicatedResourcePolicyException
 	{
 		setupService.checkAllResources();

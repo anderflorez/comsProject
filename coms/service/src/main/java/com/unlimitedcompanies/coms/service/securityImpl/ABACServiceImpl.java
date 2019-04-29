@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.data.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 
 @Service
@@ -44,6 +46,12 @@ public class ABACServiceImpl implements ABACService
 	{
 		abacDao.savePolicy(policy);
 		return this.findPolicyByName(policy.getPolicyName());
+	}
+	
+	@Override
+	public ABACPolicy findPolicy(Resource resource, PolicyType policyType)
+	{
+		return abacDao.findPolicy(resource, policyType);
 	}
 
 	@Override

@@ -11,20 +11,20 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "recordCondition", uniqueConstraints = {@UniqueConstraint(columnNames = "abacPolicy_FK")})
+@Table(name = "cdPolicies", uniqueConstraints = {@UniqueConstraint(columnNames = "abacPolicyId_FK")})
 public class CdPolicy
 {
 	@Id
 	private String cdPolicyId;
 	
 	@Column(unique = false, nullable = false)
-	private boolean create;
+	private boolean createPolicy;
 	
 	@Column(unique = false, nullable = false)
-	private boolean delete;
+	private boolean deletePolicy;
 	
 	@OneToOne
-	@JoinColumn(name = "abacPolicy_FK")
+	@JoinColumn(name = "abacPolicyId_FK")
 	private ABACPolicy policy;
 	
 	protected CdPolicy() 
@@ -32,32 +32,32 @@ public class CdPolicy
 		this.cdPolicyId = UUID.randomUUID().toString();
 	}
 	
-	protected CdPolicy(boolean create, boolean delete, ABACPolicy policy)
+	protected CdPolicy(boolean createPolicy, boolean deletePolicy, ABACPolicy policy)
 	{
 		this.cdPolicyId = UUID.randomUUID().toString();
-		this.create = create;
-		this.delete = delete;
+		this.createPolicy = createPolicy;
+		this.deletePolicy = deletePolicy;
 		this.policy = policy;
 	}
 
-	public boolean isCreate()
+	public boolean isCreatePolicy()
 	{
-		return create;
+		return createPolicy;
 	}
 
-	public void setCreate(boolean create)
+	public void setCreatePolicy(boolean createPolicy)
 	{
-		this.create = create;
+		this.createPolicy = createPolicy;
 	}
 
-	public boolean isDelete()
+	public boolean isDeletePolicy()
 	{
-		return delete;
+		return deletePolicy;
 	}
 
-	public void setDelete(boolean delete)
+	public void setDeletePolicy(boolean deletePolicy)
 	{
-		this.delete = delete;
+		this.deletePolicy = deletePolicy;
 	}
 
 	public String getAddPolicyId()

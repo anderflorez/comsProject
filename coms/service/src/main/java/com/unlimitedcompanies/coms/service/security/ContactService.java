@@ -19,6 +19,8 @@ public interface ContactService
 	public Contact searchContactByEmail(String email);
 	public Contact searchContactByEmail(String email, String username) throws NoResourceAccessException;
 	public Contact updateContact(Contact updatedContact) throws RecordNotFoundException;
+	public Contact updateContact(int contactId, String firstName, String middleName, String lastName, String email, String username) 
+			throws RecordNotFoundException, NoResourceAccessException;
 	public void deleteContact(int contactId) throws RecordNotFoundException, RecordNotDeletedException;
 //	
 //	public int findNumberOfContactAddresses();

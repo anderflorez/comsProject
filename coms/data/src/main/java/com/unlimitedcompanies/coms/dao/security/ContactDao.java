@@ -15,7 +15,9 @@ public interface ContactDao
 	public Contact getContactByCharId(String contactCharId);
 	public Contact getContactByEmail(String email);
 	public Contact getContactByEmail(String email, String policyConditions);
+	// TODO: Delete this method
 	public void updateContact(Contact updatedContact);
+	public void updateContact(int contactId, String firstName, String middleName, String lastName, String email);
 	public void deleteContact(int contactId);
 	
 //	public int getNumberOfAddresses();
