@@ -10,9 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 
 @Entity
 @Table(name = "resources")

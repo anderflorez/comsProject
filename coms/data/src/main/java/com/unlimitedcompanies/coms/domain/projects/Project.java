@@ -12,7 +12,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.domain.employees.Employee;
+import com.unlimitedcompanies.coms.domain.employee.Employee;
 
 @Entity
 @Table(name = "projects")

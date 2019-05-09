@@ -1,10 +1,12 @@
-package com.unlimitedcompanies.coms.domain.employees;
+package com.unlimitedcompanies.coms.domain.employee;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
@@ -12,18 +14,19 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.domain.projects.Project;
-import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 
 @Entity
 @Table(name = "employees")
 public class Employee
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer employeeId;
 	
 	@OneToOne
-	@JoinColumn(name = "userId_FK")
-	private User user;
+	@JoinColumn(name = "contactId_FK")
+	private Contact contact;
 	
 	@ManyToMany(mappedBy = "projectManagers")
 	private List<Project> pmProjects;
@@ -41,12 +44,12 @@ public class Employee
 		this.foremanProjects = new ArrayList<>();
 	}
 	
-	public Employee(User user)
+	public Employee(Contact contact)
 	{
 		this.pmProjects = new ArrayList<>();
 		this.superintendentProjects = new ArrayList<>();
 		this.foremanProjects = new ArrayList<>();
-		this.user = user;
+		this.contact = contact;
 	}
 
 	public Integer getEmployeeId()
@@ -54,9 +57,9 @@ public class Employee
 		return employeeId;
 	}
 
-	public User getUser()
+	public Contact getContact()
 	{
-		return user;
+		return contact;
 	}
 
 	public List<Project> getPmProjects()
@@ -106,7 +109,7 @@ public class Employee
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		result = prime * result + ((contact == null) ? 0 : contact.hashCode());
 		return result;
 	}
 
@@ -117,11 +120,11 @@ public class Employee
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		Employee other = (Employee) obj;
-		if (user == null)
+		if (contact == null)
 		{
-			if (other.user != null) return false;
+			if (other.contact != null) return false;
 		}
-		else if (!user.equals(other.user)) return false;
+		else if (!contact.equals(other.contact)) return false;
 		return true;
 	}
 		

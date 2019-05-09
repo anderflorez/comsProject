@@ -11,5 +11,6 @@ module service
 	requires spring.tx;
 	
 	exports com.unlimitedcompanies.coms.service.security;
+	exports com.unlimitedcompanies.coms.service.employee;
 	exports com.unlimitedcompanies.coms.service.exceptions;
 }

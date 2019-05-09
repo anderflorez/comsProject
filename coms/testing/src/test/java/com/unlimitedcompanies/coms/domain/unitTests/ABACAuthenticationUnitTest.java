@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.data.abac.ComparisonOperator;
-import com.unlimitedcompanies.coms.data.abac.ConditionGroup;
-import com.unlimitedcompanies.coms.data.abac.LogicOperator;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
-import com.unlimitedcompanies.coms.data.abac.ResourceAttribute;
-import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
+import com.unlimitedcompanies.coms.domain.abac.ConditionGroup;
+import com.unlimitedcompanies.coms.domain.abac.LogicOperator;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.ResourceAttribute;
+import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -257,7 +257,7 @@ public class ABACAuthenticationUnitTest
 		Role role = new Role("Management");
 		user.addRole(role);
 
-		assertTrue(policy.getQueryPolicy(user, testResource.getResourceName()).isAccessGranted(), 
+		assertTrue(policy.getReadPolicy(testResource.getResourceName(), "project", "user", user).isReadGranted(), 
 				"Entity policy return test failed");
 	}
 	
@@ -269,10 +269,10 @@ public class ABACAuthenticationUnitTest
 		policy.setLogicOperator(LogicOperator.OR);
 		ConditionGroup groupA = policy.addConditionGroup();
 		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
-		groupA.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECTS);
+		groupA.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECT_NAME);
 		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
-		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);
+		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
+		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_FOREMEN);
 		
 		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getAttributeConditions().size(), 
 					 "Adding attribute condition to condition group test failed");
@@ -290,28 +290,29 @@ public class ABACAuthenticationUnitTest
 		ConditionGroup groupA = group.addConditionGroup();
 		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
 		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.SUPERINTENDENTS);
-		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.FOREMEN);
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
+		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_FOREMEN);
 		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
 		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.P_MANAGERS);
-		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.SUPERINTENDENTS);
+		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
 		
-		Contact contact = new Contact("Test", null, null, "test@example.com");
-		User user = new User("testUsername", "123".toCharArray(), contact);
+		Contact contact = new Contact("John", null, "Doe", "john@example.com");
+		User user = new User("john", "123".toCharArray(), contact);
 		Role role1 = new Role("Project Manager");
 		Role role2 = new Role("Administrator");
 		user.addRole(role1);
 		user.addRole(role2);
 		
-		String expectedConditions = "project.manager = testUsername OR "
-				+ "project.superintendent = testUsername OR "
-				+ "project.forman = testUsername OR "
-				+ "("
-				+ "project.manager != testUsername "
-				+ "AND project.superintendent != testUsername"
+		String expectedConditions = "("
+				+ "project.projectManagers = john OR "
+				+ "project.superintendents = john OR "
+				+ "project.foremen = john"
+				+ ") OR ("
+				+ "project.projectManagers != john AND "
+				+ "project.superintendents != john"
 				+ ")";
 		
-		assertEquals(expectedConditions, policy.getQueryPolicy(user, "test").getAccessConditions(), 
+		assertEquals(expectedConditions, policy.getReadPolicy("contact", "project", "user", user).getReadConditions(),
 					"Attribute policies return test failed");
 	}
 	

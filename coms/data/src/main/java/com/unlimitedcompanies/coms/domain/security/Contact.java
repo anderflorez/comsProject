@@ -11,6 +11,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
+import com.unlimitedcompanies.coms.domain.employee.Employee;
+
 @Entity
 @Table(name="contacts")
 public class Contact
@@ -29,6 +31,9 @@ public class Contact
 	
 	@OneToOne(mappedBy = "contact")
 	private User user;
+	
+	@OneToOne(mappedBy = "contact")
+	private Employee employee;
 	
 	protected Contact()
 	{
@@ -120,6 +125,16 @@ public class Contact
 		{
 			user.setContact(this);
 		}
+	}
+
+	public Employee getEmployee()
+	{
+		return employee;
+	}
+
+	public void setEmployee(Employee employee)
+	{
+		this.employee = employee;
 	}
 
 	@Override

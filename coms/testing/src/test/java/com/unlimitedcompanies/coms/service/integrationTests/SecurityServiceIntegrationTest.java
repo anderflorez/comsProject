@@ -1,12 +1,6 @@
 package com.unlimitedcompanies.coms.service.integrationTests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,13 +15,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.data.abac.ComparisonOperator;
-import com.unlimitedcompanies.coms.data.abac.ConditionGroup;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
-import com.unlimitedcompanies.coms.data.abac.UserAttribute;
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
+import com.unlimitedcompanies.coms.domain.abac.ConditionGroup;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -126,13 +119,13 @@ class SecurityServiceIntegrationTest
 	@Test
 	public void findAllContacts() throws Exception
 	{
-		setupService.checkAllResources();
-		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
-
-		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
-		ConditionGroup group = policy.addConditionGroup();
-		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		abacService.savePolicy(policy);
+//		setupService.checkAllResources();
+//		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+//
+//		ABACPolicy policy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+//		ConditionGroup group = policy.addConditionGroup();
+//		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+//		abacService.savePolicy(policy);
 		
 		Contact contact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));
 		contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
@@ -176,7 +169,7 @@ class SecurityServiceIntegrationTest
 		ABACPolicy policy = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
 		ConditionGroup group = policy.addConditionGroup();
 		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		abacService.savePolicy(policy);		
+		abacService.savePolicy(policy);
 		
 		Contact contact = contactService.saveContact(new Contact("Richard", null, "Roe", "rick@example.com"));
 		Contact initialContact = contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"));

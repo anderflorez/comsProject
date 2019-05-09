@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.abac;
+package com.unlimitedcompanies.coms.domain.abac;
 
 import java.util.ArrayList;
 import java.util.List;

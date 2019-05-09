@@ -16,9 +16,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
+import com.unlimitedcompanies.coms.domain.abac.ConditionGroup;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
@@ -38,8 +45,11 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 	@Autowired
 	private AuthDao authDao;
 	
+	@Autowired
+	private ABACDao abacDao;
+	
 	@Override
-	public void initialSetup()
+	public void initialSetup() throws DuplicatedResourcePolicyException
 	{
 		// Check and make sure there are no risks by performing this operation
 		// Get the number of records for several important resources
@@ -52,11 +62,20 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		int contacts = contactDao.getNumberOfContacts();
 		int users = authDao.getNumberOfUsers();
 		int roles = authDao.getNumberOfRoles();
-		int permissions = authDao.getNumberOfPermissions();
+		int permissions = abacDao.getNumberOfPolicies();
 		
 		if (users == 0 && roles == 0 && contacts == 0 && permissions == 0)
 		{
-			Role adminRole = authDao.createAdminRole();			
+			this.checkAllResources();
+			
+			Resource policyResource = this.findResourceByNameWithFieldsAndPolicy("ABACPolicy");
+			ABACPolicy abacPolicy = new ABACPolicy("PolicyCreate", PolicyType.UPDATE, policyResource);
+			abacPolicy.setCdPolicy(true, false);
+			ConditionGroup conditionGroup = abacPolicy.addConditionGroup();
+			conditionGroup.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
+			abacDao.savePolicy(abacPolicy);
+			
+			Role adminRole = authDao.createAdminRole();
 			
 			contactDao.createContact(new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com"));
 			Contact adminContact = contactDao.getContactByEmail("uec_ops_support@unlimitedcompanies.com");
@@ -67,6 +86,7 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 			
 			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());
 			
+			// TODO: Remove the next print line
 			System.out.println("Created Administrator contact, user and role");
 		}
 	}
@@ -90,7 +110,6 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		{
 			if (!resources.contains(entity.getName()))
 			{
-				System.out.println("Saving resource " + entity.getName());
 				this.registerResource(entity.getName());
 			}
 		}

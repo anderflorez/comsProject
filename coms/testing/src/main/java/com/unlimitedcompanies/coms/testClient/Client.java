@@ -3,11 +3,12 @@ package com.unlimitedcompanies.coms.testClient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 public class Client
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws DuplicatedResourcePolicyException
 	{
 		// TODO: Create an integration test for general searches
 //		System.out.println(" =========== Search ===========");
@@ -34,7 +35,9 @@ public class Client
 //		AuthService authService = container.getBean(AuthService.class);
 		
 		setupService.initialSetup();
-		setupService.checkAllResources();
+		
+		//This next line is now being perform by the method setupService.initialSetup()
+//		setupService.checkAllResources();
 		
 //		int roleId = authService.findRoleByRoleName("Administrators").getRoleId();
 //		Role role = authService.findRoleByIdWithMembers(roleId);

@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 
 @Repository
@@ -56,15 +56,19 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
-	public ABACPolicy findPolicy(Resource resource, PolicyType policyType)
+	public ABACPolicy findPolicy(Resource resource, PolicyType policyType, String accessConditions)
 	{
-		return em.createQuery("select policy from ABACPolicy as policy "
-								+ "where policy.resource = :resource "
-								+ "and policy.policyType = :policyType", 
-								ABACPolicy.class)
-									.setParameter("resource", resource)
-									.setParameter("policyType", policyType.toString())
-									.getSingleResult();
+		String queryString = "select policy from ABACPolicy as policy where policy.resource = :resource and policy.policyType = :policyType";
+		
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and (" + accessConditions + ")";
+		}		
+
+		return em.createQuery(queryString, ABACPolicy.class)
+				 .setParameter("resource", resource)
+				 .setParameter("policyType", policyType.toString())
+				 .getSingleResult();
 	}
 
 	@Override

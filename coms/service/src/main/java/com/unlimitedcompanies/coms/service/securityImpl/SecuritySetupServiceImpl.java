@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
@@ -19,7 +20,7 @@ public class SecuritySetupServiceImpl implements SecuritySetupService
 	private SecuritySetupDao dao;
 
 	@Override
-	public void initialSetup()
+	public void initialSetup() throws DuplicatedResourcePolicyException
 	{
 		dao.initialSetup();
 	}

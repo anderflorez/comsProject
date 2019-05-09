@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.abac;
+package com.unlimitedcompanies.coms.domain.abac;
 
 public enum ComparisonOperator
 {

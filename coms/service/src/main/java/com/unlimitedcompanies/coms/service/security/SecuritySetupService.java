@@ -2,12 +2,13 @@ package com.unlimitedcompanies.coms.service.security;
 
 import java.util.List;
 
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
 
 public interface SecuritySetupService
 {
-	public void initialSetup();
+	public void initialSetup() throws DuplicatedResourcePolicyException;
 	public void checkAllResources();
 	public List<String> findAllResourceNames();
 	public List<ResourceField> findAllResourceFieldsWithResources();

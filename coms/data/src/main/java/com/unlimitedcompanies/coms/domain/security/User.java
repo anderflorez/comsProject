@@ -191,6 +191,16 @@ public class User
 		return Collections.unmodifiableList(this.roles);
 	}
 	
+	public List<String> getRoleNames()
+	{
+		List<String> roleNames = new ArrayList<>();
+		for (Role role : this.roles)
+		{
+			roleNames.add(role.getRoleName());
+		}
+		return roleNames;
+	}
+	
 	public void addRole(Role role)
 	{
 		if (!roles.contains(role))

@@ -11,10 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
-import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
-import com.unlimitedcompanies.coms.data.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.data.abac.PolicyResponse;
-import com.unlimitedcompanies.coms.data.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.User;
@@ -24,13 +23,14 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 @Service
 @Transactional
 public class ContactServiceImpl implements ContactService
 {
 	@Autowired
-	private ContactDao dao;
+	private ContactDao contactDao;
 	
 	@Autowired
 	private AuthDao authenticationDao;
@@ -39,7 +39,7 @@ public class ContactServiceImpl implements ContactService
 	private ABACService abacService;
 	
 	@Autowired
-	private SecuritySetupDao securitySetupDao;
+	private SecuritySetupService securitySetupService;
 
 	@Override
 	@Transactional(rollbackFor = {DuplicateRecordException.class})
@@ -47,8 +47,8 @@ public class ContactServiceImpl implements ContactService
 	{
 		try
 		{
-			dao.createContact(contact);
-			return dao.getContactByCharId(contact.getContactCharId());
+			contactDao.createContact(contact);
+			return contactDao.getContactByCharId(contact.getContactCharId());
 		} 
 		catch (ConstraintViolationException e)
 		{
@@ -59,17 +59,53 @@ public class ContactServiceImpl implements ContactService
 			return null;
 		}
 	}
+	
+	@Override
+	public Contact saveContact(Contact contact, String username) throws DuplicateRecordException, NoResourceAccessException
+	{
+		Resource contactResource = securitySetupService.findResourceByName("Contact");
+		User user = authenticationDao.getFullUserByUsername(username);
+		ABACPolicy contactPolicy = abacService.findPolicy(contactResource, PolicyType.UPDATE, "system");
+		
+		
+		
+		
+		// TODO: This has nothing to do with read, change this for a method that returns the whether there is permission to create the resource or not
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", "user", user);
+		
+		if (resourceReadPolicy.isReadGranted() && contactPolicy.getCdPolicy().isCreatePolicy())
+		{
+			try
+			{
+				contactDao.createContact(contact);
+				return contactDao.getContactByCharId(contact.getContactCharId());
+			} 
+			catch (ConstraintViolationException e)
+			{
+				if (e.getConstraintName().endsWith("_UNIQUE"))
+				{
+					throw new DuplicateRecordException();
+				}
+				throw e;
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
 
 	@Override
 	public int findNumberOfContacts()
 	{
-		return dao.getNumberOfContacts();
+		return contactDao.getNumberOfContacts();
 	}
 	
 	@Override
 	public boolean hasNextContact(int page, int elements)
 	{
-		List<Contact> foundContacts = dao.getContactsByRange((page - 1) * elements, 1);
+		List<Contact> foundContacts = contactDao.getContactsByRange((page - 1) * elements, 1);
 		if (foundContacts.isEmpty()) 
 		{
 			return false;
@@ -85,11 +121,11 @@ public class ContactServiceImpl implements ContactService
 	{
 		User user = authenticationDao.getFullUserByUsername(username);
 		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
-		PolicyResponse policyResponse = contactPolicy.getQueryPolicy(user, "contact");
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", "user", user);
 		
-		if (policyResponse.isAccessGranted())
+		if (resourceReadPolicy.isReadGranted())
 		{
-			return dao.getAllContacts(policyResponse.getAccessConditions());
+			return contactDao.getAllContacts(resourceReadPolicy.getReadConditions());
 		}
 		else
 		{
@@ -108,13 +144,13 @@ public class ContactServiceImpl implements ContactService
 //			String currentUserName = authentication.getName();
 //			loggedUser = authenticationDao.getUserByUsernameWithContact(currentUserName);
 //		}
-//		return dao.getAllContacts(loggedUser);
+//		return contactDao.getAllContacts(loggedUser);
 //	}
 
 	@Override
 	public List<Contact> searchContactsByRange(int page, int elements)
 	{
-		return dao.getContactsByRange(page - 1, elements);
+		return contactDao.getContactsByRange(page - 1, elements);
 	}
 		
 	@Override
@@ -124,7 +160,7 @@ public class ContactServiceImpl implements ContactService
 		Contact contact = null;
 		try
 		{
-			contact = dao.getContactById(id);
+			contact = contactDao.getContactById(id);
 		} 
 		catch (NoResultException e)
 		{
@@ -136,7 +172,7 @@ public class ContactServiceImpl implements ContactService
 	@Override
 	public Contact searchContactByEmail(String email)
 	{
-		return dao.getContactByEmail(email);
+		return contactDao.getContactByEmail(email);
 	}
 
 	@Override
@@ -144,11 +180,11 @@ public class ContactServiceImpl implements ContactService
 	{
 		User user = authenticationDao.getFullUserByUsername(username);
 		ABACPolicy contactPolicy = abacService.findPolicyByName("ContactRead");
-		PolicyResponse policyResponse = contactPolicy.getQueryPolicy(user, "contact");
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", "user", user);
 		
-		if (policyResponse.isAccessGranted())
+		if (resourceReadPolicy.isReadGranted())
 		{
-			return dao.getContactByEmail(email, policyResponse.getAccessConditions());
+			return contactDao.getContactByEmail(email, resourceReadPolicy.getReadConditions());
 		}
 		else
 		{
@@ -160,7 +196,7 @@ public class ContactServiceImpl implements ContactService
 	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public Contact updateContact(Contact updatedContact) throws RecordNotFoundException
 	{
-		dao.updateContact(updatedContact);
+		contactDao.updateContact(updatedContact);
 		return this.searchContactById(updatedContact.getContactId());
 	}
 	
@@ -174,13 +210,30 @@ public class ContactServiceImpl implements ContactService
 								 String username) throws RecordNotFoundException, NoResourceAccessException
 	{
 		User user = authenticationDao.getFullUserByUsername(username);
-		Resource resource = securitySetupDao.findResourceByName("Contact");
-		ABACPolicy policy = abacService.findPolicy(resource, PolicyType.UPDATE);
-		PolicyResponse policyResponse = policy.getQueryPolicy(user, "contact");
+		Resource resource = securitySetupService.findResourceByName("Contact");
+		ABACPolicy policy = abacService.findPolicy(resource, PolicyType.UPDATE, username);
 		
-		if (policyResponse.isAccessGranted())
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		// TODO: Use the update policy instead of the read policy
+		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy("contact", "project", "user", user);
+		
+		if (resourceReadPolicy.isReadGranted())
 		{
-			dao.updateContact(contactId, firstName, middleName, lastName, email);
+			contactDao.updateContact(contactId, firstName, middleName, lastName, email);
 			return this.searchContactById(contactId);
 		}
 		else
@@ -195,14 +248,14 @@ public class ContactServiceImpl implements ContactService
 	{
 		try
 		{
-			dao.deleteContact(contactId);
+			contactDao.deleteContact(contactId);
 		} 
 		catch (NoResultException e)
 		{
 			throw new RecordNotFoundException("The contact you are trying to delete could not be found");
 		}
 		
-		if (dao.existingContact(contactId))
+		if (contactDao.existingContact(contactId))
 		{
 			throw new RecordNotDeletedException("The contact could not be deleted");
 		}
@@ -211,50 +264,50 @@ public class ContactServiceImpl implements ContactService
 //	@Override
 //	public int findNumberOfContactAddresses()
 //	{
-//		return dao.getNumberOfAddresses();
+//		return contactDao.getNumberOfAddresses();
 //	}
 //
 //	@Override
 //	public void saveContactAddress(Address address)
 //	{
 //		int contactId = address.getContact().getContactId();
-//		dao.createContactAddress(address, contactId);
+//		contactDao.createContactAddress(address, contactId);
 //	}
 //
 //	@Override
 //	public List<Address> findContactAddressesByZipCode(String zipCode)
 //	{
-//		return dao.searchContactAddressByZipCode(zipCode);
+//		return contactDao.searchContactAddressByZipCode(zipCode);
 //	}
 //
 //	@Override
 //	public Address findContactAddressById(int addressId)
 //	{
-//		return dao.searchContactAddressById(addressId);
+//		return contactDao.searchContactAddressById(addressId);
 //	}
 //
 //	@Override
 //	public int findNumberOfContacPhones()
 //	{
-//		return dao.getNumberOfContactPhones();
+//		return contactDao.getNumberOfContactPhones();
 //	}
 //
 //	@Override
 //	public void saveContactPhone(Phone phone)
 //	{
 //		int contactId = phone.getContact().getContactId();
-//		dao.createContactPhone(phone, contactId);
+//		contactDao.createContactPhone(phone, contactId);
 //	}
 //
 //	@Override
 //	public List<Phone> findContactPhoneByNumber(String phoneNumber)
 //	{
-//		return dao.searchContactPhonesByNumber(phoneNumber);
+//		return contactDao.searchContactPhonesByNumber(phoneNumber);
 //	}
 //
 //	@Override
 //	public Phone findContactPhoneById(int phoneId)
 //	{
-//		return dao.searchContactPhoneById(phoneId);
+//		return contactDao.searchContactPhoneById(phoneId);
 //	}
 }

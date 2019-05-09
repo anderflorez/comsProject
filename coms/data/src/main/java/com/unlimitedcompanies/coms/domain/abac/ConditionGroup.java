@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.abac;
+package com.unlimitedcompanies.coms.domain.abac;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,41 +232,61 @@ public class ConditionGroup
 
 	protected void addFieldConditions(FieldCondition fieldCondition)
 	{
-		Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
-		for (ResourceField next : resourceFields)
+		if (this.getAbacPolicy().getPolicyType() == PolicyType.READ)
 		{
-			if (!next.getAssociation() && next.getResourceFieldName().equals(fieldCondition.getFieldName()))
+			Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
+			for (ResourceField next : resourceFields)
 			{
-				this.fieldConditions.add(fieldCondition);
-				if (!fieldCondition.getParentConditionGroup().equals(this))
+				if (!next.getAssociation() && next.getResourceFieldName().equals(fieldCondition.getFieldName()))
 				{
-					fieldCondition.setParentConditionGroup(this);
+					this.fieldConditions.add(fieldCondition);
+					if (!fieldCondition.getParentConditionGroup().equals(this))
+					{
+						fieldCondition.setParentConditionGroup(this);
+					}
+					return;
 				}
-				return;
 			}
+			// TODO: throw an exception as the fieldName is not part of the resource
+			System.out.println("ERROR: The referenced field does not belong to the intended resource");			
 		}
-		// TODO: throw an exception as the fieldName is not part of the resource
-		System.out.println("ERROR: The referenced field does not belong to the intended resource");
+		else
+		{
+			// TODO: Throw an exception as the Field Conditions are to be used only for read policies
+		}
 		
 	}
 	
 	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value)
 	{
-		Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
-		for (ResourceField next : resourceFields)
+		if (this.getAbacPolicy().getPolicyType() == PolicyType.READ)
 		{
-			if (!next.getAssociation() && next.getResourceFieldName().equals(fieldName))
+			Set<ResourceField> resourceFields = this.getAbacPolicy().getResource().getResourceFields();
+			for (ResourceField next : resourceFields)
 			{
-				new FieldCondition(fieldName, comparison, value, this);
-				return;
+				if (!next.getAssociation() && next.getResourceFieldName().equals(fieldName))
+				{
+					new FieldCondition(fieldName, comparison, value, this);
+					return;
+				}
 			}
+			// TODO: throw an exception as the fieldName is not part of the resource
+			System.out.println("ERROR: The referenced field does not belong to the intended resource");			
 		}
-		// TODO: throw an exception as the fieldName is not part of the resource
-		System.out.println("ERROR: The referenced field does not belong to the intended resource");
+		else
+		{
+			// TODO: Throw an exception as the Field Conditions are to be used only for read policies
+		}
 		
 	}
+	
+	
+	/*
+	 * 	GROUP CONDITIONS ONLY
+	 * =======================
+	 */
 
-	private boolean entityAccessGranted(User user)
+	private boolean isEntityAccessGranted(User user)
 	{
 		if (this.entityConditions.isEmpty())
 		{
@@ -278,7 +298,7 @@ public class ConditionGroup
 			{
 				return false;
 			}
-		}		
+		}
 		
 		if (this.logicOperator.equals("AND"))
 		{
@@ -298,80 +318,267 @@ public class ConditionGroup
 		}
 	}
 
-	private String getAttributePolicies(User user, String resourceEntityName)
+	private String readAttributePolicies(String projectAlias, String userAlias, User user)
 	{
 		String policy = "";
 		for (int i = 0; i < this.attributeConditions.size(); i++)
 		{
 			if (i > 0) policy += " " + this.logicOperator + " ";
-			policy += this.attributeConditions.get(i).getReadPolicy(user, resourceEntityName);
+			policy += this.attributeConditions.get(i).getReadPolicy(projectAlias, userAlias, user);
 		}
 		return policy;
 	}
 	
-	private String getFieldPolicies(String resourceEntityName)
+	private String readFieldPolicies(String resourceAlias)
 	{
 		String policy = "";
 		for (int i = 0; i < this.fieldConditions.size(); i++)
 		{
 			if (i > 0) policy += " " + this.logicOperator + " ";
-			policy += this.fieldConditions.get(i).getReadPolicy(resourceEntityName);
+			policy += this.fieldConditions.get(i).getReadPolicy(resourceAlias);
 		}
 		return policy;
 	}
 	
-	protected PolicyResponse getConditionGroupPolicies(User user, String resourceEntityName)
+	private String readAttributeAndFieldPolicies(String resourceAlias, String projectAlias, String userAlias, User user)
+	{
+		String attribPolicy = this.readAttributePolicies(projectAlias, userAlias, user);
+		String fieldPolicy = this.readFieldPolicies(resourceAlias);
+		
+		if ((attribPolicy == null || attribPolicy.isEmpty()) && (fieldPolicy == null || fieldPolicy.isEmpty()))
+		{
+			return null;
+		}
+		else if (attribPolicy == null || attribPolicy.isEmpty() || fieldPolicy == null || fieldPolicy.isEmpty())
+		{
+			return "(" + attribPolicy + fieldPolicy + ")";
+		}
+		else 
+		{
+			return "(" + attribPolicy + " " + this.logicOperator + " " + fieldPolicy + ")";
+		}		
+	}
+	
+	private ResourceReadPolicy readGroupPolicy(String resourceAlias, String projectAlias, String userAlias, User user)
+	{
+		ResourceReadPolicy resourceReadPolicy = new ResourceReadPolicy();
+		if (this.isEntityAccessGranted(user))
+		{
+			resourceReadPolicy.setReadGranted(true);
+			resourceReadPolicy.setReadConditions(this.readAttributeAndFieldPolicies(resourceAlias, projectAlias, userAlias, user));
+		}
+		
+		return resourceReadPolicy;
+	}
+	
+	
+	/*
+	 * CONDITION GROUP RETURNED POLICIES INCLUDING SUBGROUPS
+	 * =======================================================
+	 */
+	
+	protected ResourceReadPolicy getReadAccessPolicy(String resourceAlias, String projectAlias, String userAlias, User user)
+	{
+		if (this.getLogicOperator() == LogicOperator.AND)
+		{
+			ResourceReadPolicy readPolicy = new ResourceReadPolicy();
+
+			if (this.isEntityAccessGranted(user))
+			{
+				readPolicy.setReadGranted(true);
+				String conditions = this.readAttributeAndFieldPolicies(resourceAlias, projectAlias, userAlias, user);
+				
+				for (ConditionGroup group : this.getConditionGroups())
+				{
+					if (group.isEntityAccessGranted(user))
+					{
+						String groupConditions = group.readAttributeAndFieldPolicies(resourceAlias, projectAlias, userAlias, user);
+						if (conditions.isEmpty())
+						{
+							conditions = groupConditions;
+						}
+						else if (!groupConditions.isEmpty())
+						{
+							conditions = conditions + " " + this.logicOperator + " " + groupConditions;
+						}
+					}
+					else // If subgroup entity access is not granted
+					{
+						readPolicy.setReadGranted(false);
+						readPolicy.setReadConditions(null);
+						return readPolicy;
+					}
+				}
+				
+				readPolicy.setReadConditions(conditions);
+				return readPolicy;
+			}
+			else // If group entity access is not granted
+			{
+				readPolicy.setReadGranted(false);
+				return readPolicy;				
+			}
+		}
+		else // If Logic Operator is OR 
+		{
+			ResourceReadPolicy resourceReadPolicy = new ResourceReadPolicy();
+			
+			if (this.isEntityAccessGranted(user))
+			{
+				resourceReadPolicy.setReadGranted(true);
+				resourceReadPolicy.setReadConditions(this.readAttributeAndFieldPolicies(resourceAlias, projectAlias, userAlias, user));				
+			}
+
+			for (ConditionGroup group : this.getConditionGroups())
+			{
+				ResourceReadPolicy groupReadPolicy = group.readGroupPolicy(resourceAlias, projectAlias, userAlias, user);
+				if (groupReadPolicy.isReadGranted())
+				{
+					resourceReadPolicy.setReadGranted(true);
+					
+					String conditions = resourceReadPolicy.getReadConditions();
+					if (conditions.isEmpty())
+					{
+						conditions = groupReadPolicy.getReadConditions();
+					}
+					else if (!groupReadPolicy.getReadConditions().isEmpty())
+					{
+						conditions += " " + this.logicOperator + " " + groupReadPolicy.getReadConditions();
+					}
+					
+					resourceReadPolicy.setReadConditions(conditions);
+				}
+			}
+
+			return resourceReadPolicy;
+		}
+	}
+	
+	protected boolean getModifyAccessPolicy(ResourceAttribs resourceAttribs, UserAttribs userAttribs, User user)
+	{
+		if (this.getLogicOperator() == LogicOperator.AND)
+		{
+			if (this.isEntityAccessGranted(user))
+			{
+				for (AttributeCondition attributeCond : this.attributeConditions)
+				{
+					if (!attributeCond.getModifyPolicy(resourceAttribs, userAttribs))
+					{
+						return false;					
+					}
+				}
+				
+				for (ConditionGroup subGroup : this.getConditionGroups())
+				{
+					if (!subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
+					{
+						return false;
+					}
+				}
+				
+				return true;
+			}
+			
+			return false;
+			
+		}
+		else  // if logicOperator is OR 
+		{
+			if (this.isEntityAccessGranted(user))
+			{
+				for (AttributeCondition attributeCond : this.attributeConditions)
+				{
+					if (attributeCond.getModifyPolicy(resourceAttribs, userAttribs))
+					{
+						return true;					
+					}
+				}
+				
+				for (ConditionGroup subGroup : this.getConditionGroups())
+				{
+					if (subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
+					{
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	// TODO: Method to be deleted
+	protected ResourceReadPolicy getConditionGroupPolicies(String resourceAlias, String projectAlias, String userAlias, User user)
 	{
 
-		boolean entityPolicy = this.entityAccessGranted(user);
-		PolicyResponse subGroupPolicies = ABACPolicy.unifyConditionGroupPolicies(user, 
-																		resourceEntityName, 
+		boolean entityPolicy = this.isEntityAccessGranted(user);
+		ResourceReadPolicy subGroupPolicies = ABACPolicy.subGroupReadPolicies(resourceAlias, 
+																		projectAlias, 
+																		userAlias, 
+																		user, 
 																		this.conditionGroups, 
 																		this.getLogicOperator());
 			
-		PolicyResponse policyResponse = new PolicyResponse();
+		ResourceReadPolicy resourceReadPolicy = new ResourceReadPolicy();
 		
 		if (this.getLogicOperator() == LogicOperator.AND)
 		{
-			if (entityPolicy && (subGroupPolicies == null || subGroupPolicies.isAccessGranted()))
+			if (entityPolicy && (subGroupPolicies == null || subGroupPolicies.isReadGranted()))
 			{
-				policyResponse.setAccessGranted(true);
+				resourceReadPolicy.setReadGranted(true);
 
-				String queryPolicyConditions = this.unifyConditionQueries(user, resourceEntityName, subGroupPolicies);
+				String queryPolicyConditions = this.unifyConditionQueries(resourceAlias, projectAlias, userAlias, user, subGroupPolicies);
 				
-				policyResponse.setAccessConditions(queryPolicyConditions);
+				resourceReadPolicy.setReadConditions(queryPolicyConditions);
 				
-				return policyResponse;
+				return resourceReadPolicy;
 			}
 			else
 			{
-				return new PolicyResponse(false, null);
+				ResourceReadPolicy resourcePolicy = new ResourceReadPolicy();
+				resourcePolicy.setReadGranted(false);
+				resourcePolicy.setReadConditions(null);
+				return resourcePolicy;
 			}
 		}
 		else // When logic operator is OR
 		{
-			if (entityPolicy || (subGroupPolicies != null && subGroupPolicies.isAccessGranted()))
+			if (entityPolicy || (subGroupPolicies != null && subGroupPolicies.isReadGranted()))
 			{
-				policyResponse.setAccessGranted(true);
+				resourceReadPolicy.setReadGranted(true);
 
-				String queryPolicyConditions = this.unifyConditionQueries(user, resourceEntityName, subGroupPolicies);
+				String queryPolicyConditions = this.unifyConditionQueries(resourceAlias, projectAlias, userAlias, user, subGroupPolicies);
 				
-				policyResponse.setAccessConditions(queryPolicyConditions);
+				resourceReadPolicy.setReadConditions(queryPolicyConditions);
 				
-				return policyResponse;
+				return resourceReadPolicy;
 			}
 			else 
 			{
-				return new PolicyResponse(false, null);
+				ResourceReadPolicy resourcePolicy = new ResourceReadPolicy();
+				resourcePolicy.setReadGranted(false);
+				resourcePolicy.setReadConditions(null);
+				return resourcePolicy;
 			}
 		}
 
 	}
 	
-	private String unifyConditionQueries(User user, String resourceEntityName, PolicyResponse subGroupPolicies)
+	// TODO: Method to be deleted
+	private String unifyConditionQueries(String resourceAlias, 
+										 String projectAlias, 
+										 String userAlias, 
+										 User user, 
+										 ResourceReadPolicy subGroupPolicies)
 	{
-		String attributePolicyConditions = this.getAttributePolicies(user, resourceEntityName);
-		String fieldPolicyConditions = this.getFieldPolicies(resourceEntityName);
+		String attributePolicyConditions = this.readAttributePolicies(projectAlias, userAlias, user);
+		String fieldPolicyConditions = this.readFieldPolicies(resourceAlias);
 		
 		String queryPolicyConditions = "";
 		if (!attributePolicyConditions.isEmpty() && !fieldPolicyConditions.isEmpty())
@@ -399,9 +606,9 @@ public class ConditionGroup
 			queryPolicyConditions = fieldPolicyConditions;
 		}
 		
-		if (subGroupPolicies != null && subGroupPolicies.isAccessGranted())
+		if (subGroupPolicies != null && subGroupPolicies.isReadGranted())
 		{
-			queryPolicyConditions += " " + this.getLogicOperator() + " (" + subGroupPolicies.getAccessConditions() + ")";
+			queryPolicyConditions += " " + this.getLogicOperator() + " (" + subGroupPolicies.getReadConditions() + ")";
 		}
 		
 		return queryPolicyConditions;

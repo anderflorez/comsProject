@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.data.abac;
+package com.unlimitedcompanies.coms.domain.abac;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,79 +157,189 @@ public class ABACPolicy
 		return conditionGroup;
 	}
 	
-	public PolicyResponse getQueryPolicy(User user, String resourceEntityName)
+	public ResourceReadPolicy getReadPolicy(String resourceAlias, String projectAlias, String userAlias, User user)
 	{		
-		return ABACPolicy.unifyConditionGroupPolicies(user, 
-													resourceEntityName, 
-													this.conditionGroups, 
-													getLogicOperator());
+//		return ABACPolicy.subGroupReadPolicies(resourceAlias, projectAlias, userAlias, user, this.conditionGroups, getLogicOperator());
+		
+		if (this.getLogicOperator() == LogicOperator.AND)
+		{
+			String conditions = null;
+			for (ConditionGroup group : this.getConditionGroups())
+			{
+				ResourceReadPolicy groupReadPolicy = group.getReadAccessPolicy(resourceAlias, projectAlias, userAlias, user);
+				if (groupReadPolicy.isReadGranted())
+				{
+					if (
+							(conditions == null || conditions.isEmpty()) && 
+							(groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
+						)
+					{
+						conditions = groupReadPolicy.getReadConditions();
+					}
+					else if (groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
+					{
+						conditions += " " + this.getLogicOperator() + " " + groupReadPolicy.getReadConditions();
+					}
+				}
+				else
+				{
+					ResourceReadPolicy readPolicy = new ResourceReadPolicy();
+					readPolicy.setReadGranted(false);
+					return readPolicy;
+				}
+			}
+			
+			ResourceReadPolicy readPolicy = new ResourceReadPolicy();
+			readPolicy.setReadGranted(true);
+			readPolicy.setReadConditions(conditions);
+			return readPolicy;
+			
+		}
+		else // If Logic Operator is OR
+		{
+			ResourceReadPolicy readPolicy = new ResourceReadPolicy();
+			readPolicy.setReadGranted(false);
+			
+			for (ConditionGroup group : this.getConditionGroups())
+			{
+				ResourceReadPolicy groupReadPolicy = group.getReadAccessPolicy(resourceAlias, projectAlias, userAlias, user);
+				if (groupReadPolicy.isReadGranted())
+				{
+					readPolicy.setReadGranted(true);
+					String conditions = readPolicy.getReadConditions();
+					if ((conditions == null || conditions.isEmpty()) && !groupReadPolicy.getReadConditions().isEmpty())
+					{
+						conditions = groupReadPolicy.getReadConditions();
+					}
+					else if (groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
+					{
+						conditions += " " + this.getLogicOperator() + " " + groupReadPolicy.getReadConditions();
+					}
+					readPolicy.setReadConditions(conditions);
+				}
+				
+			}
+			
+			return readPolicy;
+		}
+		
 		
 	}
 	
-	protected static PolicyResponse unifyConditionGroupPolicies(User user, 
-													  String resourceEntityName, 
-													  List<ConditionGroup> conditionGroups,
-													  LogicOperator logicOperator)
+	public boolean getModifyPolicy(ResourceAttribs resourceAttribs, UserAttribs userAttribs, User user)
+	{
+		if (this.getLogicOperator() == LogicOperator.AND)
+		{
+			for (ConditionGroup subGroup : this.getConditionGroups())
+			{
+				if (!subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
+				{
+					return false;
+				}
+			}
+			
+			return true;
+			
+		}
+		else  // if logicOperator is OR 
+		{
+			for (ConditionGroup subGroup : this.getConditionGroups())
+			{
+				if (subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
+				{
+					return true;
+				}
+			}
+			
+			return false;
+		}
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// TODO: Delete this method
+	protected static ResourceReadPolicy subGroupReadPolicies(String resourceAlias, 
+																	String projectAlias, 
+																	String userAlias, 
+																	User user, 
+																	List<ConditionGroup> conditionGroups, 
+																	LogicOperator logicOperator)
 	{
 		if (conditionGroups.size() == 0)
 		{
 			return null;
 		}
 		
-		PolicyResponse policyResponse = new PolicyResponse();
+		ResourceReadPolicy resourceReadPolicy = new ResourceReadPolicy();
 
-		List<PolicyResponse> allGroupPolicies = new ArrayList<>();
+		List<ResourceReadPolicy> allGroupPolicies = new ArrayList<>();
 		for (ConditionGroup next : conditionGroups)
 		{
-			allGroupPolicies.add(next.getConditionGroupPolicies(user, resourceEntityName));
+			allGroupPolicies.add(next.getConditionGroupPolicies(resourceAlias, projectAlias, userAlias, user));
 		}		
 		
 		if (logicOperator == LogicOperator.AND)
 		{
-			policyResponse.setAccessGranted(true);
+			resourceReadPolicy.setReadGranted(true);
 			for (int i = 0; i < allGroupPolicies.size(); i++)
 			{
-				if (allGroupPolicies.get(i).isAccessGranted()) 
+				if (allGroupPolicies.get(i).isReadGranted()) 
 				{
-					if (policyResponse.getAccessConditions().isEmpty())
+					if (resourceReadPolicy.getReadConditions().isEmpty())
 					{
-						policyResponse.setAccessConditions(allGroupPolicies.get(i).getAccessConditions());					
+						resourceReadPolicy.setReadConditions(allGroupPolicies.get(i).getReadConditions());					
 					}
 					else
 					{
-						policyResponse.addAccessConditions(logicOperator, allGroupPolicies.get(i).getAccessConditions());
+						resourceReadPolicy.addReadConditions(logicOperator, allGroupPolicies.get(i).getReadConditions());
 					}
 				}
 				else
 				{
-					policyResponse.setAccessGranted(false);
-					policyResponse.setAccessConditions(null);
-					return policyResponse;
+					resourceReadPolicy.setReadGranted(false);
+					resourceReadPolicy.setReadConditions(null);
+					return resourceReadPolicy;
 				}
 				
 			}
 		}
 		else // if logicOperator equals OR
 		{
-			policyResponse.setAccessGranted(false);
+			resourceReadPolicy.setReadGranted(false);
 			for (int i = 0; i < allGroupPolicies.size(); i++)
 			{
-				if (allGroupPolicies.get(i).isAccessGranted()) 
+				if (allGroupPolicies.get(i).isReadGranted()) 
 				{
-					policyResponse.setAccessGranted(true);
-					if (policyResponse.getAccessConditions().isEmpty())
+					resourceReadPolicy.setReadGranted(true);
+					if (resourceReadPolicy.getReadConditions().isEmpty())
 					{
-						policyResponse.setAccessConditions(allGroupPolicies.get(i).getAccessConditions());
+						resourceReadPolicy.setReadConditions(allGroupPolicies.get(i).getReadConditions());
 					}
 					else
 					{
-						policyResponse.addAccessConditions(logicOperator, allGroupPolicies.get(i).getAccessConditions());
+						resourceReadPolicy.addReadConditions(logicOperator, allGroupPolicies.get(i).getReadConditions());
 					}
 				}
 			}
 		}
 		
-		return policyResponse;
+		return resourceReadPolicy;
 	}
 
 	@Override

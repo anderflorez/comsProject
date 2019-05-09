@@ -11,6 +11,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 public interface ContactService
 {
 	public Contact saveContact(Contact Contact) throws DuplicateRecordException;
+	public Contact saveContact(Contact contact, String username) throws DuplicateRecordException, NoResourceAccessException;
 	public int findNumberOfContacts();
 	public boolean hasNextContact(int page, int elements);
 	public List<Contact> searchAllContacts(String username) throws NoResourceAccessException;
