@@ -1,22 +1,21 @@
 package com.unlimitedcompanies.coms.domain.unitTests;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
-import com.unlimitedcompanies.coms.domain.abac.ConditionGroup;
 import com.unlimitedcompanies.coms.domain.abac.LogicOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
-import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
 
 public class ABACAuthenticationUnitTest
 {
@@ -29,24 +28,13 @@ public class ABACAuthenticationUnitTest
 		assertEquals(1, testResource.getPolicies().size(), "Adding policy to resource test failed");
 	}
 
-	// This test will work only if the method getLogicOperator() from ABACPolicy.java is set to public
-//	@Test
-//	public void policyLogicOperatorToStringTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		assertEquals("AND", policy.getLogicOperator(), "conversion to read logic operator to string failed");
-//	}
-	
-	// This test will work only if the method setLogicOperator(String logicOperator) from ABACPolicy.java is set to public
-//	@Test
-//	public void stringToPolicyLogicOperatorTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		policy.setLogicOperator("or");
-//		assertEquals(LogicOperator.OR, policy.getOperator(), "conversion to update logic operator from string failed");
-//	}
+	@Test
+	public void policyLogicOperatorToStringTest() throws DuplicatedResourcePolicyException 
+	{
+		Resource testResource = new Resource("TestingResource");
+		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
+		assertEquals("AND", policy.getLogicOperator().toString(), "conversion to read logic operator to string failed");
+	}
 	
 	@Test
 	public void getPolicyLogicOperatorTest() throws DuplicatedResourcePolicyException
@@ -65,24 +53,13 @@ public class ABACAuthenticationUnitTest
 		assertEquals(LogicOperator.OR, policy.getLogicOperator(), "conversion to update logic operator from string failed");
 	}
 
-	// This test will work only if the method getPolicyType() from ABACPolicy.java is set to public
-//	@Test
-//	public void policyTypeToStringTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		assertEquals("READ", policy.getPolicyType(), "Conversion to read policy type to string failed");
-//	}
-	
-	// This test will work only if the method setPolicyType(String policyType) from ABACPolicy.java is set to public
-//	@Test
-//	public void stringToPolicyTypeTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		policy.setPolicyType("Create");
-//		assertEquals(PolicyType.CREATE, policy.getType(), "Conversion to read policy type to string failed");
-//	}
+	@Test
+	public void policyTypeToStringTest() throws DuplicatedResourcePolicyException 
+	{
+		Resource testResource = new Resource("TestingResource");
+		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
+		assertEquals("READ", policy.getPolicyType().toString(), "Conversion to read policy type to string failed");
+	}
 	
 	@Test
 	public void getPolicyTypeTest() throws DuplicatedResourcePolicyException
@@ -100,27 +77,6 @@ public class ABACAuthenticationUnitTest
 		policy.setPolicyType(PolicyType.UPDATE);
 		assertEquals(PolicyType.UPDATE, policy.getPolicyType(), "Conversion to read policy type to string failed");
 	}
-	
-	// This test will work only if the method getLogicOperator() from ConditionGrup.java is set to public
-//	@Test
-//	public void conditionGroupLogicOperatorToStringTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		ConditionGroup group1 = policy.addConditionGroup();
-//		assertEquals("AND", group1.getLogicOperator(), "Getting condition group logic operator test failed");
-//	}
-	
-	// This test will work only if the method setLogicOperator(String logicOperator) from ConditionGrup.java is set to public
-//	@Test
-//	public void stringToConditionGroupLogicOperatorTest()
-//	{
-//		Resource testResource = new Resource("TestingResource");
-//		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-//		ConditionGroup group1 = policy.addConditionGroup();
-//		group1.setLogicOperator("or");
-//		assertEquals(LogicOperator.OR, group1.getOperator(), "Getting condition group logic operator test failed");
-//	}
 	
 	@Test
 	public void multipleResourcePolicyUnitTest() throws DuplicatedResourcePolicyException
@@ -158,162 +114,66 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void getConditionGroupLogicOperatorTest() throws DuplicatedResourcePolicyException
+	public void addingSubPolicyTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		ConditionGroup group1 = policy.addConditionGroup();
-		assertEquals(LogicOperator.AND, group1.getLogicOperator(), "Getting condition group logic operator test failed");
+		ABACPolicy subPolicy = policy.addSubPolicy(LogicOperator.OR);
+		
+		assertNull(policy.getSubPolicies().get(0).getPolicyName());
+		assertEquals(subPolicy.getAbacPolicyId(), policy.getSubPolicies().get(0).getAbacPolicyId(), "Adding policy condition group failed");
 	}
 	
 	@Test
-	public void setConditionGroupLogicOperatorTest() throws DuplicatedResourcePolicyException
+	public void addMultipleLevelPoliciesTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		ConditionGroup group1 = policy.addConditionGroup();
-		group1.setLogicOperator(LogicOperator.OR);
-		assertTrue(policy.getConditionGroups().size() > 0, "Getting condition group logic operator test failed");
-		assertEquals(LogicOperator.OR, group1.getLogicOperator(), "Getting condition group logic operator test failed");
+		ABACPolicy subPolicy = policy.addSubPolicy(LogicOperator.OR);
+		ABACPolicy thirdPolicy = subPolicy.addSubPolicy(LogicOperator.AND);
+		ABACPolicy fourthPolicy = thirdPolicy.addSubPolicy(LogicOperator.OR);
+		String id = fourthPolicy.getAbacPolicyId();
+				
+		ABACPolicy foundPolicy = policy.getSubPolicies().get(0).getSubPolicies().get(0).getSubPolicies().get(0);
+		assertEquals(id, foundPolicy.getAbacPolicyId(), "Adding multiple level condition groups unit test");
 	}
 	
 	@Test
-	public void addingPolicyConditionGroups() throws DuplicatedResourcePolicyException
-	{
-		Resource testResource = new Resource("TestingResource");
-		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		ConditionGroup group1 = policy.addConditionGroup();
-		assertEquals(policy, group1.getAbacPolicy(), "Adding policy condition group failed");
-	}
-	
-	@Test
-	public void addingConditionGroupsToAConditionGroup() throws DuplicatedResourcePolicyException
-	{
-		Resource testResource = new Resource("TestingResource");
-		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		ConditionGroup group1 = policy.addConditionGroup();
-		ConditionGroup groupA = group1.addConditionGroup();
-		ConditionGroup groupB = group1.addConditionGroup(LogicOperator.OR);
-		assertEquals(group1, groupA.getParentConditionGroup(), "Adding condition groups to a condition group failed");
-		assertEquals(group1, groupB.getParentConditionGroup(), "Adding condition groups to a condition group failed");
-		assertEquals(policy, groupA.getParentConditionGroup().getAbacPolicy(), "Adding condition groups to a condition group failed");
-	}
-	
-	@Test
-	public void addMultipleLevelConditionGroupsUnitTest() throws DuplicatedResourcePolicyException
+	public void addingEntityConditionTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
 		policy.setLogicOperator(LogicOperator.OR);
-		policy.addConditionGroup();
-		policy.addConditionGroup();
-		ConditionGroup groupA = policy.addConditionGroup();
-		ConditionGroup groupB = groupA.addConditionGroup(LogicOperator.OR);
-		groupA.addConditionGroup();
-		groupB.addConditionGroup();
-		groupB.addConditionGroup();
+		ABACPolicy subPolicy1 = policy.addSubPolicy(LogicOperator.OR);
+		ABACPolicy subPolicy2 = policy.addSubPolicy(LogicOperator.AND);
+		subPolicy1.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
+		subPolicy1.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Management");
+		subPolicy2.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
+		subPolicy2.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
 		
-		assertEquals(3, policy.getConditionGroups().size(), "Adding multiple level condition groups unit test");
-		assertEquals(2, policy.getConditionGroups().get(2).getConditionGroups().size(), 
-				"Adding multiple level condition groups unit test");
-		assertEquals(2, policy.getConditionGroups().get(2).getConditionGroups().get(0).getConditionGroups().size(), 
-				"Adding multiple level condition groups unit test");
-	}
-	
-	@Test
-	public void addingEntityConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
-	{
-		Resource testResource = new Resource("TestingResource");
-		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		policy.setLogicOperator(LogicOperator.OR);
-		ConditionGroup groupA = policy.addConditionGroup(LogicOperator.OR);
-		ConditionGroup groupB = policy.addConditionGroup();
-		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
-		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Management");
-		groupB.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		groupB.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
-		
-		assertEquals(2, testResource.getPolicies().get(0).getConditionGroups().get(0).getEntityConditions().size(),
+		assertEquals(2, testResource.getPolicies().get(0).getSubPolicies().get(0).getEntityConditions().size(),
 					 "Adding entity condition to condition group test failed");
-		assertEquals(2, testResource.getPolicies().get(0).getConditionGroups().get(1).getEntityConditions().size(),
+		assertEquals(2, testResource.getPolicies().get(0).getSubPolicies().get(1).getEntityConditions().size(),
 				 "Adding entity condition to condition group test failed");
 	}
-	
+
 	@Test
-	public void entityPolicyReturnTest() throws DuplicatedResourcePolicyException
+	public void addingAttributeConditionTest() throws DuplicatedResourcePolicyException
 	{
 		Resource testResource = new Resource("TestingResource");
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
 		policy.setLogicOperator(LogicOperator.OR);
-		ConditionGroup groupA = policy.addConditionGroup(LogicOperator.OR);
-		ConditionGroup groupB = policy.addConditionGroup();
-		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
-		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Management");
-		groupB.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		groupB.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
+		ABACPolicy groupA = policy.addSubPolicy(LogicOperator.AND);
+		ABACPolicy groupB = policy.addSubPolicy(LogicOperator.OR);
+		groupA.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECTS);
+		groupB.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
+		groupB.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
+		groupB.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		
-		Contact contact = new Contact("John", null, "Doe", "jdoe@example.com");
-		User user = new User("jdoe", "123".toCharArray(), contact);
-		Role role = new Role("Management");
-		user.addRole(role);
-
-		assertTrue(policy.getReadPolicy(testResource.getResourceName(), "project", "user", user).isReadGranted(), 
-				"Entity policy return test failed");
-	}
-	
-	@Test
-	public void addingAttributeConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
-	{
-		Resource testResource = new Resource("TestingResource");
-		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		policy.setLogicOperator(LogicOperator.OR);
-		ConditionGroup groupA = policy.addConditionGroup();
-		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
-		groupA.addAttributeCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, ResourceAttribute.PROJECT_NAME);
-		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
-		groupB.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_FOREMEN);
-		
-		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getAttributeConditions().size(), 
-					 "Adding attribute condition to condition group test failed");
-		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getAttributeConditions().size(), 
-					 "Adding attribute condition to condition group test failed");
-	}
-
-	@Test
-	public void attributePoliciesReturnTest() throws DuplicatedResourcePolicyException
-	{
-		Resource testResource = new Resource("test");
-		
-		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
-		ConditionGroup group = policy.addConditionGroup(LogicOperator.OR);
-		ConditionGroup groupA = group.addConditionGroup();
-		group.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
-		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_MANAGERS);
-		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
-		group.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, ResourceAttribute.P_FOREMEN);
-		groupA.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "ANY");
-		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.P_MANAGERS);
-		groupA.addAttributeCondition(UserAttribute.USERNAME, ComparisonOperator.NOT_EQUALS, ResourceAttribute.P_SUPERINTENDENTS);
-		
-		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		User user = new User("john", "123".toCharArray(), contact);
-		Role role1 = new Role("Project Manager");
-		Role role2 = new Role("Administrator");
-		user.addRole(role1);
-		user.addRole(role2);
-		
-		String expectedConditions = "("
-				+ "project.projectManagers = john OR "
-				+ "project.superintendents = john OR "
-				+ "project.foremen = john"
-				+ ") OR ("
-				+ "project.projectManagers != john AND "
-				+ "project.superintendents != john"
-				+ ")";
-		
-		assertEquals(expectedConditions, policy.getReadPolicy("contact", "project", "user", user).getReadConditions(),
-					"Attribute policies return test failed");
+		assertEquals(1, testResource.getPolicies().get(0).getSubPolicies().get(0).getAttributeConditions().size(), 
+				"Adding attribute condition to condition group test failed");
+		assertEquals(3, testResource.getPolicies().get(0).getSubPolicies().get(1).getAttributeConditions().size(), 
+				"Adding attribute condition to condition group test failed");
 	}
 	
 	@Test
@@ -327,17 +187,17 @@ public class ABACAuthenticationUnitTest
 		
 		ABACPolicy policy = new ABACPolicy("TestPolicy", PolicyType.READ, testResource);
 		policy.setLogicOperator(LogicOperator.OR);
-		ConditionGroup groupA = policy.addConditionGroup();
-		ConditionGroup groupB = policy.addConditionGroup(LogicOperator.OR);
+		ABACPolicy groupA = policy.addSubPolicy();
+		ABACPolicy groupB = policy.addSubPolicy(LogicOperator.OR);
 		groupA.addFieldConditions("TestField1", ComparisonOperator.EQUALS, "Field1Value");
 		groupB.addFieldConditions("TestField2", ComparisonOperator.NOT_EQUALS, "Field2Value");
 		groupB.addFieldConditions("TestField3", ComparisonOperator.EQUALS, "Field3Value");
 		groupB.addFieldConditions("TestField4", ComparisonOperator.EQUALS, "Field4Value");
 		
-		assertEquals(1, testResource.getPolicies().get(0).getConditionGroups().get(0).getFieldConditions().size(), 
-					 "Adding field condition to condition group test failed");
-		assertEquals(3, testResource.getPolicies().get(0).getConditionGroups().get(1).getFieldConditions().size(), 
-					 "Adding field condition to condition group test failed");
+		assertEquals(1, testResource.getPolicies().get(0).getSubPolicies().get(0).getFieldConditions().size(), 
+				"Adding field condition to condition group test failed");
+		assertEquals(3, testResource.getPolicies().get(0).getSubPolicies().get(1).getFieldConditions().size(), 
+				"Adding field condition to condition group test failed");
 	}
 	
 }

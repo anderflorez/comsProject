@@ -30,28 +30,24 @@ public class AttributeCondition
 	private ComparisonOperator comparison;
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	@JoinColumn(name="conditionGroupId_FK")
-	private ConditionGroup parentConditionGroup;
+	@JoinColumn(name = "abacPolicyId_FK")
+	private ABACPolicy abacPolicy;
 	
 	protected AttributeCondition() 
 	{
 		this.attributeConditionId = UUID.randomUUID().toString();
 	}
 	
-	protected AttributeCondition(ConditionGroup conditionGroup, 
-							     UserAttribute userAttribute, 
-							     ComparisonOperator comparisonOperator, 
-							     ResourceAttribute resourceAttribute)
+	protected AttributeCondition(ABACPolicy abacPolicy, 
+								 ResourceAttribute resourceAttribute, 
+								 ComparisonOperator comparisonOperator, 
+								 UserAttribute userAttribute)
 	{
 		this.attributeConditionId = UUID.randomUUID().toString();
 		this.userAttribute = userAttribute.toString();
 		this.comparison = comparisonOperator;
 		this.resourceAttribute = resourceAttribute.toString();
-		this.parentConditionGroup = conditionGroup;
-		if (!conditionGroup.getAttributeConditions().contains(this))
-		{
-			conditionGroup.addAttributeCondition(this);
-		}
+		this.abacPolicy = abacPolicy;
 	}
 
 	public String getAttributeConditionId()
@@ -74,23 +70,19 @@ public class AttributeCondition
 		return comparison;
 	}
 
-	public ConditionGroup getParentConditionGroup()
+	public ABACPolicy getAbacPolicy()
 	{
-		return parentConditionGroup;
+		return abacPolicy;
 	}
 
-	protected void setParentConditionGroup(ConditionGroup parentConditionGroup)
+	protected void setAbacPolicy(ABACPolicy abacPolicy)
 	{
-		this.parentConditionGroup = parentConditionGroup;
-		if (!parentConditionGroup.getAttributeConditions().contains(this))
-		{
-			parentConditionGroup.addAttributeCondition(this);
-		}
+		this.abacPolicy = abacPolicy;
 	}
 	
-	protected String getReadPolicy(String projectAlias, String userAlias, User user)
+	protected String getReadPolicy(String projectAlias, User user)
 	{
-		String attributePart = this.getResourceAttribute().getField(projectAlias, userAlias) + 
+		String attributePart = this.getResourceAttribute().getField(projectAlias) + 
 							   " " + this.getComparison().getOperator() + " ";
 		
 		List<String> userAttributes = this.getUserAttribute().getUserField(user);
@@ -156,28 +148,6 @@ public class AttributeCondition
 				}
 				return false;
 			}
-			else if (this.getResourceAttribute() == ResourceAttribute.USERNAME)
-			{
-				if (resourceAttribs.getUsername().equals(userAttribs.getUsername()))
-				{
-					return true;
-				}
-				return false;
-			}
-			else if (this.getResourceAttribute() == ResourceAttribute.ROLE)
-			{
-				for (String resourceRole : resourceAttribs.getRoles())
-				{
-					for (String userRole : userAttribs.getRoles())
-					{
-						if (resourceRole.equals(userRole))
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
 			else
 			{
 				return false;
@@ -228,28 +198,6 @@ public class AttributeCondition
 					if (foreman.equals(userAttribs.getUsername()))
 					{
 						return false;
-					}
-				}
-				return true;
-			}
-			else if (this.getResourceAttribute() == ResourceAttribute.USERNAME)
-			{
-				if (resourceAttribs.getUsername().equals(userAttribs.getUsername()))
-				{
-					return false;
-				}
-				return true;
-			}
-			else if (this.getResourceAttribute() == ResourceAttribute.ROLE)
-			{
-				for (String resourceRole : resourceAttribs.getRoles())
-				{
-					for (String userRole : userAttribs.getRoles())
-					{
-						if (resourceRole.equals(userRole))
-						{
-							return false;
-						}
 					}
 				}
 				return true;

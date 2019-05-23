@@ -13,6 +13,7 @@ import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -72,13 +73,18 @@ public class ABACDaoImpl implements ABACDao
 	}
 
 	@Override
-	public ABACPolicy findPolicyByName(String policyName)
+	public User getFullUserWithAttribs(int userId)
 	{
-		ABACPolicy policy = em.createQuery("select policy from ABACPolicy as policy where policy.policyName = :name", ABACPolicy.class)
-				 .setParameter("name", policyName)
-				 .getSingleResult();
-		
-		return policy;
+		return em.createQuery("select user from User user "
+								+ "left join fetch user.roles roles "
+								+ "left join fetch user.contact contact "
+								+ "left join fetch contact.employee employee "
+								+ "left join fetch employee.pmProjects pmProjects "
+								+ "left join fetch employee.superintendentProjects superintendentProjects "
+								+ "left join fetch employee.foremanProjects foremanProjects "
+								+ "where user.userId = :userId", User.class)
+					.setParameter("userId", userId)
+					.getSingleResult();
 	}
 
 }

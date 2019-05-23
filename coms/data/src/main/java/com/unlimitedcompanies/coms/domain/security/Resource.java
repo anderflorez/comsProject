@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,7 +21,9 @@ import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 public class Resource
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer resourceId;
+	
 	private String resourceName;
 	
 	@OneToMany(mappedBy="resource")

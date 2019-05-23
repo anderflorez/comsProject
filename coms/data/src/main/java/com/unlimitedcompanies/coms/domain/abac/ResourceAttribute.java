@@ -5,9 +5,7 @@ public enum ResourceAttribute
 	PROJECT_NAME("projectName"), 
 	P_MANAGERS("projectManagers"), 
 	P_SUPERINTENDENTS("superintendents"), 
-	P_FOREMEN("foremen"),
-	USERNAME("username"),
-	ROLE("roleName");
+	P_FOREMEN("foremen");
 	
 	private String field;
 	
@@ -16,13 +14,9 @@ public enum ResourceAttribute
 		this.field = field;
 	}
 
-	public String getField(String projectResourceName, String userResourceName)
+	public String getField(String projectResourceName)
 	{	
-		if (userResourceName != null && (this.equals(ROLE) || this.equals(USERNAME)))
-		{
-			return userResourceName + "." + this.field;
-		}
-		else if (projectResourceName != null)
+		if (projectResourceName != null)
 		{
 			return projectResourceName + "." + this.field;
 		}

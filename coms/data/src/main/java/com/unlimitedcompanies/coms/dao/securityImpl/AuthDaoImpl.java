@@ -43,6 +43,8 @@ public class AuthDaoImpl implements AuthDao
 //					
 //			query.executeUpdate();
 			
+			Contact contact = em.merge(user.getContact());
+			user.setContact(contact);
 			em.persist(user);
 		} 
 		catch (PersistenceException e)

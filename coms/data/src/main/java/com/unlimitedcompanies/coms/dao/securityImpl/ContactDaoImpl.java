@@ -1,10 +1,10 @@
 package com.unlimitedcompanies.coms.dao.securityImpl;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
+import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 
 @Repository
@@ -38,6 +39,7 @@ public class ContactDaoImpl implements ContactDao
 //					.setParameter("email", contact.getEmail())
 //					.executeUpdate();
 			em.persist(contact);
+			
 		} 
 		catch (PersistenceException e)
 		{
@@ -57,115 +59,129 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
-	public boolean existingContact(int contactId)
+	public Contact getContactWithFullEmployee(int contactId)
 	{
-		Contact contact = em.find(Contact.class, contactId);
-		return contact == null ? false : true;
+		Contact contact = em.createQuery("select contact from Contact contact left join fetch contact.employee employee "
+											+ "left join fetch employee.pmProjects pmProjects "
+											+ "left join fetch employee.superintendentProjects superintendentProjects "
+											+ "left join fetch employee.foremanProjects foremanProjects "
+											+ "where contact.contactId = :contactId", Contact.class)
+								.setParameter("contactId", contactId)
+								.getSingleResult();
+		
+		return contact;
 	}
+	
+//	
+//	@Override
+//	public boolean existingContact(int contactId)
+//	{
+//		Contact contact = em.find(Contact.class, contactId);
+//		return contact == null ? false : true;
+//	}
 	
 	@Override
 	public List<Contact> getAllContacts(String policyAccessConditions)
 	{
 		String stringQuery = "select contact from Contact as contact";
 		
-		if (!policyAccessConditions.isEmpty())
+		if (policyAccessConditions != null && !policyAccessConditions.isEmpty())
 		{
 			stringQuery += " where " + policyAccessConditions;
 		}
 		stringQuery += " order by contact.firstName";
 				
-		return em.createQuery(stringQuery, Contact.class)
-							  .getResultList();
+		List<Contact> contacts = em.createQuery(stringQuery, Contact.class).getResultList();
+		
+		return Collections.unmodifiableList(contacts);
 	}
 	
 	@Override
-	public List<Contact> getContactsByRange(int page, int elements)
+	public List<Contact> getContactsByRange(int elements, int page, String policyAccessConditions)
 	{
-		return em.createQuery("select contact from Contact contact order by contact.firstName", Contact.class)
-							  .setFirstResult(page * elements)
-							  .setMaxResults(elements)
-							  .getResultList();
-	}
-	
-	@Override
-	public Contact getContactById(int Id)
-	{
-		Contact contact = em.find(Contact.class, Id);
-		if (contact == null)
+		String stringQuery = "select contact from Contact contact";
+		
+		if (policyAccessConditions != null && !policyAccessConditions.isEmpty())
 		{
-			throw new NoResultException();
+			stringQuery += " where " + policyAccessConditions;
 		}
+		
+		stringQuery += " order by contact.firstName";
+		
+		List<Contact> contacts = em.createQuery(stringQuery, Contact.class)
+									 .setFirstResult(page * elements)
+									 .setMaxResults(elements)
+									 .getResultList();
+		
+		return Collections.unmodifiableList(contacts);
+	}
+	
+	@Override
+	public Contact getContactById(int id, String accessConditions)
+	{
+		String stringQuery = "select contact from Contact contact where contact.contactId = :contactId";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			stringQuery += " and " + accessConditions;
+		}
+		
+		Contact contact = em.createQuery(stringQuery, Contact.class).setParameter("contactId", id).getSingleResult();
+		
 		return contact;
 	}
 	
 	@Override
-	public Contact getContactByCharId(String contactCharId)
+	public Contact getContactByCharId(String contactCharId, String accessConditions)
 	{
-		return em.createQuery("select contact from Contact as contact where contact.contactCharId = :charId", Contact.class)
-							  .setParameter("charId", contactCharId)
-							  .getSingleResult();
+		String stringQuery = "select contact from Contact as contact where contact.contactCharId = :charId";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			stringQuery += " and " + accessConditions;
+		}
+		
+		Contact contact = em.createQuery(stringQuery, Contact.class).setParameter("charId", contactCharId).getSingleResult();
+		
+		return contact;
 	}
 	
 	@Override
-	public Contact getContactByEmail(String email)
-	{
-		return em.createQuery("select contact from Contact as contact where contact.email = :email", Contact.class)
-		  .setParameter("email", email)
-		  .getSingleResult();
-	}
-	
-	@Override
-	public Contact getContactByEmail(String email, String policyConditions)
+	public Contact getContactByEmail(String email, String accessConditions)
 	{
 		String stringQuery = "select contact from Contact as contact where contact.email = :email";
-		if (!policyConditions.isEmpty())
+		if (accessConditions != null && !accessConditions.isEmpty())
 		{
-			stringQuery += " " + policyConditions;
+			stringQuery += " and " + accessConditions;
 		}
-
-		return em.createQuery(stringQuery, Contact.class)
-				.setParameter("email", email)
-				.getSingleResult();
-	}
-
-	// TODO: Delete this method
-	@Override
-	public void updateContact(Contact updatedContact)
-	{
-		Contact foundContact = this.getContactById(updatedContact.getContactId());
-		foundContact.setFirstName(updatedContact.getFirstName());
-		foundContact.setMiddleName(updatedContact.getMiddleName());
-		foundContact.setLastName(updatedContact.getLastName());
-		foundContact.setEmail(updatedContact.getEmail());
+		
+		Contact contact = em.createQuery(stringQuery, Contact.class).setParameter("email", email).getSingleResult();
+		
+		return contact;
 	}
 	
 	@Override
-	public void updateContact(int contactId, String firstName, String middleName, String lastName, String email)
+	public void updateContact(Contact contact)
 	{
-		Contact contact = this.getContactById(contactId);
-		contact.setFirstName(firstName);
-		contact.setMiddleName(middleName);
-		contact.setLastName(lastName);
-		contact.setEmail(email);
+		System.out.println("Update DAO");
+		em.merge(contact);
 	}
 
 	@Override
-	public void deleteContact(int contactId)
+	public void deleteContact(Contact contact)
 	{
-		Contact contact = this.getContactById(contactId);
-		em.remove(contact);
+		Contact removeContact = em.merge(contact);
+		em.remove(removeContact);
 	}
 
-//	@Override
-//	public int getNumberOfAddresses()
-//	{
-//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM addresses").getSingleResult();
-//		return bigInt.intValue();
-//	}
-//
-//	@Override
-//	public void createContactAddress(Address address, int contactId)
-//	{
+	@Override
+	public int getNumberOfAddresses()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM addresses").getSingleResult();
+		return bigInt.intValue();
+	}
+
+	@Override
+	public void createContactAddress(Address address)
+	{
 //		em.createNativeQuery("INSERT INTO addresses (street, city, state, zipCode, contactId_FK) VALUES (:street, :city, :state, :zipCode, :contact)")
 //							 .setParameter("street", address.getStreet())
 //							 .setParameter("city", address.getCity())
@@ -173,7 +189,51 @@ public class ContactDaoImpl implements ContactDao
 //							 .setParameter("zipCode", address.getZipCode())
 //							 .setParameter("contact", contactId)
 //							 .executeUpdate();
-//	}
+		
+		em.persist(address);
+	}
+	
+	@Override
+	public List<Address> getAllAddresses(String accessConditions)
+	{
+		String stringQuery = "select address from Address address";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			stringQuery += " where " + accessConditions;
+		}
+				
+		List<Address> addresses = em.createQuery(stringQuery, Address.class).getResultList();
+		
+		return Collections.unmodifiableList(addresses);
+	}
+	
+	@Override
+	public Address getContactAddress(Contact contact, String readConditions)
+	{
+		String stringQuery = "select address from Address address where address.contact = :contact";
+		if (readConditions != null && !readConditions.isEmpty())
+		{
+			stringQuery += " and " + readConditions;
+		}
+				
+		Address address = em.createQuery(stringQuery, Address.class).setParameter("contact", contact).getSingleResult();
+		
+		return address;
+	}
+	
+	@Override
+	public Address getContactAddressById(int id, String readConditions)
+	{
+		String stringQuery = "select address from Address address where address.addressId = :id";
+		if (readConditions != null && !readConditions.isEmpty())
+		{
+			stringQuery += " and " + readConditions;
+		}
+				
+		Address address = em.createQuery(stringQuery, Address.class).setParameter("id", id).getSingleResult();
+		
+		return address;
+	}
 //
 //	@Override
 //	public List<Address> searchContactAddressByZipCode(String zipCode)
@@ -223,4 +283,12 @@ public class ContactDaoImpl implements ContactDao
 //							  .getSingleResult();
 //	}
 
+	@Override
+	public void clearEntityManager()
+	{
+		em.flush();
+		em.clear();		
+	}
+
+	
 }

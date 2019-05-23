@@ -38,8 +38,8 @@ public interface AuthService
 	public boolean hasNextRole(int page, int elements);
 	public List<Role> searchAllRoles();
 	public List<Role> searchRolesByRange(int page, int elements);
-	public Role searchRoleByRoleId(int roleId) throws RecordNotFoundException;
-	public Role searchRoleByRoleName(String roleName) throws RecordNotFoundException;
+	public Role searchRoleById(int roleId) throws RecordNotFoundException;
+	public Role searchRoleByName(String roleName) throws RecordNotFoundException;
 	public Role searchRoleByIdWithMembers(int roleId) throws RecordNotFoundException;
 	public List<User> searchRoleNonMembers(int roleId, String searchCriteria);
 	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException;

@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.dao.security;
 import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 public interface ABACDao
 {
@@ -13,6 +14,7 @@ public interface ABACDao
 
 	public void savePolicy(ABACPolicy policy);
 	public ABACPolicy findPolicy(Resource resource, PolicyType policyType, String accessConditions);
-	public ABACPolicy findPolicyByName(String policyName);
+	
+	public User getFullUserWithAttribs(int userId);
 
 }

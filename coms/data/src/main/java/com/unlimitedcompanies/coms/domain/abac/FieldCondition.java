@@ -27,8 +27,8 @@ public class FieldCondition
 	private ComparisonOperator comparison;
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	@JoinColumn(name="conditionGroupId_FK")
-	private ConditionGroup parentConditionGroup;
+	@JoinColumn(name="abacPolicyId_FK")
+	private ABACPolicy abacPolicy;
 	
 	protected FieldCondition()
 	{
@@ -36,17 +36,13 @@ public class FieldCondition
 	}
 	
 	protected FieldCondition(String fieldName, ComparisonOperator comparison, 
-							 String value, ConditionGroup parentConditionGroup)
+							 String value, ABACPolicy abacPolicy)
 	{
 		this.fieldConditionId = UUID.randomUUID().toString();
 		this.fieldName = fieldName;
 		this.comparison = comparison;
 		this.value = value;
-		this.parentConditionGroup = parentConditionGroup;
-		if (!parentConditionGroup.getFieldConditions().contains(this))
-		{
-			parentConditionGroup.addFieldConditions(this);
-		}
+		this.abacPolicy = abacPolicy;
 	}
 
 	public String getFieldConditionId()
@@ -69,20 +65,16 @@ public class FieldCondition
 		return comparison;
 	}
 	
-	public ConditionGroup getParentConditionGroup()
+	public ABACPolicy getAbacPolicy()
 	{
-		return parentConditionGroup;
+		return abacPolicy;
 	}
-	
-	protected void setParentConditionGroup(ConditionGroup parentConditionGroup)
+
+	protected void setAbacPolicy(ABACPolicy abacPolicy)
 	{
-		this.parentConditionGroup = parentConditionGroup;
-		if (!parentConditionGroup.getFieldConditions().contains(this))
-		{
-			parentConditionGroup.addFieldConditions(this);
-		}
+		this.abacPolicy = abacPolicy;
 	}
-	
+
 	protected String getReadPolicy(String resourceEntityName)
 	{
 		return resourceEntityName + "." + this.fieldName + " " + this.getComparison().getOperator() + " '" + this.value + "'";

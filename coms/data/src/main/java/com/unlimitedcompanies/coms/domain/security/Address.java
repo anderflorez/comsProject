@@ -1,6 +1,9 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -11,7 +14,10 @@ import javax.persistence.Table;
 public class Address
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(unique=true, nullable=false)
 	private Integer addressId;
+	
 	private String street;
 	private String city;
 	private String state;
@@ -60,6 +66,11 @@ public class Address
 	public Contact getContact()
 	{
 		return contact;
+	}
+
+	public void setContact(Contact contact)
+	{
+		this.contact = contact;
 	}
 
 	@Override

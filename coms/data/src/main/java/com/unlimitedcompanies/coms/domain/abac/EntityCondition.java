@@ -30,15 +30,15 @@ public class EntityCondition
 	private ComparisonOperator comparison;
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	@JoinColumn(name="conditionGroupId_FK")
-	private ConditionGroup parentConditionGroup;
+	@JoinColumn(name="abacPolicyId_FK")
+	private ABACPolicy abacPolicy;
 	
 	protected EntityCondition() 
 	{
 		this.entityConditionId = UUID.randomUUID().toString();
 	}
 	
-	protected EntityCondition(ConditionGroup conditionGroup, 
+	protected EntityCondition(ABACPolicy abacPolicy, 
 							  UserAttribute userAttribute,
 							  ComparisonOperator comparison, 
 							  String value)
@@ -47,11 +47,7 @@ public class EntityCondition
 		this.userAttribute = userAttribute.toString();
 		this.value = value;
 		this.comparison = comparison;
-		this.parentConditionGroup = conditionGroup;
-		if (!conditionGroup.getEntityConditions().contains(this))
-		{
-			conditionGroup.addEntityCondition(this);
-		}
+		this.abacPolicy = abacPolicy;
 	}
 
 	public String getEntityConditionId()
@@ -73,17 +69,17 @@ public class EntityCondition
 	{
 		return comparison;
 	}
-
-	public ConditionGroup getParentConditionGroup()
-	{
-		return parentConditionGroup;
-	}
-
-	protected void setParentConditionGroup(ConditionGroup parentConditionGroup)
-	{
-		this.parentConditionGroup = parentConditionGroup;
-	}
 	
+	public ABACPolicy getAbacPolicy()
+	{
+		return abacPolicy;
+	}
+
+	protected void setAbacPolicy(ABACPolicy abacPolicy)
+	{
+		this.abacPolicy = abacPolicy;
+	}
+
 	protected boolean entityConditionAccessGranted(User user)
 	{
 		if (this.comparison == ComparisonOperator.EQUALS)

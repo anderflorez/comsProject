@@ -83,7 +83,7 @@ public class RoleRestController
 	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
 	public RoleDTO findRoleById(@PathVariable int id) throws RecordNotFoundException
 	{
-		Role role = authService.searchRoleByRoleId(id);
+		Role role = authService.searchRoleById(id);
 		RoleDTO roleResponse = new RoleDTO(role);
 		
 		Link roleLink = linkTo(methodOn(RoleRestController.class).findRoleById(id)).withSelfRel();

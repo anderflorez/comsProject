@@ -23,7 +23,6 @@ import com.unlimitedcompanies.coms.dao.securitySettings.SecuritySetupDao;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
-import com.unlimitedcompanies.coms.domain.abac.ConditionGroup;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Contact;
@@ -69,16 +68,16 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 			this.checkAllResources();
 			
 			Resource policyResource = this.findResourceByNameWithFieldsAndPolicy("ABACPolicy");
-			ABACPolicy abacPolicy = new ABACPolicy("PolicyCreate", PolicyType.UPDATE, policyResource);
+			ABACPolicy abacPolicy = new ABACPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
 			abacPolicy.setCdPolicy(true, false);
-			ConditionGroup conditionGroup = abacPolicy.addConditionGroup();
-			conditionGroup.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
+			abacPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
 			abacDao.savePolicy(abacPolicy);
 			
 			Role adminRole = authDao.createAdminRole();
 			
-			contactDao.createContact(new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com"));
-			Contact adminContact = contactDao.getContactByEmail("uec_ops_support@unlimitedcompanies.com");
+			Contact initialContact = new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com");
+			contactDao.createContact(initialContact);
+			Contact adminContact = contactDao.getContactByCharId(initialContact.getContactCharId(), null);
 			
 			PasswordEncoder pe = new BCryptPasswordEncoder();
 			authDao.createUser(new User("administrator", pe.encode("uec123").toCharArray(), adminContact));
@@ -110,7 +109,8 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 		{
 			if (!resources.contains(entity.getName()))
 			{
-				this.registerResource(entity.getName());
+				Resource resource = new Resource(entity.getName());
+				this.registerResource(resource);
 			}
 		}
 	}
@@ -162,8 +162,11 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 	@Override
 	public Resource findResourceByName(String name)
 	{
-		return em.createQuery("select resource from Resource resource where resource.resourceName = :name",
-				Resource.class).setParameter("name", name).getSingleResult();
+		Resource resource = em.createQuery("select resource from Resource resource where resource.resourceName = :name", Resource.class)
+							.setParameter("name", name)
+							.getSingleResult();
+		
+		return resource;
 	}
 	
 	@Override
@@ -181,10 +184,11 @@ public class SecuritySetupDaoImpl implements SecuritySetupDao
 	}
 
 	@Override
-	public void registerResource(String resourceName)
+	public void registerResource(Resource resource)
 	{
-		em.createNativeQuery("INSERT INTO resources (resourceName) VALUES (:resourceName)")
-				.setParameter("resourceName", resourceName).executeUpdate();
+		em.persist(resource);
+//		em.createNativeQuery("INSERT INTO resources (resourceName) VALUES (:resourceName)")
+//				.setParameter("resourceName", resourceName).executeUpdate();
 	}
 
 	@Override

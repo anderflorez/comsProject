@@ -2,7 +2,9 @@ package com.unlimitedcompanies.coms.domain.employee;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,26 +31,26 @@ public class Employee
 	private Contact contact;
 	
 	@ManyToMany(mappedBy = "projectManagers")
-	private List<Project> pmProjects;
+	private Set<Project> pmProjects;
 	
 	@ManyToMany(mappedBy = "superintendents")
-	private List<Project> superintendentProjects;
+	private Set<Project> superintendentProjects;
 	
 	@ManyToMany(mappedBy = "foremen")
-	private List<Project> foremanProjects;
+	private Set<Project> foremanProjects;
 	
 	protected Employee() 
 	{
-		this.pmProjects = new ArrayList<>();
-		this.superintendentProjects = new ArrayList<>();
-		this.foremanProjects = new ArrayList<>();
+		this.pmProjects = new HashSet<>();
+		this.superintendentProjects = new HashSet<>();
+		this.foremanProjects = new HashSet<>();
 	}
 	
 	public Employee(Contact contact)
 	{
-		this.pmProjects = new ArrayList<>();
-		this.superintendentProjects = new ArrayList<>();
-		this.foremanProjects = new ArrayList<>();
+		this.pmProjects = new HashSet<>();
+		this.superintendentProjects = new HashSet<>();
+		this.foremanProjects = new HashSet<>();
 		this.contact = contact;
 	}
 
@@ -62,9 +64,21 @@ public class Employee
 		return contact;
 	}
 
-	public List<Project> getPmProjects()
+	public Set<Project> getPmProjects()
 	{
-		return Collections.unmodifiableList(pmProjects);
+		return Collections.unmodifiableSet(pmProjects);
+	}
+	
+	public List<String> getPmProjectNames()
+	{
+		List<String> projectNames = new ArrayList<>();
+		
+		for (Project next : this.pmProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		
+		return projectNames;
 	}
 	
 	public void assignAsProjectManager(Project project)
@@ -76,9 +90,21 @@ public class Employee
 		}
 	}
 
-	public List<Project> getSuperintendentProjects()
+	public Set<Project> getSuperintendentProjects()
 	{
-		return Collections.unmodifiableList(superintendentProjects);
+		return Collections.unmodifiableSet(superintendentProjects);
+	}
+	
+	public List<String> getSuperintendentProjectNames()
+	{
+		List<String> projectNames = new ArrayList<>();
+		
+		for (Project next : this.superintendentProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		
+		return projectNames;
 	}
 	
 	public void assignAsSuperintendent(Project project)
@@ -90,9 +116,21 @@ public class Employee
 		}
 	}
 
-	public List<Project> getForemanProjects()
+	public Set<Project> getForemanProjects()
 	{
-		return Collections.unmodifiableList(superintendentProjects);
+		return Collections.unmodifiableSet(superintendentProjects);
+	}
+	
+	public List<String> getForemanProjectNames()
+	{
+		List<String> projectNames = new ArrayList<>();
+		
+		for (Project next : this.foremanProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		
+		return projectNames;
 	}
 	
 	public void assignAsForeman(Project project)
@@ -102,6 +140,26 @@ public class Employee
 		{
 			project.addForman(this);
 		}
+	}
+	
+	public List<String> getAssociatedProjectNames()
+	{
+		List<String> projectNames = new ArrayList<>();
+		
+		for (Project next : this.pmProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		for (Project next : this.superintendentProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		for (Project next : this.foremanProjects)
+		{
+			projectNames.add(next.getProjectName());
+		}
+		
+		return projectNames;
 	}
 
 	@Override

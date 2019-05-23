@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.dao.security.exceptions;
+package com.unlimitedcompanies.coms.dao.securityExceptions;
 
 public class DuplicateContactException extends Exception
 {

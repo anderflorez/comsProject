@@ -291,7 +291,7 @@ public class AuthServiceImpl implements AuthService
 		
 		try
 		{
-			return this.searchRoleByRoleName(role.getRoleName());
+			return this.searchRoleByName(role.getRoleName());
 		}
 		catch (RecordNotFoundException e)
 		{
@@ -333,7 +333,7 @@ public class AuthServiceImpl implements AuthService
 
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public Role searchRoleByRoleId(int id) throws RecordNotFoundException
+	public Role searchRoleById(int id) throws RecordNotFoundException
 	{
 		// TODO: Throw an exception if the role is not found
 		
@@ -349,7 +349,7 @@ public class AuthServiceImpl implements AuthService
 	
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public Role searchRoleByRoleName(String roleName) throws RecordNotFoundException
+	public Role searchRoleByName(String roleName) throws RecordNotFoundException
 	{
 		try
 		{
@@ -386,7 +386,7 @@ public class AuthServiceImpl implements AuthService
 	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotChangedException.class})
 	public Role updateRole(Role editRole) throws RecordNotFoundException, RecordNotChangedException
 	{
-		Role foundRole = this.searchRoleByRoleId(editRole.getRoleId());
+		Role foundRole = this.searchRoleById(editRole.getRoleId());
 		String originalFoundRoleName = foundRole.getRoleName();
 		
 		authDao.updateRole(editRole);

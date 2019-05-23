@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.domain.abac;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ResourceAttribs
@@ -8,10 +9,14 @@ public class ResourceAttribs
 	private List<String> projectManagers;
 	private List<String> projectSuperintendents;
 	private List<String> projectForemen;
-	private String username;
-	private List<String> roles;
 	
-	public ResourceAttribs() {}
+	public ResourceAttribs() 
+	{
+		this.projectNames = new ArrayList<>();
+		this.projectManagers = new ArrayList<>();
+		this.projectSuperintendents = new ArrayList<>();
+		this.projectForemen = new ArrayList<>();
+	}
 
 	public List<String> getProjectNames()
 	{
@@ -73,28 +78,4 @@ public class ResourceAttribs
 		this.projectForemen.add(foreman);
 	}
 
-	public String getUsername()
-	{
-		return username;
-	}
-
-	public void setUsername(String username)
-	{
-		this.username = username;
-	}
-
-	public List<String> getRoles()
-	{
-		return roles;
-	}
-
-	public void setRoles(List<String> roles)
-	{
-		this.roles = roles;
-	}
-	
-	public void addRole(String role)
-	{
-		this.roles.add(role);
-	}
 }

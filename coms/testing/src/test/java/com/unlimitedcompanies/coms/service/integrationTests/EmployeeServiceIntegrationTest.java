@@ -11,10 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.domain.employee.Employee;
-import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.service.employee.EmployeeService;
-import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 
 @ExtendWith(SpringExtension.class)
@@ -35,14 +32,14 @@ class EmployeeServiceIntegrationTest
 		assertEquals(0, employeeService.getNumberOfEmployees(), "Number of employees count integration test failed");
 	}
 
-	@Test
-	public void storeNewEmployeeIntegrationTest() throws DuplicateRecordException
-	{		
-		Contact contact = contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
-		Employee employee = new Employee(contact);
-		employeeService.saveEmployee(employee);
-		
-		assertEquals(1, employeeService.getNumberOfEmployees(), "Storing a new employee integration test failed");
-	}
+//	@Test
+//	public void storeNewEmployeeIntegrationTest() throws DuplicateRecordException
+//	{		
+//		Contact contact = contactService.saveContact(new Contact("Diane", null, null, "Diane@example.com"));
+//		Employee employee = new Employee(contact);
+//		employeeService.saveEmployee(employee);
+//		
+//		assertEquals(1, employeeService.getNumberOfEmployees(), "Storing a new employee integration test failed");
+//	}
 
 }
