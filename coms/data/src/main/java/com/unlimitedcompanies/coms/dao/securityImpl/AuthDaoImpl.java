@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -326,41 +325,6 @@ public class AuthDaoImpl implements AuthDao
 		User foundUser = this.getUserByUserId(userId);
 
 		foundRole.removeUser(foundUser);
-	}
-	
-	@Override
-	public int getNumberOfPermissions()
-	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(roleResourceIdentifier) FROM permissions").getSingleResult();
-		return bigInt.intValue();
-	}
-
-	@Override
-	public void createResourcePermission(Permission newPermission)
-	{
-		try
-		{
-			em.persist(newPermission);
-		} 
-		catch (EntityExistsException e)
-		{
-			// TODO Check this exception
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public Permission searchPermissionById(String id)
-	{
-		return em.find(Permission.class, id);
-	}
-	
-	@Override
-	public List<Permission> getAllRolePermissions(Role role)
-	{
-		return em.createQuery("select permissions from Permission permissions where permissions.role = :role", Permission.class)
-							  .setParameter("role", role)
-							  .getResultList();
 	}
 
 }

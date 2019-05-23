@@ -29,23 +29,18 @@ public class Resource
 	@OneToMany(mappedBy="resource")
 	private Set<ResourceField> resourceFields;
 	
-	@OneToMany(mappedBy="resource")
-	private Set<Permission> permissions;
-	
 	@OneToMany(mappedBy = "resource")
 	private List<ABACPolicy> policies;
 
 	public Resource() 
 	{
 		this.resourceFields = new HashSet<>();
-		this.permissions = new HashSet<>();
 		this.policies = new ArrayList<>(); 
 	}	
 
 	public Resource(String resourceName)
 	{
 		this.resourceFields = new HashSet<>();
-		this.permissions = new HashSet<>();
 		this.policies = new ArrayList<>(); 
 		this.resourceId = null;
 		this.resourceName = resourceName;
@@ -87,15 +82,6 @@ public class Resource
 		{
 			this.resourceFields.add(field);
 			field.assignResource(this);
-		}
-	}
-	
-	public void addPermission(Permission permission)
-	{
-		if (!this.permissions.contains(permission))
-		{
-			this.permissions.add(permission);
-			permission.assignResource(this);
 		}
 	}
 

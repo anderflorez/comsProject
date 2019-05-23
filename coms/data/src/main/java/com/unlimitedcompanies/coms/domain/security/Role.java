@@ -2,16 +2,13 @@ package com.unlimitedcompanies.coms.domain.security;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,9 +21,6 @@ public class Role
 	
 	@ManyToMany(mappedBy = "roles")
 	private List<User> users = new ArrayList<>();
-	
-	@OneToMany(mappedBy = "role")
-	private Set<Permission> permissions = new HashSet<>();
 	
 	@ManyToMany
 	@JoinTable(name = "restrictedFields", 
@@ -81,15 +75,6 @@ public class Role
 		{
 			this.users.remove(user);
 			user.removeRole(this);
-		}
-	}
-	
-	public void addResourcePermission(Permission permission)
-	{
-		if (!this.permissions.contains(permission))
-		{
-			this.permissions.add(permission);
-			permission.assignRole(this);
 		}
 	}
 	

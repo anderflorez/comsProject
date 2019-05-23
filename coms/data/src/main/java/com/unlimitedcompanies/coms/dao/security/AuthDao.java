@@ -3,7 +3,6 @@ package com.unlimitedcompanies.coms.dao.security;
 import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -41,10 +40,5 @@ public interface AuthDao
 
 	public void assignUserToRole(int userId, int roleId);
 	public void removeUserFromRole(int userId, int roleId);
-	
-	public int getNumberOfPermissions();
-	public void createResourcePermission(Permission newPermission);
-	public Permission searchPermissionById(String id);
-	public List<Permission> getAllRolePermissions(Role role);
 
 }

@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
@@ -451,18 +450,6 @@ public class AuthServiceImpl implements AuthService
 		}
 		
 		// TODO: Create some checking and throw a new exception if the member is not removed.
-	}
-	
-	@Override
-	public Permission searchPermissionById(String id)
-	{
-		return authDao.searchPermissionById(id);
-	}
-	
-	@Override
-	public List<Permission> searchAllRolePermissions(Role role)
-	{
-		return authDao.getAllRolePermissions(role);
 	}
 
 }

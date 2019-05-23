@@ -3,7 +3,6 @@ package com.unlimitedcompanies.coms.service.security;
 import java.util.List;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Permission;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
@@ -47,8 +46,5 @@ public interface AuthService
 
 	public void assignUserToRole(int userId, int roleId) throws RecordNotFoundException;
 	public void removeRoleMember(int userId, int roleId) throws RecordNotFoundException;
-	
-	public Permission searchPermissionById(String id);
-	public List<Permission> searchAllRolePermissions(Role role);
 	
 }
