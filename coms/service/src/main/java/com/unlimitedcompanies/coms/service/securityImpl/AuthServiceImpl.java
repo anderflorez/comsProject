@@ -11,14 +11,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
+import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.ResourceAttribs;
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
+import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 
@@ -31,20 +37,33 @@ public class AuthServiceImpl implements AuthService
 
 	@Autowired
 	private ContactService contactService;
+	
+	@Autowired
+	private ABACService abacService;
+	
+	@Autowired
+	private SystemAbacService systemAbacService;
 
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public User saveUser(User user) throws RecordNotFoundException, RecordNotCreatedException
+	public User saveUser(User user, String username)
 	{
+		Resource userResource = abacService.findResourceByName("User");
+		User currentUser = authDao.getFullUserByUsername(username);
+		
+		ABACPolicy userPolicy = systemAbacService.findPolicy(userResource, PolicyType.UPDATE);
+		ResourceAttribs resourceAttribs = systemAbacService.get
+		
+		
+		
 		if (user.getContact() == null)
 		{
 			String exceptionMessage = "The contact associated with the user you are trying to create could not be found";
 			throw new RecordNotFoundException(exceptionMessage);
 		}
 		
-		// TODO: Restore this next two lines and this whole method
-//		Contact contact = contactService.searchContactById(user.getContact().getContactId());
-//		user.setContact(contact);
+		Contact contact = contactService.searchContactById(user.getContact().getContactId());
+		user.setContact(contact);
 		
 		PasswordEncoder pe = new BCryptPasswordEncoder();
 		String encoded = pe.encode(String.valueOf(user.getPassword()));

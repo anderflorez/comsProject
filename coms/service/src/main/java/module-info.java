@@ -8,7 +8,7 @@ open module service
 	requires spring.beans;
 	requires spring.context;
 	requires spring.tx;
-//	requires spring.security.core;
+	requires spring.security.core;
 	
 	exports com.unlimitedcompanies.coms.service.security;
 	exports com.unlimitedcompanies.coms.service.employee;

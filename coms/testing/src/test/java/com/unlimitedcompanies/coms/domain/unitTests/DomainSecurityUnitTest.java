@@ -52,9 +52,10 @@ class DomainSecurityUnitTest
 	@Test
 	public void addressEqualsTest()
 	{
-		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		Address address1 = new Address("0000 myway ave", "my city", "FL", "99999", contact);
-		Address address2 = new Address("0000 myway ave", "my town", "FL", "99999", contact);
+		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
+		Contact contact2 = new Contact("Jane", null, "Doe", "jane@example.com");
+		Address address1 = new Address("0000 myway ave", "my city", "FL", "99999", contact1);
+		Address address2 = new Address("0000 myway ave", "my city", "FL", "99999", contact2);
 		
 		assertEquals(address1, address2, "Domain unit test for address equals failed");
 	}

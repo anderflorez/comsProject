@@ -8,6 +8,7 @@ import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.security.Resource;
 import com.unlimitedcompanies.coms.domain.security.ResourceField;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 
 public interface SystemAbacService
 {
@@ -21,6 +22,6 @@ public interface SystemAbacService
 	
 	
 	// Get objects with system rights which is without checking any permissions to obtain them
-	public ABACPolicy findPolicy(Resource resource, PolicyType policyType);
+	public ABACPolicy findPolicy(Resource resource, PolicyType policyType) throws NoResourceAccessException;
 	public UserAttribs getUserAttribs(int userId);
 }

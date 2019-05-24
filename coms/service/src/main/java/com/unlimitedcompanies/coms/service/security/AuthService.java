@@ -13,7 +13,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 
 public interface AuthService
 {
-	public User saveUser(User user) throws RecordNotFoundException, RecordNotCreatedException;
+	public User saveUser(User user, String username);
 	public int searchNumberOfUsers();
 	public boolean hasNextUser(int page, int elements);
 	public List<User> searchAllUsers();

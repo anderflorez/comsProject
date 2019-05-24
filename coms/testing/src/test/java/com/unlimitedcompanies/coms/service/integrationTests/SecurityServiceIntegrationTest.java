@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
+import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
@@ -19,8 +20,10 @@ import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
@@ -599,22 +602,39 @@ public class SecurityServiceIntegrationTest
 	
 	// TODO: Create a test for finding a full contact with address and phone numbers
 
-//	@Test
-//	public void saveNewUserTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
-//	{
-//		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-//		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-//
-//		User user = authService.saveUser(new User("username", "mypass".toCharArray(), contact));
-//		assertEquals(1, authService.searchNumberOfUsers(), "Service test to save a new user failed");
-//		assertNotNull(user.getUserId(), "Service test to save a new user failed");
-//	}
+	@Test
+	public void saveNewUserTest() throws Exception
+	{
+		setupService.initialSetup();
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource userResource = abacService.findResourceByName("User");
+		
+		ABACPolicy contactUpdatePolicy = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		contactUpdatePolicy.setCdPolicy(true, false);
+		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactUpdatePolicy, "administrator");
+		
+		ABACPolicy contactReadPolicy = new ABACPolicy("contactRead", PolicyType.UPDATE, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		ABACPolicy userUpdatePolicy = new ABACPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		userUpdatePolicy.setCdPolicy(true, false);
+		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userUpdatePolicy, "administrator");
+		
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"), "administrator");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com", "administrator");
+		authService.saveUser(new User("username", "mypass".toCharArray(), contact), "administrator");
+		
+		assertEquals(2, authService.searchNumberOfUsers(), "Service test to save a new user failed");
+	}
 
-//	@Test
-//	public void getNumberOfUsersTest()
-//	{
-//		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
-//	}
+	@Test
+	public void getNumberOfUsersTest()
+	{
+		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
+	}
 	
 //	@Test
 //	public void findAllUsersTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException

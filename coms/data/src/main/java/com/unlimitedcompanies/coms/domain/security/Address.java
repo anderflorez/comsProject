@@ -107,7 +107,6 @@ public class Address
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((city == null) ? 0 : city.hashCode());
-		result = prime * result + ((contact == null) ? 0 : contact.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		result = prime * result + ((street == null) ? 0 : street.hashCode());
 		result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
@@ -126,11 +125,6 @@ public class Address
 			if (other.city != null) return false;
 		}
 		else if (!city.equals(other.city)) return false;
-		if (contact == null)
-		{
-			if (other.contact != null) return false;
-		}
-		else if (!contact.equals(other.contact)) return false;
 		if (state == null)
 		{
 			if (other.state != null) return false;

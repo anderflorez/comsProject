@@ -3,6 +3,8 @@ package com.unlimitedcompanies.coms.service.abacImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.NoResultException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +27,7 @@ import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 
 @Service
 @Transactional
@@ -114,9 +117,16 @@ public class SystemAbacServiceImpl implements SystemAbacService
 	 */
 	
 	@Override
-	public ABACPolicy findPolicy(Resource resource, PolicyType policyType)
+	public ABACPolicy findPolicy(Resource resource, PolicyType policyType) throws NoResourceAccessException
 	{
-		return abacDao.findPolicy(resource, policyType, null);
+		try
+		{
+			return abacDao.findPolicy(resource, policyType, null);
+		}
+		catch (NoResultException e)
+		{
+			throw new NoResourceAccessException();
+		}
 	}
 
 	@Override
