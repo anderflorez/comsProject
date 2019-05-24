@@ -17,25 +17,25 @@ import com.unlimitedcompanies.coms.ws.security.reps.ResourceLinkCollection;
 @RestController
 public class LinkDirectoryController
 {
-	@RequestMapping(value = RestLinks.URI_BASE + "directory")
-	public ResourceLinkCollection getDirectory()
-	{
-		ResourceLinkCollection resources = new ResourceLinkCollection();
-		List<Link> links = new ArrayList<>();
-		try
-		{
-			links.add(new Link("http://localhost/comsws/rest/").withRel("base_rest"));
-			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
-			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
-			links.add(linkTo(methodOn(RoleRestController.class).saveNewRole(null)).withRel("base_role"));
-		}
-		catch (Exception e) {}
-		
-		for (Link link : links)
-		{
-			resources.addResources(new ResourceLink(link.getRel(), link.getHref()));
-		}
-		
-		return resources;
-	}
+//	@RequestMapping(value = RestLinks.URI_BASE + "directory")
+//	public ResourceLinkCollection getDirectory()
+//	{
+//		ResourceLinkCollection resources = new ResourceLinkCollection();
+//		List<Link> links = new ArrayList<>();
+//		try
+//		{
+//			links.add(new Link("http://localhost/comsws/rest/").withRel("base_rest"));
+//			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
+//			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
+//			links.add(linkTo(methodOn(RoleRestController.class).saveNewRole(null)).withRel("base_role"));
+//		}
+//		catch (Exception e) {}
+//		
+//		for (Link link : links)
+//		{
+//			resources.addResources(new ResourceLink(link.getRel(), link.getHref()));
+//		}
+//		
+//		return resources;
+//	}
 }

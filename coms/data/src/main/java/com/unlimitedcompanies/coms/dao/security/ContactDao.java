@@ -24,7 +24,8 @@ public interface ContactDao
 	public List<Address> getAllAddresses(String accessConditions);
 	public Address getContactAddress(Contact contact, String readConditions);
 	public Address getContactAddressById(int id, String readConditions);
-//	public List<Address> searchContactAddressByZipCode(String zipCode);
+	public void updateContactAddress(Address address);
+	public void deleteContactAddress(Address address);
 //	
 //	public int getNumberOfContactPhones();
 //	public void createContactPhone(Phone phone, int contactId);

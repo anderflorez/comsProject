@@ -1,6 +1,7 @@
 package com.unlimitedcompanies.coms.service.integrationTests;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,12 +19,11 @@ import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
-import com.unlimitedcompanies.coms.service.security.SearchQueryService;
-import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ApplicationConfig.class })
@@ -38,10 +38,7 @@ public class SecurityServiceIntegrationTest
 	AuthService authService;
 
 	@Autowired
-	SecuritySetupService setupService;
-	
-	@Autowired
-	SearchQueryService searchService;
+	SystemAbacService setupService;
 	
 	@Autowired
 	ABACService abacService;
@@ -50,7 +47,7 @@ public class SecurityServiceIntegrationTest
 	public void saveSimpleContactTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByNameWithFieldsAndPolicy("Contact");
+		Resource contactResource = abacService.findResourceByNameWithFieldsAndPolicy("Contact");
 		
 		ABACPolicy abacPolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacPolicy.setCdPolicy(true, false);
@@ -68,7 +65,7 @@ public class SecurityServiceIntegrationTest
 	public void saveContactWithRepeatedEmailNotAllowedTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy abacPolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacPolicy.setCdPolicy(true, false);
@@ -92,7 +89,7 @@ public class SecurityServiceIntegrationTest
 	public void findAllContacts() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
@@ -131,7 +128,7 @@ public class SecurityServiceIntegrationTest
 	public void findAllContactsByRangeTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
@@ -168,7 +165,7 @@ public class SecurityServiceIntegrationTest
 	public void findContactByIdTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
@@ -192,7 +189,7 @@ public class SecurityServiceIntegrationTest
 	public void findContactByCharIdTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -214,7 +211,7 @@ public class SecurityServiceIntegrationTest
 	public void findContactByEmailTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -237,7 +234,7 @@ public class SecurityServiceIntegrationTest
 	public void updateContactTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -263,7 +260,7 @@ public class SecurityServiceIntegrationTest
 	public void noPersistentObjectUpdateTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -288,7 +285,7 @@ public class SecurityServiceIntegrationTest
 	public void deleteSingleContactTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
+		Resource contactResource = abacService.findResourceByName("Contact");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, true);
@@ -313,8 +310,8 @@ public class SecurityServiceIntegrationTest
 	public void saveContactAddressTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
-		Resource addressContactResource = setupService.findResourceByName("Address");
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -349,8 +346,8 @@ public class SecurityServiceIntegrationTest
 	public void findAllContactAddressesTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
-		Resource addressContactResource = setupService.findResourceByName("Address");
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
 		
 		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
@@ -391,8 +388,8 @@ public class SecurityServiceIntegrationTest
 	public void findContactAddressTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
-		Resource addressContactResource = setupService.findResourceByName("Address");
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
 		
 		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -418,8 +415,8 @@ public class SecurityServiceIntegrationTest
 	public void findAddressByIdTest() throws Exception
 	{
 		setupService.initialSetup();
-		Resource contactResource = setupService.findResourceByName("Contact");
-		Resource addressContactResource = setupService.findResourceByName("Address");
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
 		
 		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -444,6 +441,96 @@ public class SecurityServiceIntegrationTest
 	}
 	
 	// TODO: Possibly add methods and tests for search functions such as finding addresses by zip, state and city
+	
+	@Test
+	public void updateContactAddressTest() throws Exception
+	{
+		setupService.initialSetup();
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
+		
+		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		addressCreatePolicy.setCdPolicy(true, false);
+		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressCreatePolicy, "administrator");
+
+		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressReadPolicy, "administrator");
+		
+		Contact contact = contactService.searchContactByEmail("uec_ops_support@unlimitedcompanies.com", "administrator");
+		contactService.saveContactAddress(new Address("0000 AdminStreet Dr", "MyCity", "FL", "00001", contact), "administrator");
+		Address address = contactService.searchContactAddress(contact, "administrator");
+		
+		address.setFullAddress("0101 New Admin St", "New City", "FL", "12123");		
+		contactService.updateAddress(address, "administrator");
+		
+		assertEquals("0101 New Admin St", contactService.searchContactAddress(contact, "administrator").getStreet(), 
+				"Updating the contact address test failed");
+	}
+	
+	@Test
+	public void noPersistentAutoUpdateContactAddressTest() throws Exception
+	{
+		setupService.initialSetup();
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
+		
+		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		addressCreatePolicy.setCdPolicy(true, false);
+		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressCreatePolicy, "administrator");
+
+		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressReadPolicy, "administrator");
+		
+		Contact contact = contactService.searchContactByEmail("uec_ops_support@unlimitedcompanies.com", "administrator");
+		contactService.saveContactAddress(new Address("0000 AdminStreet Dr", "MyCity", "FL", "00001", contact), "administrator");
+		Address address = contactService.searchContactAddress(contact, "administrator");
+		
+		address.setFullAddress("0101 New Admin St", "New City", "FL", "12123");
+		
+		assertEquals("0000 AdminStreet Dr", contactService.searchContactAddress(contact, "administrator").getStreet(), 
+				"Updating the contact address test failed");
+	}
+	
+	@Test
+	public void deleteContactAddressTest() throws Exception
+	{
+		setupService.initialSetup();
+		Resource contactResource = abacService.findResourceByName("Contact");
+		Resource addressContactResource = abacService.findResourceByName("Address");
+		
+		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		addressCreatePolicy.setCdPolicy(true, true);
+		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressCreatePolicy, "administrator");
+
+		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(addressReadPolicy, "administrator");
+		
+		Contact contact = contactService.searchContactByEmail("uec_ops_support@unlimitedcompanies.com", "administrator");
+		contactService.saveContactAddress(new Address("0000 AdminStreet Dr", "MyCity", "FL", "00001", contact), "administrator");
+		Address address = contactService.searchContactAddress(contact, "administrator");
+		
+		contactService.deleteContactAddress(address, "administrator");
+		
+		assertEquals(0, contactService.findNumberOfContactAddresses(), "Delete contact address test failed");
+	}
 	
 	//
 	// @Test

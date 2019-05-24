@@ -41,9 +41,10 @@ public class AuthServiceImpl implements AuthService
 			String exceptionMessage = "The contact associated with the user you are trying to create could not be found";
 			throw new RecordNotFoundException(exceptionMessage);
 		}
-
-		Contact contact = contactService.searchContactById(user.getContact().getContactId());
-		user.setContact(contact);
+		
+		// TODO: Restore this next two lines and this whole method
+//		Contact contact = contactService.searchContactById(user.getContact().getContactId());
+//		user.setContact(contact);
 		
 		PasswordEncoder pe = new BCryptPasswordEncoder();
 		String encoded = pe.encode(String.valueOf(user.getPassword()));

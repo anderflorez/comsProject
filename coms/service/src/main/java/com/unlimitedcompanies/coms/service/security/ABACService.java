@@ -7,6 +7,10 @@ import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 
 public interface ABACService
 {
+	public Resource findResourceByName(String name);
+	public Resource findResourceByNameWithFields(String name);
+	public Resource findResourceByNameWithFieldsAndPolicy(String name);
+	
 	public void savePolicy(ABACPolicy policy, String username) throws NoResourceAccessException;
 	
 	public int getNumberOfPolicies();
@@ -14,4 +18,6 @@ public interface ABACService
 	public int getNumberOfAttributeConditions();
 
 	public ABACPolicy findPolicy(Resource requestedResource, PolicyType policyType, String username) throws NoResourceAccessException;
+
+	public int getNumberOfRestrictedFields();
 }

@@ -17,7 +17,6 @@ import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
-import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
 
 @Service
 @Transactional
@@ -33,13 +32,28 @@ public class ABACServiceImpl implements ABACService
 	@Autowired
 	private AuthService authService;
 	
-	@Autowired
-	private SecuritySetupService setupService;
+	@Override
+	public Resource findResourceByName(String name)
+	{
+		return abacDao.findResourceByName(name);
+	}
+
+	@Override
+	public Resource findResourceByNameWithFields(String name)
+	{
+		return abacDao.findResourceByNameWithFields(name);
+	}
+
+	@Override
+	public Resource findResourceByNameWithFieldsAndPolicy(String name)
+	{
+		return abacDao.findResourceByNameWithFieldsAndPolicy(name);
+	}
 	
 	@Override
 	public void savePolicy(ABACPolicy policy, String username) throws NoResourceAccessException
 	{
-		Resource policyResource = setupService.findResourceByNameWithFields("ABACPolicy");
+		Resource policyResource = this.findResourceByNameWithFields("ABACPolicy");
 		User user = authService.searchFullUserByUsername(username);
 		UserAttribs userAttribs = new UserAttribs(username);
 		userAttribs.setRoles(user.getRoleNames());
@@ -75,7 +89,7 @@ public class ABACServiceImpl implements ABACService
 	{
 		// Check if user has access to read policies
 		User user = authService.searchFullUserByUsername(username);
-		Resource abacPolicyResource = setupService.findResourceByName("ABACPolicy");
+		Resource abacPolicyResource = this.findResourceByName("ABACPolicy");
 		ABACPolicy policy;
 		try
 		{
@@ -97,6 +111,12 @@ public class ABACServiceImpl implements ABACService
 		{
 			throw new NoResourceAccessException();
 		}
+	}
+
+	@Override
+	public int getNumberOfRestrictedFields()
+	{
+		return abacDao.getNumberOfRestrictedFields();
 	}
 	
 }

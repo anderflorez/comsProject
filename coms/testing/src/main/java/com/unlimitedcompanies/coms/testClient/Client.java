@@ -4,7 +4,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.service.security.SecuritySetupService;
+import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
 
 public class Client
 {
@@ -31,7 +31,7 @@ public class Client
 		container.register(ApplicationConfig.class);
 		container.refresh();
 		
-		SecuritySetupService setupService = container.getBean(SecuritySetupService.class);
+		SystemAbacService setupService = container.getBean(SystemAbacService.class);
 //		AuthService authService = container.getBean(AuthService.class);
 		
 		setupService.initialSetup();

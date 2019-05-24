@@ -29,17 +29,7 @@ public class ContactDaoImpl implements ContactDao
 	{	
 		try
 		{
-			// TODO: Clean this method
-//			em.createNativeQuery(
-//					"INSERT INTO contacts (contactCharId, firstName, middleName, lastName, email) VALUES (:charId, :fname, :mname, :lname, :email)")
-//					.setParameter("charId", contact.getContactCharId())
-//					.setParameter("fname", contact.getFirstName())
-//					.setParameter("mname", contact.getMiddleName())
-//					.setParameter("lname", contact.getLastName())
-//					.setParameter("email", contact.getEmail())
-//					.executeUpdate();
 			em.persist(contact);
-			
 		} 
 		catch (PersistenceException e)
 		{
@@ -161,7 +151,6 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public void updateContact(Contact contact)
 	{
-		System.out.println("Update DAO");
 		em.merge(contact);
 	}
 
@@ -182,14 +171,6 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public void createContactAddress(Address address)
 	{
-//		em.createNativeQuery("INSERT INTO addresses (street, city, state, zipCode, contactId_FK) VALUES (:street, :city, :state, :zipCode, :contact)")
-//							 .setParameter("street", address.getStreet())
-//							 .setParameter("city", address.getCity())
-//							 .setParameter("state", address.getState())
-//							 .setParameter("zipCode", address.getZipCode())
-//							 .setParameter("contact", contactId)
-//							 .executeUpdate();
-		
 		em.persist(address);
 	}
 	
@@ -233,6 +214,19 @@ public class ContactDaoImpl implements ContactDao
 		Address address = em.createQuery(stringQuery, Address.class).setParameter("id", id).getSingleResult();
 		
 		return address;
+	}
+	
+	@Override
+	public void updateContactAddress(Address address)
+	{
+		em.merge(address);
+	}
+	
+	@Override
+	public void deleteContactAddress(Address address)
+	{
+		Address deleteAddress = em.merge(address);
+		em.remove(deleteAddress);		
 	}
 //
 //	@Override

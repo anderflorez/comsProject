@@ -30,8 +30,9 @@ public interface ContactService
 	public List<Address> searchAllContactAddresses(String username) throws NoResourceAccessException;
 	public Address searchContactAddress(Contact contact, String username) throws NoResourceAccessException;
 	public Address searchContactAddressById(int id, String username) throws NoResourceAccessException;
-//	public List<Address> findContactAddressesByZipCode(String zipCode);
-//	
+	public void updateAddress(Address address, String username) throws NoResourceAccessException;
+	public void deleteContactAddress(Address address, String username) throws NoResourceAccessException, RecordNotDeletedException;
+
 //	public int findNumberOfContacPhones();
 //	public void saveContactPhone(Phone phone);
 //	public List<Phone> findContactPhoneByNumber(String phoneNumber);
