@@ -1,4 +1,4 @@
-module data
+open module data
 {
 	requires transitive java.persistence;
 	requires transitive tomcat.jdbc;
