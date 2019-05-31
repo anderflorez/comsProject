@@ -28,7 +28,7 @@ public class FieldCondition
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name="abacPolicyId_FK")
-	private ABACPolicy abacPolicy;
+	private AbacPolicy abacPolicy;
 	
 	protected FieldCondition()
 	{
@@ -36,7 +36,7 @@ public class FieldCondition
 	}
 	
 	protected FieldCondition(String fieldName, ComparisonOperator comparison, 
-							 String value, ABACPolicy abacPolicy)
+							 String value, AbacPolicy abacPolicy)
 	{
 		this.fieldConditionId = UUID.randomUUID().toString();
 		this.fieldName = fieldName;
@@ -65,12 +65,12 @@ public class FieldCondition
 		return comparison;
 	}
 	
-	public ABACPolicy getAbacPolicy()
+	public AbacPolicy getAbacPolicy()
 	{
 		return abacPolicy;
 	}
 
-	protected void setAbacPolicy(ABACPolicy abacPolicy)
+	protected void setAbacPolicy(AbacPolicy abacPolicy)
 	{
 		this.abacPolicy = abacPolicy;
 	}

@@ -15,23 +15,24 @@ import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.Resource;
+import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Resource;
-import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
+import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 
 @Service
 @Transactional
-public class SystemAbacServiceImpl implements SystemAbacService
+public class SystemServiceImpl implements SystemService
 {
 	
 	@Autowired
@@ -68,13 +69,14 @@ public class SystemAbacServiceImpl implements SystemAbacService
 		{
 			this.checkAllResources();
 			
-			Resource policyResource = abacDao.findResourceByNameWithFieldsAndPolicy("ABACPolicy");
-			ABACPolicy abacPolicy = new ABACPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
+			Resource policyResource = abacDao.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+			AbacPolicy abacPolicy = new AbacPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
 			abacPolicy.setCdPolicy(true, false);
 			abacPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
 			abacDao.savePolicy(abacPolicy);
 			
-			Role adminRole = authDao.createAdminRole();
+			authDao.createRole(new Role("Administrators"));
+			Role adminRole = authDao.getRoleByName("Administrators", null);
 			
 			Contact initialContact = new Contact("Administrator", null, null, "uec_ops_support@unlimitedcompanies.com");
 			contactDao.createContact(initialContact);
@@ -82,7 +84,7 @@ public class SystemAbacServiceImpl implements SystemAbacService
 			
 			PasswordEncoder pe = new BCryptPasswordEncoder();
 			authDao.createUser(new User("administrator", pe.encode("uec123").toCharArray(), adminContact));
-			User adminUser = authDao.getUserByUsername("administrator");
+			User adminUser = authDao.getUserByUsername("administrator", null);
 			
 			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());
 			
@@ -99,17 +101,10 @@ public class SystemAbacServiceImpl implements SystemAbacService
 	}
 
 	@Override
-	public List<String> findAllResourceNames()
+	public List<String> searchAllResourceNames()
 	{
-		return abacDao.findAllResourceNames();
+		return abacDao.searchAllResourceNames();
 	}
-
-	@Override
-	public List<ResourceField> findAllResourceFieldsWithResources()
-	{
-		return abacDao.findAllResourceFieldsWithResources();
-	}
-	
 	
 	
 	/*
@@ -117,22 +112,79 @@ public class SystemAbacServiceImpl implements SystemAbacService
 	 */
 	
 	@Override
-	public ABACPolicy findPolicy(Resource resource, PolicyType policyType) throws NoResourceAccessException
+	public AbacPolicy searchPolicy(Resource resource, PolicyType policyType) throws NoResourceAccessException
 	{
 		try
 		{
-			return abacDao.findPolicy(resource, policyType, null);
+			return abacDao.searchPolicy(resource, policyType, null);
 		}
 		catch (NoResultException e)
 		{
 			throw new NoResourceAccessException();
 		}
 	}
+	
+	@Override
+	public Role searchRoleById(int roleId) throws NoResourceAccessException
+	{
+		// TODO: This method has not been tested
+		try
+		{
+			return authDao.getRoleById(roleId, null);
+		}
+		catch (NoResultException e)
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public Role roleWithAllRestrictedFields(Integer roleId) throws RecordNotFoundException
+	{
+		Role role = authDao.getRoleWithRestrictedFields(roleId);
+		if (role == null)
+		{
+			throw new RecordNotFoundException("The role referenced by the id provided could not be found");
+		}
+		return role;
+	}
+	
+	@Override
+	public ResourceField searchResourceFieldById(int fieldId) throws NoResourceAccessException
+	{
+		// TODO: This method has not been tested
+		try
+		{
+			return abacDao.searchResourceFieldById(fieldId);
+		}
+		catch (NoResultException e)
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public List<ResourceField> searchRestrictedFields(Resource resource, String signedUser)
+	{
+		return abacDao.getRestrictedFields();
+	}
+	
+	@Override
+	public List<String> searchRestrictedFieldNames(Resource resource, String signedUser)
+	{
+		
+	}
+	
+	@Override
+	public User searchFullUserByUsername(String username)
+	{
+		return authDao.getFullUserByUsername(username, null);
+	}
 
 	@Override
 	public UserAttribs getUserAttribs(int userId)
 	{
-		User user = abacDao.getFullUserWithAttribs(userId);
+		User user = authDao.getFullUserWithAttribs(userId);
 
 		UserAttribs userAttribs = new UserAttribs(user.getUsername());
 		

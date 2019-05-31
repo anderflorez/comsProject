@@ -17,13 +17,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.domain.security.Resource;
-import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
 @Table(name = "abacPolicies")
-public class ABACPolicy
+public class AbacPolicy
 {
 	@Id
 	@Column(unique=true, nullable=false)
@@ -46,11 +44,11 @@ public class ABACPolicy
 	private Resource resource;
 	
 	@OneToMany(mappedBy = "parentPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	private List<ABACPolicy> subPolicies;
+	private List<AbacPolicy> subPolicies;
 	
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "abacPolicyId_FK")
-	private ABACPolicy parentPolicy;
+	private AbacPolicy parentPolicy;
 	
 	@OneToMany(mappedBy = "abacPolicy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	//@LazyCollection(LazyCollectionOption.FALSE)
@@ -64,7 +62,7 @@ public class ABACPolicy
 	//@LazyCollection(LazyCollectionOption.FALSE)
 	private List<FieldCondition> fieldConditions;
 	
-	protected ABACPolicy() 
+	protected AbacPolicy() 
 	{
 		this.abacPolicyId = UUID.randomUUID().toString();
 		this.subPolicies = new ArrayList<>();
@@ -73,7 +71,7 @@ public class ABACPolicy
 		this.fieldConditions = new ArrayList<>();
 	}
 	
-	public ABACPolicy(String name, PolicyType policyType, Resource resource) 
+	public AbacPolicy(String name, PolicyType policyType, Resource resource) 
 			throws DuplicatedResourcePolicyException 
 	{
 		this.abacPolicyId = UUID.randomUUID().toString();
@@ -177,17 +175,17 @@ public class ABACPolicy
 		}
 	}
 	
-	public List<ABACPolicy> getSubPolicies()
+	public List<AbacPolicy> getSubPolicies()
 	{
 		return subPolicies;
 	}
 	
-	public ABACPolicy addSubPolicy()
+	public AbacPolicy addSubPolicy()
 	{
-		ABACPolicy subPolicy = null;
+		AbacPolicy subPolicy = null;
 		try
 		{
-			subPolicy = new ABACPolicy(null, this.getPolicyType(), null);
+			subPolicy = new AbacPolicy(null, this.getPolicyType(), null);
 			this.subPolicies.add(subPolicy);
 			subPolicy.setParentPolicy(this);
 		}
@@ -199,12 +197,12 @@ public class ABACPolicy
 		
 	}
 	
-	public ABACPolicy addSubPolicy(LogicOperator logicOperator)
+	public AbacPolicy addSubPolicy(LogicOperator logicOperator)
 	{
-		ABACPolicy subPolicy = null;
+		AbacPolicy subPolicy = null;
 		try
 		{
-			subPolicy = new ABACPolicy(null, this.getPolicyType(), null);
+			subPolicy = new AbacPolicy(null, this.getPolicyType(), null);
 			subPolicy.setLogicOperator(logicOperator);
 			this.subPolicies.add(subPolicy);
 			subPolicy.setParentPolicy(this);
@@ -216,12 +214,12 @@ public class ABACPolicy
 		return subPolicy;
 	}
 	
-	public ABACPolicy getParentPolicy()
+	public AbacPolicy getParentPolicy()
 	{
 		return parentPolicy;
 	}
 	
-	public void setParentPolicy(ABACPolicy parentPolicy)
+	public void setParentPolicy(AbacPolicy parentPolicy)
 	{
 		this.parentPolicy = parentPolicy;
 	}
@@ -390,7 +388,7 @@ public class ABACPolicy
 				readPolicy.setReadGranted(true);
 				String conditions = this.readAttributeAndFieldPolicies(resourceAlias, projectAlias, user);
 				
-				for (ABACPolicy subPolicy : this.getSubPolicies())
+				for (AbacPolicy subPolicy : this.getSubPolicies())
 				{
 					if (subPolicy.isEntityAccessGranted(user))
 					{
@@ -431,7 +429,7 @@ public class ABACPolicy
 				resourceReadPolicy.setReadConditions(this.readAttributeAndFieldPolicies(resourceAlias, projectAlias, user));				
 			}
 
-			for (ABACPolicy subPolicy : this.getSubPolicies())
+			for (AbacPolicy subPolicy : this.getSubPolicies())
 			{
 				ResourceReadPolicy groupReadPolicy = subPolicy.readGroupPolicy(resourceAlias, projectAlias, user);
 				if (groupReadPolicy.isReadGranted())
@@ -470,7 +468,7 @@ public class ABACPolicy
 					}
 				}
 				
-				for (ABACPolicy subPolicy : this.getSubPolicies())
+				for (AbacPolicy subPolicy : this.getSubPolicies())
 				{
 					if (!subPolicy.getModifyPolicy(resourceAttribs, userAttribs, user))
 					{
@@ -496,7 +494,7 @@ public class ABACPolicy
 					}
 				}
 				
-				for (ABACPolicy subPolicy : this.getSubPolicies())
+				for (AbacPolicy subPolicy : this.getSubPolicies())
 				{
 					if (subPolicy.getModifyPolicy(resourceAttribs, userAttribs, user))
 					{
@@ -655,7 +653,7 @@ public class ABACPolicy
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ABACPolicy other = (ABACPolicy) obj;
+		AbacPolicy other = (AbacPolicy) obj;
 		if (policyType == null)
 		{
 			if (other.policyType != null) return false;

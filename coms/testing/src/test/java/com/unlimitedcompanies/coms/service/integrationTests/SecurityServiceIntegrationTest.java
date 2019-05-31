@@ -1,7 +1,11 @@
 package com.unlimitedcompanies.coms.service.integrationTests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,18 +16,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
+import com.unlimitedcompanies.coms.domain.abac.Resource;
+import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
+import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
@@ -41,7 +46,7 @@ public class SecurityServiceIntegrationTest
 	AuthService authService;
 
 	@Autowired
-	SystemAbacService setupService;
+	SystemService systemService;
 	
 	@Autowired
 	ABACService abacService;
@@ -49,15 +54,16 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void saveSimpleContactTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByNameWithFieldsAndPolicy("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByNameWithFieldsAndPolicy("Contact");
 		
-		ABACPolicy abacPolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy abacPolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacPolicy.setCdPolicy(true, false);
 		abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacPolicy, "administrator");
 		
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
+		
 		contactService.saveContact(contact, "administrator");
 		
 		assertEquals(2, contactService.findNumberOfContacts(),
@@ -65,12 +71,22 @@ public class SecurityServiceIntegrationTest
 	}
 	
 	@Test
+	public void noPermissionToSaveContactTest() throws Exception
+	{
+		systemService.initialSetup();
+		Contact contact = new Contact("John", null, "Doe", "john@example.com");
+		
+		assertThrows(NoResourceAccessException.class, () -> contactService.saveContact(contact, "administrator"), 
+				"Test for Saving a new contact without permission failed");
+	}
+	
+	@Test
 	public void saveContactWithRepeatedEmailNotAllowedTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy abacPolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy abacPolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacPolicy.setCdPolicy(true, false);
 		abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacPolicy, "administrator");
@@ -91,15 +107,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findAllContacts() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy abacUpdatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
 		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacUpdatePolicy, "administrator");
 		
-		ABACPolicy abacReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy abacReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		abacReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacReadPolicy, "administrator");
 		
@@ -130,15 +146,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findAllContactsByRangeTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy abacUpdatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
 		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacUpdatePolicy, "administrator");
 		
-		ABACPolicy abacReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy abacReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		abacReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacReadPolicy, "administrator");
 		
@@ -167,15 +183,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findContactByIdTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy abacUpdatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy abacUpdatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		abacUpdatePolicy.setCdPolicy(true, false);
 		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacUpdatePolicy, "administrator");
 		
-		ABACPolicy abacReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy abacReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		abacReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(abacReadPolicy, "administrator");
 		
@@ -191,15 +207,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findContactByCharIdTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
@@ -213,15 +229,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findContactByEmailTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
@@ -236,15 +252,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void updateContactTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
@@ -262,15 +278,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void noPersistentObjectUpdateTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
@@ -287,15 +303,15 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void deleteSingleContactTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, true);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
@@ -312,20 +328,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void saveContactAddressTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
@@ -348,25 +364,25 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findAllContactAddressesTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactCreatePolicy = new ABACPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactCreatePolicy = new AbacPolicy("ContactCreate", PolicyType.UPDATE, contactResource);
 		contactCreatePolicy.setCdPolicy(true, false);
 		contactCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactCreatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -390,20 +406,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findContactAddressTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -417,20 +433,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void findAddressByIdTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -448,20 +464,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void updateContactAddressTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -479,20 +495,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void noPersistentAutoUpdateContactAddressTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, false);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -509,20 +525,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void deleteContactAddressTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource addressContactResource = abacService.findResourceByName("Address");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource addressContactResource = abacService.searchResourceByName("Address");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy addressCreatePolicy = new ABACPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
+		AbacPolicy addressCreatePolicy = new AbacPolicy("AddressCreate", PolicyType.UPDATE, addressContactResource);
 		addressCreatePolicy.setCdPolicy(true, true);
 		addressCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressCreatePolicy, "administrator");
 
-		ABACPolicy addressReadPolicy = new ABACPolicy("AddressRead", PolicyType.READ, addressContactResource);
+		AbacPolicy addressReadPolicy = new AbacPolicy("AddressRead", PolicyType.READ, addressContactResource);
 		addressReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(addressReadPolicy, "administrator");
 		
@@ -605,20 +621,20 @@ public class SecurityServiceIntegrationTest
 	@Test
 	public void saveNewUserTest() throws Exception
 	{
-		setupService.initialSetup();
-		Resource contactResource = abacService.findResourceByName("Contact");
-		Resource userResource = abacService.findResourceByName("User");
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource userResource = abacService.searchResourceByName("User");
 		
-		ABACPolicy contactUpdatePolicy = new ABACPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
 		contactUpdatePolicy.setCdPolicy(true, false);
 		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactUpdatePolicy, "administrator");
 		
-		ABACPolicy contactReadPolicy = new ABACPolicy("contactRead", PolicyType.UPDATE, contactResource);
+		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
 		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		ABACPolicy userUpdatePolicy = new ABACPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
 		userUpdatePolicy.setCdPolicy(true, false);
 		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(userUpdatePolicy, "administrator");
@@ -629,27 +645,86 @@ public class SecurityServiceIntegrationTest
 		
 		assertEquals(2, authService.searchNumberOfUsers(), "Service test to save a new user failed");
 	}
+	
+	@Test
+	public void userWithDuplicatedUsernameNotAllowedTest() throws Exception
+	{
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource userResource = abacService.searchResourceByName("User");
+		
+		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		contactUpdatePolicy.setCdPolicy(true, false);
+		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactUpdatePolicy, "administrator");
+		
+		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		userUpdatePolicy.setCdPolicy(true, false);
+		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userUpdatePolicy, "administrator");
+		
+		Contact initContact = new Contact("John", null, "Doe", "johnd@example.com");
+		contactService.saveContact(initContact, "administrator");
+		initContact = contactService.searchContactByCharId(initContact.getContactCharId(), "administrator");
+		
+		Contact dupContact = new Contact("Johnny", null, "Doe");
+		contactService.saveContact(dupContact, "administrator");
+		dupContact = contactService.searchContactByCharId(dupContact.getContactCharId(), "administrator");
+		
+		authService.saveUser(new User("username", "mypass".toCharArray(), initContact), "administrator");
+		
+		User user = new User("username", "mypass".toCharArray(), dupContact);
+		assertThrows(DuplicateRecordException.class, () -> authService.saveUser(user, "administrator"), 
+				"Service test to make sure a user with duplicated username is not allowed failed");
+	}
 
 	@Test
 	public void getNumberOfUsersTest()
 	{
 		assertEquals(0, authService.searchNumberOfUsers(), "Service test to find the number of users failed");
 	}
-	
+//	
 //	@Test
-//	public void findAllUsersTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
+//	public void findAllUsersTest() throws Exception
 //	{
-//		Contact contact1 = contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-//		Contact contact2 = contactService.saveContact(new Contact("Jane", null, "Doe", "janed@example.com"));
-//		Contact contact3 = contactService.saveContact(new Contact("Richard", null, "Doe", "rich@example.com"));
-//
-//		authService.saveUser(new User("username1", "mypass".toCharArray(), contact1));
-//		User user = new User("username2", "mypass".toCharArray(), contact2);
-//		user.setEnabled(false);
-//		authService.saveUser(user);
-//		authService.saveUser(new User("username3", "mypass".toCharArray(), contact3));
+//		systemService.initialSetup();
+//		Resource contactResource = abacService.findResourceByName("Contact");
+//		Resource userResource = abacService.findResourceByName("User");
 //		
-//		assertEquals(3, authService.searchAllUsers().size(), "Find all users integration test failed");
+//		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+//		contactUpdatePolicy.setCdPolicy(true, false);
+//		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		abacService.savePolicy(contactUpdatePolicy, "administrator");
+//		
+//		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
+//		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		abacService.savePolicy(contactReadPolicy, "administrator");
+//		
+//		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+//		userUpdatePolicy.setCdPolicy(true, false);
+//		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		abacService.savePolicy(userUpdatePolicy, "administrator");
+//		
+//		Contact firstContact = new Contact("John", null, "Doe", "johnd@example.com");
+//		contactService.saveContact(firstContact, "administrator");
+//		firstContact = contactService.searchContactByCharId(firstContact.getContactCharId(), "administrator");
+//		authService.saveUser(new User("firstUser", "pass".toCharArray(), firstContact), "administrator");
+//		
+//		Contact secondContact = new Contact("Jane", null, "Doe", "janed@example.com");
+//		contactService.saveContact(secondContact, "administrator");
+//		secondContact = contactService.searchContactByCharId(secondContact.getContactCharId(), "administrator");
+//		authService.saveUser(new User("secondUser", "pass".toCharArray(), secondContact), "administrator");
+//		
+//		Contact thirdContact = new Contact("Richard", null, "Roe", "richardr@example.com");
+//		contactService.saveContact(thirdContact, "administrator");
+//		thirdContact = contactService.searchContactByCharId(thirdContact.getContactCharId(), "administrator");
+//		authService.saveUser(new User("thirdUser", "pass".toCharArray(), thirdContact), "administrator");
+//		
+//		assertEquals(3, authService.searchAllUsers("administrator").size(), "Find all users integration test failed");
 //	}
 //	
 //	@Test
@@ -676,30 +751,73 @@ public class SecurityServiceIntegrationTest
 //		assertEquals(user3.getUsername(), authService.searchUsersByRange(1, 3).get(2).getUsername());
 //		assertEquals(user7.getUsername(), authService.searchUsersByRange(4, 2).get(0).getUsername());
 //	}
-//	
-//	@Test
-//	public void findUserByUserId() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
-//	{
-//		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-//		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-//		User user = authService.saveUser(new User("jdoe", "mypass".toCharArray(), contact));
-//		
-//		User foundUser = authService.searchUserByUserId(user.getUserId());
-//		assertEquals(user, foundUser, "Service test for finding user by userId failed");
-//	}
-//	
-//	@Test
-//	public void findUserByUsernameTest() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
-//	{
-//		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"));
-//		Contact contact = contactService.searchContactByEmail("johnd@example.com");
-//		User user = new User("jdoe", "mypass".toCharArray(), contact);
-//		authService.saveUser(user);
-//
-//		User founduser = authService.searchUserByUsername("jdoe");
-//
-//		assertEquals(user, founduser, "Service test for finding user by username with contact failed");
-//	}
+	
+	@Test
+	public void findUserByUserId() throws Exception
+	{
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource userResource = abacService.searchResourceByName("User");
+		
+		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		contactUpdatePolicy.setCdPolicy(true, false);
+		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactUpdatePolicy, "administrator");
+		
+		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		userUpdatePolicy.setCdPolicy(true, false);
+		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userUpdatePolicy, "administrator");
+		
+		AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
+		userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userReadPolicy, "Administrator");
+		
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"), "administrator");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com", "administrator");
+		authService.saveUser(new User("username", "mypass".toCharArray(), contact), "administrator");
+		User user = authService.searchUserByUsername("username", "administrator");
+
+		assertEquals(user, authService.searchUserById(user.getUserId(), "administrator"), 
+				"Service test for finding user by userId failed");
+	}
+	
+	@Test
+	public void findUserByUsernameTest() throws Exception 
+	{
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource userResource = abacService.searchResourceByName("User");
+		
+		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		contactUpdatePolicy.setCdPolicy(true, false);
+		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactUpdatePolicy, "administrator");
+		
+		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+		
+		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		userUpdatePolicy.setCdPolicy(true, false);
+		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userUpdatePolicy, "administrator");
+		
+		AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
+		userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userReadPolicy, "administrator");
+		
+		contactService.saveContact(new Contact("John", null, "Doe", "johnd@example.com"), "administrator");
+		Contact contact = contactService.searchContactByEmail("johnd@example.com", "administrator");
+		authService.saveUser(new User("username", "mypass".toCharArray(), contact), "administrator");
+		
+		assertTrue(authService.searchUserByUsername("username", "administrator").isEnabled(), 
+				"Service test for finding user by username with contact failed");
+	}
 //	
 //	@Test
 //	public void findUserByContact() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
@@ -870,20 +988,28 @@ public class SecurityServiceIntegrationTest
 //		 // TODO: Change the assert statement to an assert that gets an exception
 //		 assertEquals(1, authService.searchNumberOfUsers(), "Service test for deleting a single user failed");
 //	 }
-//
-//	@Test
-//	public void getNumberOfRolesTest()
-//	{
-//		assertEquals(0, authService.searchNumberOfRoles(), "Service test for finding number of roles failed");
-//	}
-//
-//	@Test
-//	public void saveNewRoleTest() throws RecordNotCreatedException
-//	{
-//		Role role = authService.saveRole(new Role("Administrator"));
-//		assertEquals(1, authService.searchNumberOfRoles(), "Service test for saving new role failed");
-//		assertNotNull(role.getRoleId(), "Service test for saving new role failed");
-//	}
+
+	@Test
+	public void getNumberOfRolesTest()
+	{
+		assertEquals(0, authService.searchNumberOfRoles(), "Service test for finding number of roles failed");
+	}
+
+	@Test
+	public void saveNewRoleTest() throws Exception
+	{
+		systemService.initialSetup();
+		Resource roleResource = abacService.searchResourceByName("Role");
+		
+		AbacPolicy roleUpdate = new AbacPolicy("RoleUpdate", PolicyType.UPDATE, roleResource);
+		roleUpdate.setCdPolicy(true, false);
+		roleUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleUpdate, "administrator");
+		
+		authService.saveRole(new Role("Manager"), "administrator");
+		
+		assertEquals(2, authService.searchNumberOfRoles(), "Service test for saving new role failed");
+	}
 //	
 //	@Test
 //	public void findAllRolesTest() throws RecordNotCreatedException
@@ -909,29 +1035,37 @@ public class SecurityServiceIntegrationTest
 //		assertEquals("Receptionist", authService.searchRolesByRange(3, 2).get(1).getRoleName());
 //		assertEquals("Administrator", authService.searchRolesByRange(1, 3).get(1).getRoleName());
 //	}
-//	
-//	@Test
-//	public void findRoleByRoleIdTest() throws RecordNotCreatedException, RecordNotFoundException
-//	{
-//		Role initialrole = new Role("Administrator");
-//		System.out.println(initialrole.getRoleId());
-//		Role savedRole = authService.saveRole(initialrole);
-//		System.out.println("Searching for role with id: " + savedRole.getRoleId());
-//		Role foundRole = authService.searchRoleById(savedRole.getRoleId());
-//		System.out.println("found Role: " + foundRole.getRoleId());
-//		
-//		assertEquals(initialrole, foundRole, "Service test for finding role by roleId failed");
-//	}
-//	
-//	@Test
-//	public void findRoleByRoleNameTest() throws RecordNotCreatedException, RecordNotFoundException
-//	{
-//		Role initialrole = new Role("Administrator");
-//		authService.saveRole(initialrole);
-//		Role foundrole = authService.searchRoleByName("Administrator");
-//		
-//		assertEquals(initialrole, foundrole, "Service test for finding role by roleName failed");
-//	}
+	
+	@Test
+	public void findRoleByRoleIdTest() throws Exception
+	{
+		systemService.initialSetup();
+		Resource roleResource = abacService.searchResourceByName("Role");
+		
+		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
+		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleRead, "administrator");
+		
+		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
+		
+		assertEquals("Administrators", authService.searchRoleById(adminRole.getRoleId(), "administrator").getRoleName(), 
+				"Service test for finding role by roleId failed");
+	}
+	
+	@Test
+	public void findRoleByRoleNameTest() throws Exception
+	{
+		systemService.initialSetup();
+		Resource roleResource = abacService.searchResourceByName("Role");
+		
+		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
+		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleRead, "administrator");
+		
+		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
+		
+		assertNotNull(adminRole.getRoleId(), "Service test for finding role by roleName failed");
+	}
 //	
 //	@Test
 //	public void findRoleByIdWithMembers() throws DuplicateRecordException, RecordNotFoundException, RecordNotCreatedException
@@ -975,19 +1109,32 @@ public class SecurityServiceIntegrationTest
 //		assertEquals(2, foundUsers.size(), "Service test for search role non members failed");
 //		assertEquals("Richard", foundUsers.get(1).getContact().getFirstName(), "Service test for search role non members failed");
 //	}
-//
-//	@Test
-//	 public void updateRoleTest() throws RecordNotCreatedException, RecordNotFoundException, RecordNotChangedException
-//	 {
-//		Role role = authService.saveRole(new Role("Administrator"));
-//		Role newrole = new Role("Admins");
-//		newrole.setRoleId(role.getRoleId());
-//		
-//		role = authService.updateRole(newrole);
-//		
-//		assertNotEquals("Administrator", role.getRoleName(), "Service test for updating role has failed");
-//		assertEquals("Admins", role.getRoleName(), "Service test for updating role has failed");
-//	 }
+
+	@Test
+	 public void updateRoleTest() throws Exception
+	 {
+		systemService.initialSetup();
+		Resource roleResource = abacService.searchResourceByName("Role");
+		
+		AbacPolicy roleUpdate = new AbacPolicy("RoleUpdate", PolicyType.UPDATE, roleResource);
+		roleUpdate.setCdPolicy(true, false);
+		roleUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleUpdate, "administrator");
+		
+		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
+		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleRead, "administrator");
+		
+		authService.saveRole(new Role("Manager"), "administrator");
+		Role role = authService.searchRoleByName("Manager", "administrator");
+		int roleId = role.getRoleId();
+
+		role.setRoleName("Coordinator");
+		authService.updateRole(role, "administrator");
+		
+		assertEquals(roleId, authService.searchRoleByName("Coordinator", "administrator").getRoleId(), 
+				"Service test for updating role has failed");
+	 }
 //	
 //	@Test
 //	 public void updateFailureRoleTest() throws RecordNotCreatedException
@@ -1065,9 +1212,9 @@ public class SecurityServiceIntegrationTest
 //	@Test
 //	public void checkResourcesTest()
 //	{
-//		setupService.checkAllResources();
-//		List<String> resources = setupService.findAllResourceNames();
-//		List<ResourceField> resourceFields = setupService.findAllResourceFieldsWithResources();
+//		systemService.checkAllResources();
+//		List<String> resources = systemService.findAllResourceNames();
+//		List<ResourceField> resourceFields = systemService.findAllResourceFieldsWithResources();
 //		Set<String> resourceFromFields = new HashSet<>();
 //		for (ResourceField rf : resourceFields)
 //		{
@@ -1080,8 +1227,8 @@ public class SecurityServiceIntegrationTest
 //	@Test
 //	public void findAResourceTest()
 //	{
-//		setupService.checkAllResources();
-//		Resource resource = setupService.findResourceByName("Contact");
+//		systemService.checkAllResources();
+//		Resource resource = systemService.findResourceByName("Contact");
 //		assertEquals("Contact", resource.getResourceName(), "Find resource integration test failed");
 //	}
 }

@@ -1,23 +1,26 @@
 package com.unlimitedcompanies.coms.service.security;
 
-import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
+import java.util.List;
+
+import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
-import com.unlimitedcompanies.coms.domain.security.Resource;
+import com.unlimitedcompanies.coms.domain.abac.Resource;
+import com.unlimitedcompanies.coms.domain.abac.ResourceField;
+import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 
 public interface ABACService
 {
-	public Resource findResourceByName(String name);
-	public Resource findResourceByNameWithFields(String name);
-	public Resource findResourceByNameWithFieldsAndPolicy(String name);
-	
-	public void savePolicy(ABACPolicy policy, String username) throws NoResourceAccessException;
+	public void savePolicy(AbacPolicy policy, String username) throws NoResourceAccessException;
+	public void addFieldRestriction(int fieldId, int roleId, String loggedUser) throws NoResourceAccessException;
 	
 	public int getNumberOfPolicies();
 	public int getNumberOfEntityConditions();
 	public int getNumberOfAttributeConditions();
-
-	public ABACPolicy findPolicy(Resource requestedResource, PolicyType policyType, String username) throws NoResourceAccessException;
-
 	public int getNumberOfRestrictedFields();
+
+	public Resource searchResourceByName(String name);
+	public Resource searchResourceByNameWithFields(String name);
+	public Resource searchResourceByNameWithFieldsAndPolicy(String name);
+	public AbacPolicy searchPolicy(Resource requestedResource, PolicyType policyType, String signedUsername) throws NoResourceAccessException;
 }

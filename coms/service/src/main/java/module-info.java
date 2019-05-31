@@ -4,7 +4,7 @@ open module service
 	requires java.management;
 	requires java.sql;
 	requires java.base;
-//	requires org.hibernate.orm.core;
+	requires org.hibernate.orm.core;
 	requires spring.beans;
 	requires spring.context;
 	requires spring.tx;

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.service.abac.SystemAbacService;
+import com.unlimitedcompanies.coms.service.abac.SystemService;
 
 public class Client
 {
@@ -31,13 +31,13 @@ public class Client
 		container.register(ApplicationConfig.class);
 		container.refresh();
 		
-		SystemAbacService setupService = container.getBean(SystemAbacService.class);
+		SystemService setupService = container.getBean(SystemService.class);
 //		AuthService authService = container.getBean(AuthService.class);
 		
 		setupService.initialSetup();
 		
-		//This next line is now being perform by the method setupService.initialSetup()
-//		setupService.checkAllResources();
+		//This next line is now being perform by the method systemService.initialSetup()
+//		systemService.checkAllResources();
 		
 //		int roleId = authService.findRoleByRoleName("Administrators").getRoleId();
 //		Role role = authService.findRoleByIdWithMembers(roleId);

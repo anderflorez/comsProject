@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.domain.security;
+package com.unlimitedcompanies.coms.domain.abac;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +13,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.domain.abac.ABACPolicy;
-import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 
 @Entity
 @Table(name = "resources")
@@ -30,7 +28,7 @@ public class Resource
 	private Set<ResourceField> resourceFields;
 	
 	@OneToMany(mappedBy = "resource")
-	private List<ABACPolicy> policies;
+	private List<AbacPolicy> policies;
 
 	public Resource() 
 	{
@@ -85,17 +83,17 @@ public class Resource
 		}
 	}
 
-	public List<ABACPolicy> getPolicies()
+	public List<AbacPolicy> getPolicies()
 	{
 		return policies;
 	}
 
-	protected void setPolicies(List<ABACPolicy> policies)
+	protected void setPolicies(List<AbacPolicy> policies)
 	{
 		this.policies = policies;
 	}
 	
-	public void addPolicy(ABACPolicy policy) throws DuplicatedResourcePolicyException
+	public void addPolicy(AbacPolicy policy) throws DuplicatedResourcePolicyException
 	{
 		if (!this.verifyExistingPolicy(policy))
 		{
@@ -113,12 +111,12 @@ public class Resource
 	
 	public void addPolicy(String policyName, PolicyType policyType) throws DuplicatedResourcePolicyException
 	{
-		new ABACPolicy(policyName, policyType, this);
+		new AbacPolicy(policyName, policyType, this);
 	}
 	
-	private boolean verifyExistingPolicy(ABACPolicy policy)
+	private boolean verifyExistingPolicy(AbacPolicy policy)
 	{
-		for (ABACPolicy next : this.policies)
+		for (AbacPolicy next : this.policies)
 		{
 			if (next.equals(policy))
 			{

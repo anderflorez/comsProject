@@ -1,21 +1,27 @@
-package com.unlimitedcompanies.coms.domain.security;
+package com.unlimitedcompanies.coms.domain.abac;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.unlimitedcompanies.coms.domain.security.Role;
+
 @Entity
 @Table(name = "resourceFields")
 public class ResourceField
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer resourceFieldId;
+	
 	private String resourceFieldName;
 	private byte association;
 

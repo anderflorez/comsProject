@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import com.unlimitedcompanies.coms.domain.abac.Resource;
+import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Phone;
-import com.unlimitedcompanies.coms.domain.security.Resource;
-import com.unlimitedcompanies.coms.domain.security.ResourceField;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
@@ -91,6 +91,8 @@ class DomainSecurityUnitTest
 		assertThrows(InvalidPhoneNumberException.class, 
 					 () -> new Phone("(999)9999999", null, null, contact));
 	}
+	
+	// TODO: Create more testing for users and other classes to check for constraints such as userWithNullUsernameNotAllowed
 	
 	@Test
 	public void datesForUsersFormatingTesting()

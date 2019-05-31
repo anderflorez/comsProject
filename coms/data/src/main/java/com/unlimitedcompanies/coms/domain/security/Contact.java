@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
+import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
 
 @Entity
@@ -135,6 +137,42 @@ public class Contact
 	public void setEmployee(Employee employee)
 	{
 		this.employee = employee;
+	}
+	
+	public void cleanRestrictedFields(List<String> restrictions)
+	{
+		if (restrictions.contains("contactId"))
+		{
+			this.contactId = null;
+		}
+		if (restrictions.contains("contactCharId"))
+		{
+			this.contactCharId = null;
+		}
+		if (restrictions.contains("firstName"))
+		{
+			this.firstName = null;
+		}
+		if (restrictions.contains("middleName"))
+		{
+			this.middleName = null;
+		}
+		if (restrictions.contains("lastName"))
+		{
+			this.lastName = null;
+		}
+		if (restrictions.contains("email"))
+		{
+			this.email = null;
+		}
+		if (restrictions.contains("user"))
+		{
+			this.user = null;
+		}
+		if (restrictions.contains("employee"))
+		{
+			this.employee = null;
+		}
 	}
 
 	@Override

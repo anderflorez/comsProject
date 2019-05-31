@@ -25,14 +25,14 @@ public class CdPolicy
 	
 	@OneToOne
 	@JoinColumn(name = "abacPolicyId_FK")
-	private ABACPolicy policy;
+	private AbacPolicy policy;
 	
 	protected CdPolicy() 
 	{
 		this.cdPolicyId = UUID.randomUUID().toString();
 	}
 	
-	protected CdPolicy(boolean createPolicy, boolean deletePolicy, ABACPolicy policy)
+	protected CdPolicy(boolean createPolicy, boolean deletePolicy, AbacPolicy policy)
 	{
 		this.cdPolicyId = UUID.randomUUID().toString();
 		this.createPolicy = createPolicy;
@@ -65,7 +65,7 @@ public class CdPolicy
 		return cdPolicyId;
 	}
 
-	public ABACPolicy getPolicy()
+	public AbacPolicy getPolicy()
 	{
 		return policy;
 	}

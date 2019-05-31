@@ -31,14 +31,14 @@ public class EntityCondition
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name="abacPolicyId_FK")
-	private ABACPolicy abacPolicy;
+	private AbacPolicy abacPolicy;
 	
 	protected EntityCondition() 
 	{
 		this.entityConditionId = UUID.randomUUID().toString();
 	}
 	
-	protected EntityCondition(ABACPolicy abacPolicy, 
+	protected EntityCondition(AbacPolicy abacPolicy, 
 							  UserAttribute userAttribute,
 							  ComparisonOperator comparison, 
 							  String value)
@@ -70,12 +70,12 @@ public class EntityCondition
 		return comparison;
 	}
 	
-	public ABACPolicy getAbacPolicy()
+	public AbacPolicy getAbacPolicy()
 	{
 		return abacPolicy;
 	}
 
-	protected void setAbacPolicy(ABACPolicy abacPolicy)
+	protected void setAbacPolicy(AbacPolicy abacPolicy)
 	{
 		this.abacPolicy = abacPolicy;
 	}

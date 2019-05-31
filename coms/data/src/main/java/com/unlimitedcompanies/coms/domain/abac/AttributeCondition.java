@@ -31,14 +31,14 @@ public class AttributeCondition
 	
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name = "abacPolicyId_FK")
-	private ABACPolicy abacPolicy;
+	private AbacPolicy abacPolicy;
 	
 	protected AttributeCondition() 
 	{
 		this.attributeConditionId = UUID.randomUUID().toString();
 	}
 	
-	protected AttributeCondition(ABACPolicy abacPolicy, 
+	protected AttributeCondition(AbacPolicy abacPolicy, 
 								 ResourceAttribute resourceAttribute, 
 								 ComparisonOperator comparisonOperator, 
 								 UserAttribute userAttribute)
@@ -70,12 +70,12 @@ public class AttributeCondition
 		return comparison;
 	}
 
-	public ABACPolicy getAbacPolicy()
+	public AbacPolicy getAbacPolicy()
 	{
 		return abacPolicy;
 	}
 
-	protected void setAbacPolicy(ABACPolicy abacPolicy)
+	protected void setAbacPolicy(AbacPolicy abacPolicy)
 	{
 		this.abacPolicy = abacPolicy;
 	}

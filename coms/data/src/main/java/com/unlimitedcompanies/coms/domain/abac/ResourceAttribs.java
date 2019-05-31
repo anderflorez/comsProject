@@ -32,6 +32,11 @@ public class ResourceAttribs
 	{
 		this.projectNames.add(projectName);
 	}
+	
+	public void addProjectName(List<String> projectNames)
+	{
+		this.projectNames.addAll(projectNames);
+	}
 
 	public List<String> getProjectManagers()
 	{
@@ -46,6 +51,11 @@ public class ResourceAttribs
 	public void addProjectManager(String projectManager)
 	{
 		this.projectManagers.add(projectManager);
+	}
+	
+	public void addProjectManager(List<String> projectManagers)
+	{
+		this.projectManagers.addAll(projectManagers);
 	}
 
 	public List<String> getProjectSuperintendents()
@@ -62,6 +72,11 @@ public class ResourceAttribs
 	{
 		this.projectSuperintendents.add(superintendent);
 	}
+	
+	public void addProjectSuperintendent(List<String> superintendents)
+	{
+		this.projectSuperintendents.addAll(superintendents);
+	}
 
 	public List<String> getProjectForemen()
 	{
@@ -76,6 +91,11 @@ public class ResourceAttribs
 	public void addProjectForman(String foreman)
 	{
 		this.projectForemen.add(foreman);
+	}
+	
+	public void addProjectForman(List<String> projectFormen)
+	{
+		this.projectForemen.addAll(projectFormen);
 	}
 
 }
