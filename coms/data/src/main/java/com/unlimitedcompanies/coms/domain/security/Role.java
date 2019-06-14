@@ -14,6 +14,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.hibernate.Hibernate;
+import org.hibernate.collection.internal.PersistentBag;
+
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 
 @Entity
@@ -37,10 +40,16 @@ public class Role
 			   inverseJoinColumns = {@JoinColumn(name = "resourceFieldId_FK")})
 	private List<ResourceField> restrictedFields = new ArrayList<>();
 	
-	protected Role() {}
+	protected Role() 
+	{
+		this.users = new ArrayList<>();
+		this.restrictedFields = new ArrayList<>();
+	}
 
 	public Role(String roleName)
 	{
+		this.users = new ArrayList<>();
+		this.restrictedFields = new ArrayList<>();
 		this.roleName = roleName;
 	}
 	
@@ -64,7 +73,7 @@ public class Role
 		this.roleName = roleName;
 	}
 	
-	public List<User> getMembers()
+	public List<User> getUsers()
 	{
 		return Collections.unmodifiableList(this.users);
 	}
@@ -94,11 +103,16 @@ public class Role
 
 	public void addRestrictedField(ResourceField field)
 	{
-		if (!this.restrictedFields.contains(field))
+		if (this.restrictedFields != null && !this.restrictedFields.contains(field))
 		{
 			this.restrictedFields.add(field);
 			field.assignRestrictedRole(this);
 		}
+	}
+	
+	public void clearRestrictedFields()
+	{
+		this.restrictedFields = new ArrayList<>();
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.Role;
+import com.unlimitedcompanies.coms.domain.security.User;
 
 public interface ABACDao
 {
@@ -18,13 +18,14 @@ public interface ABACDao
 	public int getNumberOfEntityConditions();
 	public int getNumberOfAttributeConditions();
 	public int getNumberOfRestrictedFields();
-	public AbacPolicy searchPolicy(Resource resource, PolicyType policyType, String accessConditions);
-	public List<String> searchAllResourceNames();
-	public Resource searchResourceByName(String name);
-	public Resource searchResourceByNameWithFields(String name);
-	public Resource searchResourceByNameWithFieldsAndPolicy(String name);
-	public ResourceField searchResourceFieldById(int fieldId);
-	public List<ResourceField> searchAllResourceFieldsWithResources();
+	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions);
+	public List<String> getAllResourceNames();
+	public Resource getResourceByName(String name);
+	public Resource getResourceByNameWithFields(String name);
+	public Resource getResourceByNameWithFieldsAndPolicy(String name);
+	public ResourceField getResourceFieldById(int fieldId);
+	public List<ResourceField> getAllResourceFieldsWithResources();
+	public List<ResourceField> getRestrictedFields(int userId, int resourceId);
 	
 	public void checkResourceList();
 	public void checkResourceFieldList();

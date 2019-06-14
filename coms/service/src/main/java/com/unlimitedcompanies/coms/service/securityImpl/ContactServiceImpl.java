@@ -1,6 +1,5 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -18,7 +17,6 @@ import com.unlimitedcompanies.coms.domain.abac.ResourceAttribs;
 import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
-import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemService;
@@ -43,20 +41,23 @@ public class ContactServiceImpl implements ContactService
 	private ABACService abacService;
 
 	@Override
-	public void saveContact(Contact contact, String username) throws DuplicateRecordException, NoResourceAccessException
+	public void saveContact(Contact contact, String signedUsername) throws DuplicateRecordException, NoResourceAccessException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.UPDATE);;
-		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
 		// TODO: Add the projects that are associated to the user
 		
-		if (contactPolicy.getModifyPolicy(null, userAttribs, user) && contactPolicy.getCdPolicy().isCreatePolicy())
+		if (contactPolicy.getModifyPolicy(null, userAttribs, signedUser) && contactPolicy.getCdPolicy().isCreatePolicy())
 		{
-//			List<ResourceField> restrictedFields = systemService.searchRestrictedFields(contactResource, "administrator");
-//			contact.cleanRestrictedFields(restrictedFields);
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				contact.cleanRestrictedFields(restrictedFields);
+			}
 			
 			try
 			{
@@ -86,10 +87,22 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public List<Contact> searchAllContacts(String username) throws NoResourceAccessException
+	public int findNumberOfContactAddresses()
+	{
+		return contactDao.getNumberOfAddresses();
+	}
+	
+	@Override
+	public int findNumberOfContactPhones()
+	{
+		return contactDao.getNumberOfContactPhones();
+	}
+	
+	@Override
+	public List<Contact> searchAllContacts(String signedUsername) throws NoResourceAccessException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		AbacPolicy contactPolicy;
 		try
 		{
@@ -100,11 +113,22 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", user);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
 		if (resourceReadPolicy.isReadGranted())
 		{
 			List<Contact> contacts = contactDao.getAllContacts(resourceReadPolicy.getReadConditions());
 			contactDao.clearEntityManager();
+			
+			// Check if there are any restricted fields for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				for (Contact contact : contacts)
+				{
+					contact.cleanRestrictedFields(restrictedFields);
+				}
+			}
+			
 			return contacts;
 		}
 		else
@@ -114,10 +138,10 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public List<Contact> searchContactsByRange(int elements, int page, String username) throws NoResourceAccessException
+	public List<Contact> searchContactsByRange(int elements, int page, String signedUsername) throws NoResourceAccessException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		AbacPolicy contactPolicy;
 		try
 		{
@@ -128,11 +152,22 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", user);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
 		if (resourceReadPolicy.isReadGranted())
 		{
 			List<Contact> contacts = contactDao.getContactsByRange(elements, page - 1, resourceReadPolicy.getReadConditions());
 			contactDao.clearEntityManager();
+			
+			// Check if there are any restricted fields for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				for (Contact contact : contacts)
+				{
+					contact.cleanRestrictedFields(restrictedFields);
+				}
+			}
+			
 			return contacts;
 		}
 		else
@@ -158,10 +193,10 @@ public class ContactServiceImpl implements ContactService
 		
 	@Override
 	@Transactional(rollbackFor = {RecordNotFoundException.class})
-	public Contact searchContactById(int id, String username) throws RecordNotFoundException, NoResourceAccessException
+	public Contact searchContactById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		AbacPolicy contactPolicy;
 		try
 		{
@@ -172,13 +207,21 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", user);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
 		if (resourceReadPolicy.isReadGranted())
 		{
 			try
 			{
 				Contact contact = contactDao.getContactById(id, resourceReadPolicy.getReadConditions());
 				contactDao.clearEntityManager();
+				
+				// Check if there are any restricted fields for the requesting user
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					contact.cleanRestrictedFields(restrictedFields);
+				}
+				
 				return contact;
 			} 
 			catch (NoResultException e)
@@ -193,10 +236,10 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public Contact searchContactByCharId(String charId, String username) throws NoResourceAccessException, RecordNotFoundException
+	public Contact searchContactByCharId(String charId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy;
 		try
@@ -208,13 +251,21 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", user);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
 		if (resourceReadPolicy.isReadGranted())
 		{
 			try
 			{
 				Contact contact = contactDao.getContactByCharId(charId, resourceReadPolicy.getReadConditions());
 				contactDao.clearEntityManager();
+				
+				// Check if there are any restricted fields for the requesting user
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					contact.cleanRestrictedFields(restrictedFields);
+				}
+								
 				return contact;
 			}
 			catch (NoResultException e)
@@ -229,10 +280,10 @@ public class ContactServiceImpl implements ContactService
 	}
 
 	@Override
-	public Contact searchContactByEmail(String email, String username) throws NoResourceAccessException, RecordNotFoundException
+	public Contact searchContactByEmail(String email, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy;
 		try
@@ -244,13 +295,21 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", user);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
 		if (resourceReadPolicy.isReadGranted())
 		{
 			try
 			{
 				Contact contact = contactDao.getContactByEmail(email, resourceReadPolicy.getReadConditions());
 				contactDao.clearEntityManager();
+				
+				// Check if there are any restricted fields for the requesting user
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					contact.cleanRestrictedFields(restrictedFields);
+				}
+				
 				return contact;
 			}
 			catch (NoResultException e)
@@ -266,10 +325,10 @@ public class ContactServiceImpl implements ContactService
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void updateContact(Contact contact, String username) throws NoResourceAccessException 
+	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException 
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
-		User user = systemService.searchFullUserByUsername(username);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy;
 		try
@@ -282,10 +341,18 @@ public class ContactServiceImpl implements ContactService
 		}
 		
 		ResourceAttribs resourceAttribs = this.getContactResourceAttribs(contact.getContactId());
-		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
-		if (contactPolicy.getModifyPolicy(resourceAttribs, userAttribs, user))
+		if (contactPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
+			// Check if there are any restricted fields for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				Contact foundContact = contactDao.getContactById(contact.getContactId(), null);
+				contact.cleanRestrictedFields(restrictedFields, foundContact);
+			}
+			
 			contactDao.updateContact(contact);
 			contactDao.clearEntityManager();
 		}
@@ -294,6 +361,48 @@ public class ContactServiceImpl implements ContactService
 			throw new NoResourceAccessException();
 		}
 		
+	}
+	
+	@Override
+	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException
+	{
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy contactPolicy;
+		try
+		{
+			contactPolicy = systemService.searchPolicy(contactResource, PolicyType.UPDATE);
+		}
+		catch (NoResultException e)
+		{
+			throw new NoResourceAccessException();
+		}
+		
+		ResourceAttribs resourceAttribs = this.getContactResourceAttribs(contact.getContactId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (contactPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
+		{
+			// Check if there are any restricted fields for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				Contact foundContact = contactDao.getContactById(contact.getContactId(), null);
+				contact.cleanRestrictedFields(restrictedFields, foundContact);
+			}
+			
+			if (contact.getAddress() != null)
+			{
+				contactDao.deleteAddress(contact.getAddress());
+				contact.removeAddress();
+				contactDao.clearEntityManager();
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
 	}
 
 	@Override
@@ -335,231 +444,6 @@ public class ContactServiceImpl implements ContactService
 		}
 		
 	}
-	
-	@Override
-	public void saveContactAddress(Address address, String username) throws NoResourceAccessException
-	{
-		Resource contactAddressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy contactAddressPolicy;
-		try
-		{
-			contactAddressPolicy = systemService.searchPolicy(contactAddressResource, PolicyType.UPDATE);
-		}
-		catch (NoResultException e)
-		{
-			throw new NoResourceAccessException();
-		}
-		
-		ResourceAttribs resourceAttribs = new ResourceAttribs();
-		UserAttribs userAttribs = new UserAttribs(username);
-		
-		if (contactAddressPolicy.getCdPolicy().isCreatePolicy() && contactAddressPolicy.getModifyPolicy(resourceAttribs, userAttribs, user))
-		{
-			contactDao.createContactAddress(address);
-			contactDao.clearEntityManager();
-		}
-		
-	}
-
-	@Override
-	public int findNumberOfContactAddresses()
-	{
-		return contactDao.getNumberOfAddresses();
-	}
-	
-	@Override
-	public List<Address> searchAllContactAddresses(String username) throws NoResourceAccessException
-	{
-		Resource addressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy addressPolicy;
-		try
-		{
-			addressPolicy = systemService.searchPolicy(addressResource, PolicyType.READ);
-		}
-		catch (NoResultException e)
-		{
-			throw new NoResourceAccessException();
-		}
-
-		ResourceReadPolicy addressReadPolicy = addressPolicy.getReadPolicy("address", "project", user);
-		if (addressReadPolicy.isReadGranted())
-		{
-			List<Address> addresses = contactDao.getAllAddresses(addressReadPolicy.getReadConditions());
-			contactDao.clearEntityManager();
-			return addresses;
-		}
-		else
-		{
-			throw new NoResourceAccessException();
-		}
-	}
-	
-	@Override
-	public Address searchContactAddress(Contact contact, String username) throws NoResourceAccessException
-	{
-		Resource addressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy addressPolicy;
-		try
-		{
-			addressPolicy = systemService.searchPolicy(addressResource, PolicyType.READ);
-		}
-		catch (NoResultException e)
-		{
-			throw new NoResourceAccessException();
-		}
-
-		ResourceReadPolicy addressReadPolicy = addressPolicy.getReadPolicy("address", "project", user);
-		if (addressReadPolicy.isReadGranted())
-		{
-			Address address = contactDao.getContactAddress(contact, addressReadPolicy.getReadConditions());
-			contactDao.clearEntityManager();
-			return address;
-		}
-		else
-		{
-			throw new NoResourceAccessException();
-		}
-	}
-	
-	@Override
-	public Address searchContactAddressById(int id, String username) throws NoResourceAccessException
-	{
-		Resource addressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy addressPolicy;
-		try
-		{
-			addressPolicy = systemService.searchPolicy(addressResource, PolicyType.READ);
-		}
-		catch (NoResultException e)
-		{
-			throw new NoResourceAccessException();
-		}
-
-		ResourceReadPolicy addressReadPolicy = addressPolicy.getReadPolicy("address", "project", user);
-		if (addressReadPolicy.isReadGranted())
-		{
-			Address address = contactDao.getContactAddressById(id, addressReadPolicy.getReadConditions());
-			contactDao.clearEntityManager();
-			return address;
-		}
-		else
-		{
-			throw new NoResourceAccessException();
-		}
-	}
-	
-	@Override
-	public void updateAddress(Address address, String username) throws NoResourceAccessException
-	{
-		Resource addressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy addressUpdate;
-		try
-		{
-			addressUpdate = systemService.searchPolicy(addressResource, PolicyType.UPDATE);
-		}
-		catch (NoResultException e)
-		{
-			throw new NoResourceAccessException();
-		}
-		
-		ResourceAttribs resourceAttribs = this.getContactResourceAttribs(address.getContact().getContactId());
-		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
-		
-		if (addressUpdate.getModifyPolicy(resourceAttribs, userAttribs, user))
-		{
-			contactDao.updateContactAddress(address);
-			contactDao.clearEntityManager();
-		}
-		else
-		{
-			throw new NoResourceAccessException();
-		}
-	}
-	
-	@Override
-	public void deleteContactAddress(Address address, String username) throws NoResourceAccessException, RecordNotDeletedException
-	{
-		Resource addressResource = abacService.searchResourceByName("Address");
-		User user = systemService.searchFullUserByUsername(username);
-		
-		AbacPolicy addressModifyPolicy;
-		try
-		{
-			addressModifyPolicy = systemService.searchPolicy(addressResource, PolicyType.UPDATE);
-		}
-		catch (Exception e)
-		{
-			throw new NoResourceAccessException();
-		}
-		
-		ResourceAttribs resourceAttribs = this.getContactResourceAttribs(address.getContact().getContactId());
-		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
-		
-		if (addressModifyPolicy.getModifyPolicy(resourceAttribs, userAttribs, user))
-		{
-			try
-			{
-				contactDao.deleteContactAddress(address);
-			}
-			catch (IllegalArgumentException e)
-			{
-				throw new RecordNotDeletedException("Contact address provided to be deleted is an illegal entity");
-			}
-		}
-		else
-		{
-			throw new NoResourceAccessException();
-		}
-	}
-//
-//	@Override
-//	public List<Address> findContactAddressesByZipCode(String zipCode)
-//	{
-//		return contactDao.searchContactAddressByZipCode(zipCode);
-//	}
-//
-//	@Override
-//	public Address findContactAddressById(int addressId)
-//	{
-//		return contactDao.searchContactAddressById(addressId);
-//	}
-//
-//	@Override
-//	public int findNumberOfContacPhones()
-//	{
-//		return contactDao.getNumberOfContactPhones();
-//	}
-//
-//	@Override
-//	public void saveContactPhone(Phone phone)
-//	{
-//		int contactId = phone.getContact().getContactId();
-//		contactDao.createContactPhone(phone, contactId);
-//	}
-//
-//	@Override
-//	public List<Phone> findContactPhoneByNumber(String phoneNumber)
-//	{
-//		return contactDao.searchContactPhonesByNumber(phoneNumber);
-//	}
-//
-//	@Override
-//	public Phone findContactPhoneById(int phoneId)
-//	{
-//		return contactDao.searchContactPhoneById(phoneId);
-//	}
-	
-	
 	
 	private ResourceAttribs getContactResourceAttribs(int contactId)
 	{

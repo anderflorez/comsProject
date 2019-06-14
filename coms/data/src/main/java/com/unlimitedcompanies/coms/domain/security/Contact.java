@@ -1,19 +1,24 @@
 package com.unlimitedcompanies.coms.domain.security;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
-import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
+import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
 
 @Entity
 @Table(name="contacts")
@@ -23,13 +28,19 @@ public class Contact
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(unique=true, nullable=false)
 	private Integer contactId;
+	private String contactCharId;
 	
 	@NotEmpty
 	private String firstName;
 	private String middleName;
 	private String lastName;
 	private String email;
-	private String contactCharId;
+	
+	@OneToMany(mappedBy = "contact", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+	private List<ContactPhone> contactPhones;
+	
+	@OneToOne(mappedBy = "contact", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+	private ContactAddress contactAddress;
 	
 	@OneToOne(mappedBy = "contact")
 	private User user;
@@ -40,6 +51,7 @@ public class Contact
 	protected Contact()
 	{
 		this.contactCharId = UUID.randomUUID().toString();
+		this.contactPhones = new ArrayList<>();
 	}
 	
 	public Contact(String firstName, String middleName, String lastName)
@@ -49,6 +61,7 @@ public class Contact
 		this.middleName = middleName;
 		this.lastName = lastName;
 		this.email = null;
+		this.contactPhones = new ArrayList<>();
 	}
 	
 	public Contact(String firstName, String middleName, String lastName, String email)
@@ -58,6 +71,7 @@ public class Contact
 		this.middleName = middleName;
 		this.lastName = lastName;
 		this.email = email;
+		this.contactPhones = new ArrayList<>();
 	}
 	
 	public Integer getContactId()
@@ -115,6 +129,33 @@ public class Contact
 		this.email = email;
 	}
 	
+	public ContactAddress getAddress()
+	{
+		return contactAddress;
+	}
+
+	public void setAddress(String street, String city, String state, String zipCode)
+	{
+		ContactAddress address = new ContactAddress(street, city, state, zipCode, this);
+		this.contactAddress = address;
+	}
+	
+	public void removeAddress()
+	{
+		this.contactAddress = null;
+	}
+
+	public List<ContactPhone> getPhones()
+	{
+		return Collections.unmodifiableList(contactPhones);
+	}
+	
+	public void addPhone(String phoneNumber, String extention, String phoneType) throws InvalidPhoneNumberException
+	{
+		ContactPhone phone = new ContactPhone(phoneNumber, extention, phoneType, this);
+		this.contactPhones.add(phone);
+	}
+
 	public User getUser()
 	{
 		return user;
@@ -165,6 +206,14 @@ public class Contact
 		{
 			this.email = null;
 		}
+		if (restrictions.contains("contactPhones"))
+		{
+			this.contactPhones = null;
+		}
+		if (restrictions.contains("contactAddress"))
+		{
+			this.contactAddress = null;
+		}
 		if (restrictions.contains("user"))
 		{
 			this.user = null;
@@ -172,6 +221,50 @@ public class Contact
 		if (restrictions.contains("employee"))
 		{
 			this.employee = null;
+		}
+	}
+	
+	public void cleanRestrictedFields(List<String> restrictions, Contact contact)
+	{
+		if (restrictions.contains("contactId"))
+		{
+			this.contactId = contact.getContactId();
+		}
+		if (restrictions.contains("contactCharId"))
+		{
+			this.contactCharId = contact.getContactCharId();
+		}
+		if (restrictions.contains("firstName"))
+		{
+			this.firstName = contact.getFirstName();
+		}
+		if (restrictions.contains("middleName"))
+		{
+			this.middleName = contact.getMiddleName();
+		}
+		if (restrictions.contains("lastName"))
+		{
+			this.lastName = contact.getLastName();
+		}
+		if (restrictions.contains("email"))
+		{
+			this.email = contact.getEmail();
+		}
+		if (restrictions.contains("contactPhones"))
+		{
+			this.contactPhones = contact.getPhones();
+		}
+		if (restrictions.contains("contactAddress"))
+		{
+			this.contactAddress = contact.getAddress();
+		}		
+		if (restrictions.contains("user"))
+		{
+			this.user = contact.getUser();
+		}
+		if (restrictions.contains("employee"))
+		{
+			this.employee = contact.getEmployee();
 		}
 	}
 

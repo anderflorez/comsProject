@@ -20,7 +20,6 @@ import com.unlimitedcompanies.coms.domain.abac.ResourceAttribs;
 import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
-import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemService;
@@ -45,14 +44,14 @@ public class AuthServiceImpl implements AuthService
 
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public void saveUser(User user, String username) 
+	public void saveUser(User user, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException, DuplicateRecordException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
-		User currentUser = systemService.searchFullUserByUsername(username);
+		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.UPDATE);
-		UserAttribs userAttribs = systemService.getUserAttribs(currentUser.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(loggedUser.getUserId());
 		
 		if (user.getContact() == null || user.getContact().getContactId() == null)
 		{
@@ -60,7 +59,7 @@ public class AuthServiceImpl implements AuthService
 			throw new RecordNotFoundException(exceptionMessage);
 		}
 		
-		if (userPolicy.getModifyPolicy(null, userAttribs, currentUser) && userPolicy.getCdPolicy().isCreatePolicy())
+		if (userPolicy.getModifyPolicy(null, userAttribs, loggedUser) && userPolicy.getCdPolicy().isCreatePolicy())
 		{
 			try
 			{
@@ -361,6 +360,8 @@ public class AuthServiceImpl implements AuthService
 		if (roleUpdate.getModifyPolicy(null, userAttribs, loggedUser))
 		{
 			// TODO: Return an exception if the role is not created
+			
+			role.clearRestrictedFields();
 			authDao.createRole(role);
 			authDao.clearEntityManager();
 		}
@@ -462,6 +463,35 @@ public class AuthServiceImpl implements AuthService
 		}
 		
 	}
+	
+	@Override
+	public Role searchRoleByNameWithRestrictedFields(String roleName, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource roleResource = abacService.searchResourceByName("Role");
+		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy("role", "project", loggedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			try
+			{
+				Role role = authDao.getRoleByNameWithRestrictedFields(roleName, readPolicy.getReadConditions());
+				authDao.clearEntityManager();
+				return role;
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The role could not be found");
+			}			
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
 //
 //	// TODO: Check if this method is actually needed - delete it if not being used
 //	@Override
@@ -496,6 +526,7 @@ public class AuthServiceImpl implements AuthService
 		
 		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, loggedUser))
 		{
+			role.clearRestrictedFields();
 			authDao.updateRole(role);
 			authDao.clearEntityManager();
 		}
@@ -562,7 +593,7 @@ public class AuthServiceImpl implements AuthService
 	private ResourceAttribs getRoleResourceAttribs(int roleId)
 	{
 		Role role = authDao.getRolePathWithFullEmployees(roleId);
-		List<User> users = role.getMembers();
+		List<User> users = role.getUsers();
 		List<Employee> employees = new ArrayList<>();
 		
 		for (User user : users)

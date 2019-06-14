@@ -50,16 +50,15 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public void addFieldRestriction(int fieldId, int roleId, String loggedUser) throws NoResourceAccessException
+	public void addFieldRestriction(int roleId, int fieldId, String loggedUser) throws NoResourceAccessException
 	{
-		Resource roleResource = this.searchResourceByName("Role");
-		Resource fieldResource = this.searchResourceByName("ResourceField");
+		Resource restrictedFieldResource = this.searchResourceByName("RestrictedField");
 		User signedUser = systemService.searchFullUserByUsername(loggedUser);
 		
 		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
-		AbacPolicy fieldPolicy = systemService.searchPolicy(fieldResource, PolicyType.UPDATE);
-		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
-		if (fieldPolicy.getModifyPolicy(null, userAttribs, signedUser) && rolePolicy.getModifyPolicy(null, userAttribs, signedUser))
+		AbacPolicy restrictionPolicy = systemService.searchPolicy(restrictedFieldResource, PolicyType.UPDATE);
+		
+		if (restrictionPolicy.getModifyPolicy(null, userAttribs, signedUser) && restrictionPolicy.getCdPolicy().isCreatePolicy())
 		{
 			ResourceField resourceField;
 			Role role;
@@ -84,19 +83,19 @@ public class ABACServiceImpl implements ABACService
 	@Override
 	public Resource searchResourceByName(String name)
 	{
-		return abacDao.searchResourceByName(name);
+		return abacDao.getResourceByName(name);
 	}
 
 	@Override
 	public Resource searchResourceByNameWithFields(String name)
 	{
-		return abacDao.searchResourceByNameWithFields(name);
+		return abacDao.getResourceByNameWithFields(name);
 	}
 
 	@Override
 	public Resource searchResourceByNameWithFieldsAndPolicy(String name)
 	{
-		return abacDao.searchResourceByNameWithFieldsAndPolicy(name);
+		return abacDao.getResourceByNameWithFieldsAndPolicy(name);
 	}
 
 	@Override
@@ -144,7 +143,7 @@ public class ABACServiceImpl implements ABACService
 		// If user has access then read the requested policy and return it
 		if (resourceReadPolicy.isReadGranted())
 		{
-			return abacDao.searchPolicy(requestedResource, policyType, resourceReadPolicy.getReadConditions());
+			return abacDao.getPolicy(requestedResource, policyType, resourceReadPolicy.getReadConditions());
 		}
 		else
 		{

@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.domain.abac.Resource;
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.Address;
+import com.unlimitedcompanies.coms.domain.security.ContactAddress;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.Phone;
+import com.unlimitedcompanies.coms.domain.security.ContactPhone;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
@@ -54,10 +54,10 @@ class DomainSecurityUnitTest
 	{
 		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
 		Contact contact2 = new Contact("Jane", null, "Doe", "jane@example.com");
-		Address address1 = new Address("0000 myway ave", "my city", "FL", "99999", contact1);
-		Address address2 = new Address("0000 myway ave", "my city", "FL", "99999", contact2);
+		contact1.setAddress("0000 myway ave", "my city", "FL", "99999");
+		contact2.setAddress("0000 myway ave", "my city", "FL", "99999");
 		
-		assertEquals(address1, address2, "Domain unit test for address equals failed");
+		assertEquals(contact1.getAddress(), contact2.getAddress());
 	}
 	
 	@Test
@@ -65,20 +65,20 @@ class DomainSecurityUnitTest
 	{
 		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
 		Contact contact2 = new Contact("Jane", null, "Doe", "jane@example.com");
-		Phone firstPhone = new Phone("9998887766", null, null, contact1);
-		Phone secondPhone = new Phone("9998887766", "", null, contact2);
+		contact1.addPhone("9998887766", null, null);
+		contact2.addPhone("9998887766", "", null);
 		
-		assertEquals(firstPhone, secondPhone, "Domain test phone not equal test failed");
+		assertEquals(contact1.getPhones().get(0), contact2.getPhones().get(0));
 	}
 	
 	@Test
 	public void phoneNotEqualTest() throws InvalidPhoneNumberException
 	{
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		Phone firstPhone = new Phone("9998887766", null, null, contact);
-		Phone secondPhone = new Phone("9998887766", "111", null, contact);
+		contact.addPhone("9998887766", null, null);
+		contact.addPhone("9998887766", "111", null);
 		
-		assertNotEquals(firstPhone, secondPhone, "Domain test phone not equal test failed");
+		assertNotEquals(contact.getPhones().get(0), contact.getPhones().get(1));
 	}
 	
 	@Test
@@ -89,7 +89,7 @@ class DomainSecurityUnitTest
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
 		
 		assertThrows(InvalidPhoneNumberException.class, 
-					 () -> new Phone("(999)9999999", null, null, contact));
+					 () -> contact.addPhone("(999)9999999", null, null));
 	}
 	
 	// TODO: Create more testing for users and other classes to check for constraints such as userWithNullUsernameNotAllowed

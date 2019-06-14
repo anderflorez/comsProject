@@ -267,6 +267,7 @@ class ABACAuthenticationIntegrationTests
 		systemService.initialSetup();
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		Resource roleResource = abacService.searchResourceByName("Role");
+		Resource restrictedFieldResource = abacService.searchResourceByName("RestrictedField");
 		
 		AbacPolicy contactUpdate = new AbacPolicy("contactUpdate", PolicyType.UPDATE, contactResource);
 		contactUpdate.setCdPolicy(true, false);
@@ -285,12 +286,20 @@ class ABACAuthenticationIntegrationTests
 		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
 		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(roleRead, "administrator");
-
-		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
-		contactResource = abacService.searchResourceByNameWithFields("Contact");		
 		
-		adminRole.addRestrictedField(contactResource.getResourceFieldByName("email"));
-		authService.updateRole(adminRole, "administrator");
+		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
+		restrictionFieldUpdate.setCdPolicy(true, false);
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(restrictionFieldUpdate, "administrator");
+		
+//		AbacPolicy restrictionFieldRead = new AbacPolicy("RestrictedRead", PolicyType.READ, restrictedFieldResource);
+//		restrictionFieldRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		abacService.savePolicy(restrictionFieldRead, "administrator");
+		
+		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
+		contactResource = abacService.searchResourceByNameWithFields("Contact");
+		ResourceField field = contactResource.getResourceFieldByName("email");
+		abacService.addFieldRestriction(adminRole.getRoleId(), field.getResourceFieldId(), "administrator");
 		
 		assertEquals(1, abacService.getNumberOfRestrictedFields(), "Add restricted fields in the db failed");
 	}
@@ -301,6 +310,7 @@ class ABACAuthenticationIntegrationTests
 		systemService.initialSetup();
 		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
 		Resource roleResource = abacService.searchResourceByName("Role");
+		Resource restrictedFieldResource = abacService.searchResourceByName("RestrictedField");
 		
 		AbacPolicy contactUpdate = new AbacPolicy("contactUpdate", PolicyType.UPDATE, contactResource);
 		contactUpdate.setCdPolicy(true, false);
@@ -319,13 +329,17 @@ class ABACAuthenticationIntegrationTests
 		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
 		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(roleRead, "administrator");
+		
+		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
+		restrictionFieldUpdate.setCdPolicy(true, false);
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
 		contactResource = abacService.searchResourceByNameWithFields("Contact");
 		ResourceField contactEmailField = contactResource.getResourceFieldByName("email");
 		
-		contactEmailField.assignRestrictedRole(adminRole);
-		authService.updateRole(adminRole, "administrator");
+		abacService.addFieldRestriction(adminRole.getRoleId(), contactEmailField.getResourceFieldId(), "administrator");
 		
 		assertEquals(1, abacService.getNumberOfRestrictedFields(), "Add restricted fields in the db failed");
 	}
@@ -336,6 +350,7 @@ class ABACAuthenticationIntegrationTests
 		systemService.initialSetup();
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		Resource roleResource = abacService.searchResourceByName("Role");
+		Resource restrictedFieldResource = abacService.searchResourceByName("RestrictedField");
 		
 		AbacPolicy contactUpdate = new AbacPolicy("contactUpdate", PolicyType.UPDATE, contactResource);
 		contactUpdate.setCdPolicy(true, false);
@@ -354,12 +369,17 @@ class ABACAuthenticationIntegrationTests
 		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
 		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(roleRead, "administrator");
+		
+		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
+		restrictionFieldUpdate.setCdPolicy(true, false);
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
-		contactResource = abacService.searchResourceByNameWithFields("Contact");		
+		contactResource = abacService.searchResourceByNameWithFields("Contact");
+		ResourceField field = contactResource.getResourceFieldByName("email");
 		
-		adminRole.addRestrictedField(contactResource.getResourceFieldByName("email"));
-		authService.updateRole(adminRole, "administrator");
+		abacService.addFieldRestriction(adminRole.getRoleId(), field.getResourceFieldId(), "administrator");
 		
 		adminRole = systemService.roleWithAllRestrictedFields(adminRole.getRoleId());
 		List<ResourceField> restrictedFields = adminRole.getRestrictedFields();

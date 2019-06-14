@@ -27,8 +27,7 @@ public interface SystemService
 	public Role searchRoleById(int roleId) throws NoResourceAccessException;
 	public Role roleWithAllRestrictedFields(Integer roleId) throws RecordNotFoundException;
 	public ResourceField searchResourceFieldById(int fieldId) throws NoResourceAccessException;
-	public List<ResourceField> searchRestrictedFields(Resource resource, String signedUser);
-	public List<String> searchRestrictedFieldNames(Resource resource, String signedUser);
+	public List<String> searchRestrictedFields(int userId, int resourceId);
 	
 	public User searchFullUserByUsername(String username);
 	public UserAttribs getUserAttribs(int userId);

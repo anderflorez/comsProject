@@ -43,6 +43,8 @@ public interface AuthService
 //	public List<Role> searchRolesByRange(int page, int elements);
 	public Role searchRoleById(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Role searchRoleByName(String roleName, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public Role searchRoleByNameWithRestrictedFields(String roleName, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException;
 //	public Role searchRoleByIdWithMembers(int roleId) throws RecordNotFoundException;
 //	public List<User> searchRoleNonMembers(int roleId, String searchCriteria);
 	public void updateRole(Role role, String signedUser) throws NoResourceAccessException;

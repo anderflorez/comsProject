@@ -2,13 +2,15 @@ package com.unlimitedcompanies.coms.dao.security;
 
 import java.util.List;
 
-import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.ContactAddress;
 
 public interface ContactDao
 {
 	public void createContact(Contact contact);
 	public int getNumberOfContacts();
+	public int getNumberOfAddresses();
+	public int getNumberOfContactPhones();
 //	boolean existingContact(int contactId);
 	public List<Contact> getAllContacts(String policyAccessConditions);
 	public List<Contact> getContactsByRange(int elements, int page, String policyAccessConditions);
@@ -17,20 +19,15 @@ public interface ContactDao
 	public Contact getContactByEmail(String email, String accessConditions);
 	public Contact getContactWithFullEmployee(int contactId);
 	public void updateContact(Contact contact);
+	public void deleteAddress(ContactAddress address);
 	public void deleteContact(Contact contact);
 	
-	public void createContactAddress(Address address);
-	public int getNumberOfAddresses();
-	public List<Address> getAllAddresses(String accessConditions);
-	public Address getContactAddress(Contact contact, String readConditions);
-	public Address getContactAddressById(int id, String readConditions);
-	public void updateContactAddress(Address address);
-	public void deleteContactAddress(Address address);
+
+
 //	
-//	public int getNumberOfContactPhones();
-//	public void createContactPhone(Phone phone, int contactId);
-//	public List<Phone> searchContactPhonesByNumber(String phoneNumber);
-//	public Phone searchContactPhoneById(int id);
+//	public void createContactPhone(ContactPhone phone, int contactId);
+//	public List<ContactPhone> searchContactPhonesByNumber(String phoneNumber);
+//	public ContactPhone searchContactPhoneById(int id);
 	
 	public void clearEntityManager();
 }

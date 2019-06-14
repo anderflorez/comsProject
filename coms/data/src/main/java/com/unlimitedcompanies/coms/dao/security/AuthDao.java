@@ -36,6 +36,7 @@ public interface AuthDao
 //	public Role getRoleByIdWithMembers(int id);
 	public Role getRolePathWithFullEmployees(int roleId);
 	public Role getRoleWithRestrictedFields(Integer roleId);
+	public Role getRoleByNameWithRestrictedFields(String roleName, String accessConditions);
 //	public List<User> getRoleNonMembersByCriteria(int roleId, String searchCriteria);
 	public void updateRole(Role role);
 //	public void deleteRole(int roleId);

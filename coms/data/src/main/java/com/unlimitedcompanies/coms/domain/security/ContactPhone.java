@@ -1,6 +1,8 @@
 package com.unlimitedcompanies.coms.domain.security;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -10,9 +12,10 @@ import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberExcept
 
 @Entity
 @Table(name="phones")
-public class Phone
+public class ContactPhone
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer phoneId;
 	private String phoneNumber;
 	private String extention;
@@ -22,13 +25,14 @@ public class Phone
 	@JoinColumn(name="contactId_FK")
 	private Contact contact;
 	
-	protected Phone() {}
+	protected ContactPhone() {}
 
-	public Phone(String phoneNumber, String extention, String phoneType, Contact contact)
+	protected ContactPhone(String phoneNumber, String extention, String phoneType, Contact contact)
 			throws InvalidPhoneNumberException
 	{
 		try
 		{
+			// TODO: Create a better way to detect wrong phone number formats
 			Long.parseLong(phoneNumber);
 		} catch (NumberFormatException e)
 		{
@@ -85,7 +89,7 @@ public class Phone
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Phone other = (Phone) obj;
+		ContactPhone other = (ContactPhone) obj;
 		if (extention == null)
 		{
 			if (other.extention != null && !other.extention.equals(""))

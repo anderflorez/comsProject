@@ -14,8 +14,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
-import com.unlimitedcompanies.coms.domain.security.Address;
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.ContactAddress;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -45,6 +45,20 @@ public class ContactDaoImpl implements ContactDao
 	public int getNumberOfContacts()
 	{
 		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(contactId) FROM contacts").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public int getNumberOfAddresses()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM addresses").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	public int getNumberOfContactPhones()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(phoneId) FROM phones").getSingleResult();
 		return bigInt.intValue();
 	}
 	
@@ -153,6 +167,14 @@ public class ContactDaoImpl implements ContactDao
 	{
 		em.merge(contact);
 	}
+	
+	@Override
+	public void deleteAddress(ContactAddress address)
+	{
+		em.createQuery("delete from ContactAddress where addressId = :id")
+			.setParameter("id", address.getAddressId())
+			.executeUpdate();
+	}
 
 	@Override
 	public void deleteContact(Contact contact)
@@ -161,97 +183,23 @@ public class ContactDaoImpl implements ContactDao
 		em.remove(removeContact);
 	}
 
-	@Override
-	public int getNumberOfAddresses()
-	{
-		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(addressId) FROM addresses").getSingleResult();
-		return bigInt.intValue();
-	}
-
-	@Override
-	public void createContactAddress(Address address)
-	{
-		em.persist(address);
-	}
-	
-	@Override
-	public List<Address> getAllAddresses(String accessConditions)
-	{
-		String stringQuery = "select address from Address address";
-		if (accessConditions != null && !accessConditions.isEmpty())
-		{
-			stringQuery += " where " + accessConditions;
-		}
-				
-		List<Address> addresses = em.createQuery(stringQuery, Address.class).getResultList();
-		
-		return Collections.unmodifiableList(addresses);
-	}
-	
-	@Override
-	public Address getContactAddress(Contact contact, String readConditions)
-	{
-		String stringQuery = "select address from Address address where address.contact = :contact";
-		if (readConditions != null && !readConditions.isEmpty())
-		{
-			stringQuery += " and " + readConditions;
-		}
-				
-		Address address = em.createQuery(stringQuery, Address.class).setParameter("contact", contact).getSingleResult();
-		
-		return address;
-	}
-	
-	@Override
-	public Address getContactAddressById(int id, String readConditions)
-	{
-		String stringQuery = "select address from Address address where address.addressId = :id";
-		if (readConditions != null && !readConditions.isEmpty())
-		{
-			stringQuery += " and " + readConditions;
-		}
-				
-		Address address = em.createQuery(stringQuery, Address.class).setParameter("id", id).getSingleResult();
-		
-		return address;
-	}
-	
-	@Override
-	public void updateContactAddress(Address address)
-	{
-		em.merge(address);
-	}
-	
-	@Override
-	public void deleteContactAddress(Address address)
-	{
-		Address deleteAddress = em.merge(address);
-		em.remove(deleteAddress);		
-	}
 //
 //	@Override
-//	public List<Address> searchContactAddressByZipCode(String zipCode)
+//	public List<ContactAddress> searchContactAddressByZipCode(String zipCode)
 //	{
-//		return em.createQuery("select address from Address as address where address.zipCode = :zip", Address.class)
+//		return em.createQuery("select address from ContactAddress as address where address.zipCode = :zip", ContactAddress.class)
 //				  			  .setParameter("zip", zipCode)
 //				  			  .getResultList();
 //	}
 //
 //	@Override
-//	public Address searchContactAddressById(int id)
+//	public ContactAddress searchContactAddressById(int id)
 //	{
-//		return em.find(Address.class, id);
+//		return em.find(ContactAddress.class, id);
 //	}
 //
 //	@Override
-//	public int getNumberOfContactPhones()
-//	{
-//		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(phoneId) FROM phones").getSingleResult();
-//		return bigInt.intValue();
-//	}
-//
-//	@Override
-//	public void createContactPhone(Phone phone, int contactId)
+//	public void createContactPhone(ContactPhone phone, int contactId)
 //	{
 //		em.createNativeQuery("INSERT INTO phones (phoneNumber, extention, phoneType, contactId_FK) VALUES (:phoneNumber, :extention, :phoneType, :contact)")
 //							 .setParameter("phoneNumber", phone.getPhoneNumber())
@@ -262,17 +210,17 @@ public class ContactDaoImpl implements ContactDao
 //	}
 //
 //	@Override
-//	public List<Phone> searchContactPhonesByNumber(String phoneNumber)
+//	public List<ContactPhone> searchContactPhonesByNumber(String phoneNumber)
 //	{
-//		return em.createQuery("select phone from Phone as phone where phone.phoneNumber = :number", Phone.class)
+//		return em.createQuery("select phone from ContactPhone as phone where phone.phoneNumber = :number", ContactPhone.class)
 //							  .setParameter("number", phoneNumber)
 //							  .getResultList();
 //	}
 //
 //	@Override
-//	public Phone searchContactPhoneById(int id)
+//	public ContactPhone searchContactPhoneById(int id)
 //	{
-//		return em.createQuery("select phone from Phone as phone where phone.phoneId = :id", Phone.class)
+//		return em.createQuery("select phone from ContactPhone as phone where phone.phoneId = :id", ContactPhone.class)
 //							  .setParameter("id", id)
 //							  .getSingleResult();
 //	}

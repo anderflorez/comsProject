@@ -12,7 +12,7 @@ import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 public interface ABACService
 {
 	public void savePolicy(AbacPolicy policy, String username) throws NoResourceAccessException;
-	public void addFieldRestriction(int fieldId, int roleId, String loggedUser) throws NoResourceAccessException;
+	public void addFieldRestriction(int roleId, int fieldId, String loggedUser) throws NoResourceAccessException;
 	
 	public int getNumberOfPolicies();
 	public int getNumberOfEntityConditions();

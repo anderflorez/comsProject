@@ -20,8 +20,6 @@ import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.Role;
-import com.unlimitedcompanies.coms.domain.security.User;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -40,20 +38,12 @@ public class ABACDaoImpl implements ABACDao
 	public void registerResource(Resource resource)
 	{
 		em.persist(resource);
-//		em.createNativeQuery("INSERT INTO resources (resourceName) VALUES (:resourceName)")
-//				.setParameter("resourceName", resourceName).executeUpdate();
 	}
 	
 	@Override
 	public void registerResourceField(ResourceField resourceField)
 	{
 		em.persist(resourceField);
-//		em.createNativeQuery(
-//				"INSERT INTO resourceFields (resourceFieldName, association, resourceId_FK) VALUES (:field, :association, :resource)")
-//				.setParameter("field", resourceField.getResourceFieldName())
-//				.setParameter("association", resourceField.getAssociation())
-//				.setParameter("resource", resourceField.getResource())
-//				.executeUpdate();
 	}
 
 	@Override
@@ -85,7 +75,7 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
-	public AbacPolicy searchPolicy(Resource resource, PolicyType policyType, String accessConditions)
+	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions)
 	{
 		String queryString = "select policy from AbacPolicy as policy where policy.resource = :resource and policy.policyType = :policyType";
 		
@@ -101,38 +91,36 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
-	public List<String> searchAllResourceNames()
+	public List<String> getAllResourceNames()
 	{
 		return em.createQuery("select resource.resourceName from Resource resource", String.class)
 				.getResultList();
 	}
 	
 	@Override
-	public Resource searchResourceByName(String name)
+	public Resource getResourceByName(String name)
 	{
-		Resource resource = em.createQuery("select resource from Resource resource where resource.resourceName = :name", Resource.class)
+		return em.createQuery("select resource from Resource resource where resource.resourceName = :name", Resource.class)
 				.setParameter("name", name)
 				.getSingleResult();
-		
-		return resource;
 	}
 	
 	@Override
-	public Resource searchResourceByNameWithFields(String name)
+	public Resource getResourceByNameWithFields(String name)
 	{
 		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
 	
 	@Override
-	public Resource searchResourceByNameWithFieldsAndPolicy(String name)
+	public Resource getResourceByNameWithFieldsAndPolicy(String name)
 	{
 		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields left join fetch resource.policies where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
 	
 	@Override
-	public ResourceField searchResourceFieldById(int fieldId)
+	public ResourceField getResourceFieldById(int fieldId)
 	{
 		ResourceField field = em.find(ResourceField.class, fieldId);
 		if (field == null)
@@ -143,10 +131,26 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
-	public List<ResourceField> searchAllResourceFieldsWithResources()
+	public List<ResourceField> getAllResourceFieldsWithResources()
 	{
 		return em.createQuery("select field from ResourceField field left join fetch field.resource", ResourceField.class)
 				.getResultList();
+	}
+	
+	@Override
+	public List<ResourceField> getRestrictedFields(int userId, int resourceId)
+	{
+		String queryString = "select field from ResourceField field "
+							+ "join field.resource resource "
+							+ "join field.restrictedForRoles role "
+							+ "join role.users user "
+							+ "where resource.resourceId = :resourceId "
+							+ "and user.userId = :userId";
+		
+		return em.createQuery(queryString, ResourceField.class)
+				 .setParameter("resourceId", resourceId)
+				 .setParameter("userId", userId)
+				 .getResultList();
 	}
 	
 	@Override
@@ -157,9 +161,12 @@ public class ABACDaoImpl implements ABACDao
 		 */
 		
 		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
-		List<String> resources = this.searchAllResourceNames();
-		resources.add("Resource");
-		resources.add("ResourceField");
+		
+		List<String> resources = this.getAllResourceNames();
+		
+		// TODO: Create a test to make sure the next classes are not saved as resources in the resources db table
+		resources.add("ContactAddress");
+		resources.add("ContactPhone");
 		
 		for (EntityType<?> entity : entities)
 		{
@@ -169,6 +176,9 @@ public class ABACDaoImpl implements ABACDao
 				this.registerResource(resource);
 			}
 		}
+		
+		Resource fieldResource = new Resource("RestrictedField");
+		this.registerResource(fieldResource);
 	}
 	
 	@Override
@@ -178,16 +188,23 @@ public class ABACDaoImpl implements ABACDao
 		 * This method will check and make sure all resource fields found by the entity manager are accounted and stored in the db table resourceFields
 		 */
 		
-		List<ResourceField> fields = this.searchAllResourceFieldsWithResources();
+		List<ResourceField> fields = this.getAllResourceFieldsWithResources();
 		
 		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
 		List<ResourceField> foundFields = new ArrayList<>();
+		
+		List<String> nonResources = new ArrayList<>();
+		nonResources.add("Resource");
+		nonResources.add("ResourceField");
+		nonResources.add("ContactAddress");
+		nonResources.add("ContactPhone");
+		
 		for (EntityType<?> entity : entities)
 		{
-			if (!entity.getName().equals("Resource") && !entity.getName().equals("ResourceField"))
+			if (!nonResources.contains(entity.getName()))
 			{
 				String resourceName = entity.getName();
-				Resource resource = this.searchResourceByName(resourceName);
+				Resource resource = this.getResourceByName(resourceName);
 				for (Attribute<?,?> attribute : entity.getAttributes())
 				{
 					ResourceField foundRF = new ResourceField(attribute.getName(), attribute.isAssociation(), resource);

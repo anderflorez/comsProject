@@ -6,12 +6,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="addresses")
-public class Address
+public class ContactAddress
 {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,13 +23,13 @@ public class Address
 	private String state;
 	private String zipCode;
 	
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name="contactId_FK")
 	private Contact contact;
 	
-	protected Address() {}
+	protected ContactAddress() {}
 
-	public Address(String street, String city, String state, String zipCode, Contact contact)
+	protected ContactAddress(String street, String city, String state, String zipCode, Contact contact)
 	{
 		this.street = street;
 		this.city = city;
@@ -96,11 +96,6 @@ public class Address
 		return contact;
 	}
 
-	public void setContact(Contact contact)
-	{
-		this.contact = contact;
-	}
-
 	@Override
 	public int hashCode()
 	{
@@ -119,7 +114,7 @@ public class Address
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		Address other = (Address) obj;
+		ContactAddress other = (ContactAddress) obj;
 		if (city == null)
 		{
 			if (other.city != null) return false;

@@ -281,6 +281,18 @@ public class AuthDaoImpl implements AuthDao
 
 		return em.createQuery(queryString, Role.class).setParameter("name", roleName).getSingleResult();
 	}
+	
+	@Override
+	public Role getRoleByNameWithRestrictedFields(String roleName, String accessConditions)
+	{
+		String queryString = "select role from Role as role left join fetch role.restrictedFields where role.roleName = :name";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+
+		return em.createQuery(queryString, Role.class).setParameter("name", roleName).getSingleResult();
+	}
 //	
 //	@Override
 //	public Role getRoleByIdWithMembers(int id)

@@ -69,7 +69,7 @@ public class SystemServiceImpl implements SystemService
 		{
 			this.checkAllResources();
 			
-			Resource policyResource = abacDao.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+			Resource policyResource = abacDao.getResourceByNameWithFieldsAndPolicy("AbacPolicy");
 			AbacPolicy abacPolicy = new AbacPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
 			abacPolicy.setCdPolicy(true, false);
 			abacPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
@@ -103,7 +103,7 @@ public class SystemServiceImpl implements SystemService
 	@Override
 	public List<String> searchAllResourceNames()
 	{
-		return abacDao.searchAllResourceNames();
+		return abacDao.getAllResourceNames();
 	}
 	
 	
@@ -116,7 +116,7 @@ public class SystemServiceImpl implements SystemService
 	{
 		try
 		{
-			return abacDao.searchPolicy(resource, policyType, null);
+			return abacDao.getPolicy(resource, policyType, null);
 		}
 		catch (NoResultException e)
 		{
@@ -155,7 +155,7 @@ public class SystemServiceImpl implements SystemService
 		// TODO: This method has not been tested
 		try
 		{
-			return abacDao.searchResourceFieldById(fieldId);
+			return abacDao.getResourceFieldById(fieldId);
 		}
 		catch (NoResultException e)
 		{
@@ -164,15 +164,16 @@ public class SystemServiceImpl implements SystemService
 	}
 	
 	@Override
-	public List<ResourceField> searchRestrictedFields(Resource resource, String signedUser)
+	public List<String> searchRestrictedFields(int userId, int resourceId)
 	{
-		return abacDao.getRestrictedFields();
-	}
-	
-	@Override
-	public List<String> searchRestrictedFieldNames(Resource resource, String signedUser)
-	{
+		List<ResourceField> fields = abacDao.getRestrictedFields(userId, resourceId);
 		
+		List<String> restrictedFields = new ArrayList<>();
+		for (ResourceField field : fields)
+		{
+			restrictedFields.add(field.getResourceFieldName());
+		}
+		return restrictedFields;
 	}
 	
 	@Override
