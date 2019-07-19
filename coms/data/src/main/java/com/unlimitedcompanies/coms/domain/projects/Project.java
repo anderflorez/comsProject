@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.domain.employee.Employee;
@@ -19,6 +19,7 @@ import com.unlimitedcompanies.coms.domain.employee.Employee;
 public class Project
 {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer projectId;
 	
 	@Column(unique = true, nullable = false)
@@ -27,38 +28,19 @@ public class Project
 	@Column(unique = true, nullable = false)
 	private String projectName;
 	
-	@ManyToMany
-	@JoinTable(name = "projectManagers",
-				joinColumns = {@JoinColumn(name = "projectId_FK")},
-				inverseJoinColumns = {@JoinColumn(name = "employeeId_FK")})
-	private List<Employee> projectManagers;
-	
-	@ManyToMany
-	@JoinTable(name = "superintendents",
-				joinColumns = {@JoinColumn(name = "projectId_FK")},
-				inverseJoinColumns = {@JoinColumn(name = "employeeId_FK")})
-	private List<Employee> superintendents;
-	
-	@ManyToMany
-	@JoinTable(name = "foremen",
-				joinColumns = {@JoinColumn(name = "projectId_FK")},
-				inverseJoinColumns = {@JoinColumn(name = "employeeId_FK")})
-	private List<Employee> foremen;
+	@OneToMany(mappedBy="project")
+	private List<ProjectMember> projectMembers;
 	
 	protected Project() 
 	{
-		this.projectManagers = new ArrayList<>();
-		this.superintendents = new ArrayList<>();
-		this.foremen = new ArrayList<>();
+		this.projectMembers = new ArrayList<>();
 	}
 
 	public Project(int jobNumber, String projectName)
 	{
-		this.projectManagers = new ArrayList<>();
-		this.superintendents = new ArrayList<>();
-		this.foremen = new ArrayList<>();
 		this.jobNumber = jobNumber;
 		this.projectName = projectName;
+		this.projectMembers = new ArrayList<>();
 	}
 
 	public Integer getProjectId()
@@ -76,48 +58,22 @@ public class Project
 		return projectName;
 	}
 
-	public List<Employee> getProjectManagers()
+	public List<ProjectMember> getProjectMembers()
 	{
-		return Collections.unmodifiableList(this.projectManagers);
+		return Collections.unmodifiableList(this.projectMembers);
 	}
 	
-	public void addProjectManager(Employee projectManager)
+	public void addProjectMember(Employee employee, ProjectAccess projectAccess)
 	{
-		this.projectManagers.add(projectManager);
-		if (!projectManager.getPmProjects().contains(this))
+		// TODO: Make sure this does NOT add a new employee - only existing employees in the db
+		ProjectMember member = new ProjectMember(employee, this, projectAccess);
+		if (this.projectMembers == null)
 		{
-			projectManager.assignAsProjectManager(this);
+			this.projectMembers = new ArrayList<>();
 		}
-	}
-
-	public List<Employee> getSuperintendents()
-	{
-		return Collections.unmodifiableList(superintendents);
+		this.projectMembers.add(member);
 	}
 	
-	public void addSuperintendent(Employee superintendent)
-	{
-		this.superintendents.add(superintendent);
-		if (!superintendent.getSuperintendentProjects().contains(this))
-		{
-			superintendent.assignAsSuperintendent(this);
-		}
-	}
-
-	public List<Employee> getForemen()
-	{
-		return Collections.unmodifiableList(foremen);
-	}
-	
-	public void addForman(Employee foreman)
-	{
-		this.foremen.add(foreman);
-		if (foreman.getForemanProjects().contains(this))
-		{
-			foreman.assignAsForeman(this);
-		}
-	}
-
 	@Override
 	public int hashCode()
 	{

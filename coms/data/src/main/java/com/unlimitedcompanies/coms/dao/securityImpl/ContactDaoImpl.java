@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.ContactAddress;
+import com.unlimitedcompanies.coms.domain.security.ContactPhone;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -65,10 +66,8 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public Contact getContactWithFullEmployee(int contactId)
 	{
-		Contact contact = em.createQuery("select contact from Contact contact left join fetch contact.employee employee "
-											+ "left join fetch employee.pmProjects pmProjects "
-											+ "left join fetch employee.superintendentProjects superintendentProjects "
-											+ "left join fetch employee.foremanProjects foremanProjects "
+		Contact contact = em.createQuery("select contact from Contact as contact left join fetch contact.employee as employee "
+											+ "left join fetch employee.projectMembers as member "
 											+ "where contact.contactId = :contactId", Contact.class)
 								.setParameter("contactId", contactId)
 								.getSingleResult();
@@ -163,6 +162,18 @@ public class ContactDaoImpl implements ContactDao
 	}
 	
 	@Override
+	public Contact getContactByPhoneId(int phoneId, String readConditions)
+	{
+		String stringQuery = "select contact from Contact as contact left join fetch contact.contactPhones as phone where phone.phoneId = :phoneId";
+		if (readConditions != null && !readConditions.isEmpty())
+		{
+			stringQuery += " and " + readConditions;
+		}
+		
+		return em.createQuery(stringQuery, Contact.class).setParameter("phoneId", phoneId).getSingleResult();
+	}
+	
+	@Override
 	public void updateContact(Contact contact)
 	{
 		em.merge(contact);
@@ -173,6 +184,14 @@ public class ContactDaoImpl implements ContactDao
 	{
 		em.createQuery("delete from ContactAddress where addressId = :id")
 			.setParameter("id", address.getAddressId())
+			.executeUpdate();
+	}
+	
+	@Override
+	public void deleteContactPhone(ContactPhone contactPhone)
+	{
+		em.createQuery("delete from ContactPhone where phoneId = :id")
+			.setParameter("id", contactPhone.getPhoneId())
 			.executeUpdate();
 	}
 

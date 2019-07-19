@@ -3,14 +3,16 @@ package com.unlimitedcompanies.coms.domain.unitTests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.domain.abac.Resource;
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.ContactAddress;
 import com.unlimitedcompanies.coms.domain.security.Contact;
-import com.unlimitedcompanies.coms.domain.security.ContactPhone;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.domain.security.exen.InvalidPhoneNumberException;
@@ -45,7 +47,8 @@ class DomainSecurityUnitTest
 	@Test
 	public void bidirectionalContactAndUserRelationshipTest()
 	{
-		Contact contact = new Contact("John", null, "Doe");
+		// TODO: Code this test
+//		Contact contact = new Contact("John", null, "Doe");
 //		User user = new User();
 	}
 	
@@ -95,29 +98,65 @@ class DomainSecurityUnitTest
 	// TODO: Create more testing for users and other classes to check for constraints such as userWithNullUsernameNotAllowed
 	
 	@Test
+	public void createNewUserPasswordEncryptionTest()
+	{
+		User user = new User("testUser", "testPassword", new Contact("Test", null, "User"));
+		assertTrue(user.isPassword("testPassword"));
+	}
+	
+	@Test
+	public void updateUserPasswordEncryptionTest()
+	{
+		User user = new User("testUser", "testPassword", new Contact("Test", null, "User"));
+		user.setPassword("TestPassword");
+		assertTrue(user.isPassword("TestPassword"));
+	}
+	
+	@Test
 	public void datesForUsersFormatingTesting()
 	{
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
-		User user = new User("admin", "mypass".toCharArray(), contact);
+		User user = new User("admin", "mypass", contact);
 		
-		System.out.println("=====> Date Added: " + user.getDateAdded());
-		System.out.println("=====> Last Access: " + user.getLastAccess());
+		String initialDate = user.getDateAdded().getMonth() + " " + user.getDateAdded().getDayOfMonth() + ", " + user.getDateAdded().getYear();
 		
-		System.out.println("=====> Date Added: " + user.getClientLocalDateAdded());
-		System.out.println("=====> Last Access: " + user.getClientLocalLastAccess());
+		ZonedDateTime tmp = user.getLastAccess().withZoneSameInstant(ZoneId.systemDefault());
+		int hour = tmp.getHour();
+		String timeOfDay = "AM";
+		if (hour > 11) timeOfDay = "PM";
+		if (hour > 12) hour -= 12;
+		String stringHour = hour < 10 ? "0" : "";
+		stringHour += Integer.valueOf(hour);
+		String initialAccess = tmp.getMonth() + " " + tmp.getDayOfMonth() + ", " + tmp.getYear() 
+								+ " " + stringHour + ":" + tmp.getMinute() + " " + timeOfDay;
 		
-		// TODO: Create some good checking for date and date time
-		// TODO: Create some good translating between MySQL dates and times and Java dates and times		
+		assertTrue(initialDate.equalsIgnoreCase(user.getClientLocalDateAdded()));
+		assertTrue(initialAccess.equalsIgnoreCase(user.getClientLocalLastAccess()));
+	}
+	
+	@Test
+	public void updateDateTest()
+	{
+		Contact contact = new Contact("John", null, "Doe", "john@example.com");
+		User user = new User("admin", "mypass", contact);
+		
+		ZonedDateTime createdTemp = user.getDateAdded();
+		ZonedDateTime accessTemp = user.getLastAccess();
+		
+		user.setLastAccess(ZonedDateTime.now());
+
+		assertTrue(createdTemp.isEqual(user.getDateAdded()));
+		assertTrue(accessTemp.isBefore(user.getLastAccess()));
 	}
 	
 	@Test
 	public void equalUserTest()
 	{
 		Contact contact1 = new Contact("John", null, "Doe", "john@example.com");
-		User user1 = new User("John", "mypass".toCharArray(), contact1);
+		User user1 = new User("John", "mypass", contact1);
 		
 		Contact contact2 = new Contact("Jane", null, "Doe", "jane@example.com");
-		User user2 = new User("John", "mypass".toCharArray(), contact2);
+		User user2 = new User("John", "mypass", contact2);
 		
 		assertEquals(user1, user2, "Domain unit test for equal users failed");
 	}

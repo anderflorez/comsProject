@@ -8,33 +8,29 @@ import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 
 public interface AuthService
 {
-	public void saveUser(User user, String username) 
+	public void saveUser(User user, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException, DuplicateRecordException;
 	public int searchNumberOfUsers();
-//	public List<User> searchAllUsers(String username);
+	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException;
 //	public boolean hasNextUser(int page, int elements);
-//	public List<User> searchUsersByRange(int page, int elements);
-	public User searchUserById(int id, String requestedByUsername) throws RecordNotFoundException, NoResourceAccessException;
-	public User searchUserByUsername(String username, String requestedByUsername) 
+	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException;
+	public User searchUserById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException;
+	public User searchUserByUsername(String username, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException;
-//	public User searchUserByContact(Contact contact) throws RecordNotFoundException;
-//	public User searchUserByUserIdWithContact(int userId) throws RecordNotFoundException;
-//	public User searchUserByUsernameWithContact(String username) throws RecordNotFoundException;
-////	public User searchAUserByIdWithRoles(int userId);
-//	public User searchFullUserByUserId(int userId);
-//	public User searchFullUserByUsername(String username);	
-//	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException;
-//	public User updateUser(User user) throws RecordNotFoundException;
-//	public void changeUserPassword(int userId, char[] currentPassword, char[] newPassword) 
-//			throws RecordNotFoundException, IncorrectPasswordException, RecordNotChangedException;
-//	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException;
+	public User searchUserByIdWithContact(int userId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public User searchUserByUsernameWithContact(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public User searchUserByContact(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public User searchUserByUsernameWithRoles(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public void updateUser(User user, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public void changeUserPassword(User user, String currentPassword, String newPassword, String signedUsername) 
+			throws IncorrectPasswordException, NoResourceAccessException, RecordNotFoundException;
+	public void deleteUser(int userId, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException, RecordNotDeletedException;
 //	
 	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException;
 	public int searchNumberOfRoles();

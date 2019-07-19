@@ -17,6 +17,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
@@ -72,7 +73,7 @@ public class AbacPolicy
 	}
 	
 	public AbacPolicy(String name, PolicyType policyType, Resource resource) 
-			throws DuplicatedResourcePolicyException 
+			throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException 
 	{
 		this.abacPolicyId = UUID.randomUUID().toString();
 		this.policyName = name;
@@ -87,9 +88,39 @@ public class AbacPolicy
 		}
 		this.logicOperator = "AND";
 		this.resource = resource;
-		if (this.resource != null)
+		if (this.resource == null)
 		{
-			resource.addPolicy(this);
+			throw new NoParentPolicyOrResourceException();
+		}
+		else {
+			resource.addPolicy(this);			
+		}
+		this.subPolicies = new ArrayList<>();
+		this.entityConditions = new ArrayList<>();
+		this.attributeConditions = new ArrayList<>();
+		this.fieldConditions = new ArrayList<>();
+	}
+	
+	private AbacPolicy(PolicyType policyType, AbacPolicy parentPolicy) 
+			throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException 
+	{
+		this.abacPolicyId = UUID.randomUUID().toString();
+		this.policyName = null;
+		if (policyType != null)
+		{
+			this.policyType = policyType.toString();			
+		}
+		if (policyType == PolicyType.UPDATE)
+		{
+			CdPolicy cdPolicy = new CdPolicy(false, false, this);
+			this.cdPolicy = cdPolicy;
+		}
+		this.logicOperator = "AND";
+		this.resource = null;
+		this.parentPolicy = parentPolicy;
+		if (this.parentPolicy == null)
+		{
+			throw new NoParentPolicyOrResourceException();
 		}
 		this.subPolicies = new ArrayList<>();
 		this.entityConditions = new ArrayList<>();
@@ -180,12 +211,12 @@ public class AbacPolicy
 		return subPolicies;
 	}
 	
-	public AbacPolicy addSubPolicy()
+	public AbacPolicy addSubPolicy() throws NoParentPolicyOrResourceException
 	{
 		AbacPolicy subPolicy = null;
 		try
 		{
-			subPolicy = new AbacPolicy(null, this.getPolicyType(), null);
+			subPolicy = new AbacPolicy(this.getPolicyType(), this);
 			this.subPolicies.add(subPolicy);
 			subPolicy.setParentPolicy(this);
 		}
@@ -197,15 +228,15 @@ public class AbacPolicy
 		
 	}
 	
-	public AbacPolicy addSubPolicy(LogicOperator logicOperator)
+	public AbacPolicy addSubPolicy(LogicOperator logicOperator) throws NoParentPolicyOrResourceException
 	{
 		AbacPolicy subPolicy = null;
 		try
 		{
-			subPolicy = new AbacPolicy(null, this.getPolicyType(), null);
+			subPolicy = new AbacPolicy(this.getPolicyType(), this);
 			subPolicy.setLogicOperator(logicOperator);
 			this.subPolicies.add(subPolicy);
-			subPolicy.setParentPolicy(this);
+//			subPolicy.setParentPolicy(this);
 		}
 		catch (DuplicatedResourcePolicyException e)
 		{

@@ -2,20 +2,19 @@ package com.unlimitedcompanies.coms.domain.employee;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.domain.projects.Project;
+import com.unlimitedcompanies.coms.domain.projects.ProjectAccess;
+import com.unlimitedcompanies.coms.domain.projects.ProjectMember;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 
 @Entity
@@ -30,27 +29,17 @@ public class Employee
 	@JoinColumn(name = "contactId_FK")
 	private Contact contact;
 	
-	@ManyToMany(mappedBy = "projectManagers")
-	private Set<Project> pmProjects;
-	
-	@ManyToMany(mappedBy = "superintendents")
-	private Set<Project> superintendentProjects;
-	
-	@ManyToMany(mappedBy = "foremen")
-	private Set<Project> foremanProjects;
+	@OneToMany(mappedBy = "employee")
+	private List<ProjectMember> projectMembers;
 	
 	protected Employee() 
 	{
-		this.pmProjects = new HashSet<>();
-		this.superintendentProjects = new HashSet<>();
-		this.foremanProjects = new HashSet<>();
+		this.projectMembers = new ArrayList<>();
 	}
 	
 	public Employee(Contact contact)
 	{
-		this.pmProjects = new HashSet<>();
-		this.superintendentProjects = new HashSet<>();
-		this.foremanProjects = new HashSet<>();
+		this.projectMembers = new ArrayList<>();
 		this.contact = contact;
 	}
 
@@ -64,99 +53,59 @@ public class Employee
 		return contact;
 	}
 
-	public Set<Project> getPmProjects()
-	{
-		return Collections.unmodifiableSet(pmProjects);
-	}
-	
-	public List<String> getPmProjectNames()
+	public List<String> getPMAssociatedProjectNames()
 	{
 		List<String> projectNames = new ArrayList<>();
-		
-		for (Project next : this.pmProjects)
+		for (ProjectMember member : this.projectMembers)
 		{
-			projectNames.add(next.getProjectName());
+			if (member.getProjectAccess() == ProjectAccess.PROJECT_MANAGER)
+			{
+				projectNames.add(member.getProject().getProjectName());
+			}
+		}
+		return projectNames;
+	}
+	
+	public List<String> getSuperintendentAssociatedProjectNames()
+	{
+		List<String> projectNames = new ArrayList<>();		
+		for (ProjectMember member : this.projectMembers)
+		{
+			if (member.getProjectAccess() == ProjectAccess.SUPERINTENDENT)
+			{
+				projectNames.add(member.getProject().getProjectName());
+			}
 		}
 		
 		return projectNames;
 	}
 	
-	public void assignAsProjectManager(Project project)
+	public List<String> getForemanAssociatedProjectNames()
 	{
-		this.pmProjects.add(project);
-		if (!project.getProjectManagers().contains(this))
+		List<String> projectNames = new ArrayList<>();		
+		for (ProjectMember member : this.projectMembers)
 		{
-			project.addProjectManager(this);
-		}
-	}
-
-	public Set<Project> getSuperintendentProjects()
-	{
-		return Collections.unmodifiableSet(superintendentProjects);
-	}
-	
-	public List<String> getSuperintendentProjectNames()
-	{
-		List<String> projectNames = new ArrayList<>();
-		
-		for (Project next : this.superintendentProjects)
-		{
-			projectNames.add(next.getProjectName());
+			if (member.getProjectAccess() == ProjectAccess.FOREMAN)
+			{
+				projectNames.add(member.getProject().getProjectName());
+			}
 		}
 		
 		return projectNames;
 	}
 	
-	public void assignAsSuperintendent(Project project)
+	public List<ProjectMember> getAssociatedProjects()
 	{
-		this.superintendentProjects.add(project);
-		if (!project.getSuperintendents().contains(this))
-		{
-			project.addSuperintendent(this);
-		}
-	}
-
-	public Set<Project> getForemanProjects()
-	{
-		return Collections.unmodifiableSet(superintendentProjects);
-	}
-	
-	public List<String> getForemanProjectNames()
-	{
-		List<String> projectNames = new ArrayList<>();
-		
-		for (Project next : this.foremanProjects)
-		{
-			projectNames.add(next.getProjectName());
-		}
-		
-		return projectNames;
-	}
-	
-	public void assignAsForeman(Project project)
-	{
-		this.foremanProjects.add(project);
-		if (!project.getForemen().contains(this))
-		{
-			project.addForman(this);
-		}
+		return Collections.unmodifiableList(this.projectMembers);
 	}
 	
 	public List<String> getAssociatedProjectNames()
 	{
 		List<String> projectNames = new ArrayList<>();
 		
-		for (Project next : this.pmProjects)
+		for(ProjectMember member : this.projectMembers)
 		{
-			projectNames.add(next.getProjectName());
-		}
-		for (Project next : this.superintendentProjects)
-		{
-			projectNames.add(next.getProjectName());
-		}
-		for (Project next : this.foremanProjects)
-		{
-			projectNames.add(next.getProjectName());
+			projectNames.add(member.getProject().getProjectName());
 		}
 		
 		return projectNames;

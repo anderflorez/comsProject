@@ -5,7 +5,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -18,6 +20,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Entity
 @Table(name="users")
 public class User
@@ -27,8 +32,11 @@ public class User
 	private Integer userId;
 	
 	private String username;
+	
+	@SuppressWarnings("unused")
 	private char[] password;
-	private boolean enabled;
+	
+	private Boolean enabled;
 	// TODO: Test the methods related to the ZonedDateTime attributes
 	private ZonedDateTime dateAdded;
 	private ZonedDateTime lastAccess;
@@ -41,16 +49,16 @@ public class User
 	@JoinTable(name = "users_roles", 
 				joinColumns = {@JoinColumn(name = "userId_FK")}, 
 				inverseJoinColumns = {@JoinColumn(name = "roleId_FK")})
-	private List<Role> roles = new ArrayList<>();
+	private Set<Role> roles = new HashSet<>();
 	
-	// Constructor not to be used - intended for persistence only
 	protected User() {}
 
-	// Constructor intended for new users to be saved in the db
-	public User(String username, char[] password, Contact contact)
+	public User(String username, String password, Contact contact)
 	{
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		this.password = pe.encode(password).toCharArray();
+		
 		this.username = username;
-		this.password = password;
 		this.enabled = true;
 		this.contact = contact;
 		if (contact.getUser() == null || !contact.getUser().equals(this))
@@ -61,24 +69,12 @@ public class User
 		this.lastAccess = ZonedDateTime.now(ZoneId.of("UTC"));
 	}
 	
-	// Constructor intended for existing users in the db to be updated
-	// TODO: This constructor must be improved as it allows the userId to be set
-	// TODO: Eliminate this constructor - userId must not be allowed to be set
-	public User(Integer userId, String username, boolean enabled)
-	{
-		this.userId = userId;
-		this.username = username;
-		this.password = null;
-		this.enabled = enabled;
-		this.dateAdded = null;
-		this.lastAccess = null;
-	}
-
 	public Integer getUserId()
 	{
 		return userId;
 	}
 
+	// TODO: Delete this method
 	public void setUserId(Integer userId)
 	{
 		this.userId = userId;
@@ -94,14 +90,27 @@ public class User
 		this.username = username;
 	}	
 
-	public char[] getPassword()
+	@SuppressWarnings("unused")
+	private char[] getPassword()
 	{
-		return password;
+		return null;
+	}
+	
+	public boolean isPassword(String password)
+	{
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		String encodedPassword = "";
+		for(char next : this.password)
+		{
+			encodedPassword += next;
+		}
+		return pe.matches(password, encodedPassword);
 	}
 
-	public void setPassword(char[] password)
+	public void setPassword(String password)
 	{
-		this.password = password;
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		this.password = pe.encode(password).toCharArray();
 	}
 
 	public boolean isEnabled()
@@ -121,24 +130,24 @@ public class User
 	
 	public String getClientLocalDateAdded()
 	{
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
 		return this.dateAdded.withZoneSameInstant(ZoneId.systemDefault()).format(formatter);
 	}
 	
-	public void setDateAdded(ZonedDateTime dateAdded)
-	{
-		this.dateAdded = dateAdded;
-	}
+//	private void setDateAdded(ZonedDateTime dateAdded)
+//	{
+//		this.dateAdded = dateAdded;
+//	}
 	
-	public void setDateAdded(String dateTime)
-	{
-		if (dateTime != null)
-		{
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
-			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-			this.dateAdded = accessTime;
-		}
-	}
+//	private void setDateAdded(String dateTime)
+//	{
+//		if (dateTime != null)
+//		{
+//			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
+//			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+//			this.dateAdded = accessTime;
+//		}
+//	}
 	
 	public ZonedDateTime getLastAccess()
 	{
@@ -159,18 +168,18 @@ public class User
 	
 	public void setLastAccess(ZonedDateTime lastAccess)
 	{
-		this.lastAccess = lastAccess;
+		this.lastAccess = lastAccess.withZoneSameInstant(ZoneId.of("UTC"));
 	}
 	
-	public void setLastAccess(String dateTime)
-	{
-		if (dateTime != null)
-		{
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
-			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
-			this.lastAccess = accessTime;
-		}
-	}
+//	private void setLastAccess(String dateTime)
+//	{
+//		if (dateTime != null)
+//		{
+//			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
+//			ZonedDateTime accessTime = ZonedDateTime.parse(dateTime, formatter);
+//			this.lastAccess = accessTime;
+//		}
+//	}
 	
 	public Contact getContact()
 	{
@@ -186,9 +195,9 @@ public class User
 		}
 	}
 	
-	public List<Role> getRoles()
+	public Set<Role> getRoles()
 	{
-		return Collections.unmodifiableList(this.roles);
+		return Collections.unmodifiableSet(this.roles);
 	}
 	
 	public List<String> getRoleNames()
@@ -216,6 +225,79 @@ public class User
 		{
 			this.roles.remove(role);
 			role.removeUser(this);
+		}
+	}
+	
+	public void cleanRestrictedFields(List<String> restrictedFields)
+	{
+		if (restrictedFields.contains("userId"))
+		{
+			this.userId = null;
+		}
+		if (restrictedFields.contains("username"))
+		{
+			this.username = null;
+		}
+		if (restrictedFields.contains("password"))
+		{
+			this.password = null;
+		}
+		if (restrictedFields.contains("enabled"))
+		{
+			this.enabled = null;
+		}
+		if (restrictedFields.contains("dateAdded"))
+		{
+			this.dateAdded = null;
+		}
+		if (restrictedFields.contains("lastAccess"))
+		{
+			this.lastAccess = null;
+		}
+		if (restrictedFields.contains("contact"))
+		{
+			this.contact = null;
+		}
+		if (restrictedFields.contains("roles"))
+		{
+			this.roles = Collections.unmodifiableSet(new HashSet<>());
+		}
+	}
+	
+	public void cleanRestrictedFields(List<String> restrictedFields, User user)
+	{
+		if (restrictedFields.contains("userId"))
+		{
+			this.userId = user.getUserId();
+		}
+		if (restrictedFields.contains("username"))
+		{
+			this.username = user.getUsername();
+		}
+		if (restrictedFields.contains("password"))
+		{
+			// TODO: review this next line
+			this.password = user.password;
+		}
+		if (restrictedFields.contains("enabled"))
+		{
+			this.enabled = user.isEnabled();
+		}
+		if (restrictedFields.contains("dateAdded"))
+		{
+			this.dateAdded = user.getDateAdded();
+		}
+		if (restrictedFields.contains("lastAccess"))
+		{
+			this.lastAccess = user.getLastAccess();
+		}
+		if (restrictedFields.contains("contact"))
+		{
+			this.contact = user.getContact();
+		}
+		if (restrictedFields.contains("roles"))
+		{
+			this.roles = user.getRoles();
 		}
 	}
 

@@ -48,7 +48,7 @@ public class ABACDaoImpl implements ABACDao
 
 	@Override
 	public int getNumberOfPolicies()
-	{
+	{		
 		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(abacPolicyId) FROM abacPolicies").getSingleResult();
 		return bigInt.intValue();
 	}

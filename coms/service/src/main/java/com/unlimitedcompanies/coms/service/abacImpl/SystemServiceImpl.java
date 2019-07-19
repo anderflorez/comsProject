@@ -6,8 +6,6 @@ import java.util.List;
 import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +13,7 @@ import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
@@ -50,7 +49,7 @@ public class SystemServiceImpl implements SystemService
 	 */
 	
 	@Override
-	public void initialSetup() throws DuplicatedResourcePolicyException
+	public void initialSetup() throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
 	{
 		// Check and make sure there are no risks by performing this operation
 		// Get the number of records for several important resources
@@ -82,8 +81,7 @@ public class SystemServiceImpl implements SystemService
 			contactDao.createContact(initialContact);
 			Contact adminContact = contactDao.getContactByCharId(initialContact.getContactCharId(), null);
 			
-			PasswordEncoder pe = new BCryptPasswordEncoder();
-			authDao.createUser(new User("administrator", pe.encode("uec123").toCharArray(), adminContact));
+			authDao.createUser(new User("administrator", "uec123", adminContact));
 			User adminUser = authDao.getUserByUsername("administrator", null);
 			
 			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());

@@ -21,7 +21,7 @@ public class ABACAuthenticationUnitTest
 {
 	
 	@Test
-	public void addPolicyToResourceTest() throws DuplicatedResourcePolicyException
+	public void addPolicyToResourceTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -29,7 +29,7 @@ public class ABACAuthenticationUnitTest
 	}
 
 	@Test
-	public void policyLogicOperatorToStringTest() throws DuplicatedResourcePolicyException 
+	public void policyLogicOperatorToStringTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -37,7 +37,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void getPolicyLogicOperatorTest() throws DuplicatedResourcePolicyException
+	public void getPolicyLogicOperatorTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -45,7 +45,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void setPolicyLogicOperatorTest() throws DuplicatedResourcePolicyException
+	public void setPolicyLogicOperatorTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -54,7 +54,7 @@ public class ABACAuthenticationUnitTest
 	}
 
 	@Test
-	public void policyTypeToStringTest() throws DuplicatedResourcePolicyException 
+	public void policyTypeToStringTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -62,7 +62,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void getPolicyTypeTest() throws DuplicatedResourcePolicyException
+	public void getPolicyTypeTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -70,7 +70,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void setPolicyTypeTest() throws DuplicatedResourcePolicyException
+	public void setPolicyTypeTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -79,7 +79,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void multipleResourcePolicyUnitTest() throws DuplicatedResourcePolicyException
+	public void multipleResourcePolicyUnitTest() throws Exception
 	{
 		Resource userResource = new Resource("UserResource");
 		
@@ -90,7 +90,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void duplicateResourcePolicyNotAllowedUnitTest() throws DuplicatedResourcePolicyException
+	public void duplicateResourcePolicyNotAllowedUnitTest() throws Exception
 	{
 		Resource userResource = new Resource("UserResource");
 		
@@ -114,7 +114,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void addingSubPolicyTest() throws DuplicatedResourcePolicyException
+	public void addingSubPolicyTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -125,7 +125,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void addMultipleLevelPoliciesTest() throws DuplicatedResourcePolicyException
+	public void addMultipleLevelPoliciesTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -139,7 +139,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void addingEntityConditionTest() throws DuplicatedResourcePolicyException
+	public void addingEntityConditionTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -158,7 +158,7 @@ public class ABACAuthenticationUnitTest
 	}
 
 	@Test
-	public void addingAttributeConditionTest() throws DuplicatedResourcePolicyException
+	public void addingAttributeConditionTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
@@ -177,7 +177,7 @@ public class ABACAuthenticationUnitTest
 	}
 	
 	@Test
-	public void addingFieldConditionToConditionGroupTest() throws DuplicatedResourcePolicyException
+	public void addingFieldConditionToConditionGroupTest() throws Exception
 	{
 		Resource testResource = new Resource("TestingResource");
 		new ResourceField("TestField1", false, testResource);

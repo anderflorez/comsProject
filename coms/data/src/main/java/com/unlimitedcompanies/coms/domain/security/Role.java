@@ -2,7 +2,9 @@ package com.unlimitedcompanies.coms.domain.security;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,9 +15,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-
-import org.hibernate.Hibernate;
-import org.hibernate.collection.internal.PersistentBag;
 
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 
@@ -32,7 +31,7 @@ public class Role
 	private String roleName;
 	
 	@ManyToMany(mappedBy = "roles")
-	private List<User> users = new ArrayList<>();
+	private Set<User> users = new HashSet<>();
 	
 	@ManyToMany
 	@JoinTable(name = "restrictedFields", 
@@ -42,13 +41,13 @@ public class Role
 	
 	protected Role() 
 	{
-		this.users = new ArrayList<>();
+		this.users = new HashSet<>();
 		this.restrictedFields = new ArrayList<>();
 	}
 
 	public Role(String roleName)
 	{
-		this.users = new ArrayList<>();
+		this.users = new HashSet<>();
 		this.restrictedFields = new ArrayList<>();
 		this.roleName = roleName;
 	}
@@ -73,9 +72,9 @@ public class Role
 		this.roleName = roleName;
 	}
 	
-	public List<User> getUsers()
+	public Set<User> getUsers()
 	{
-		return Collections.unmodifiableList(this.users);
+		return Collections.unmodifiableSet(this.users);
 	}
 	
 	public void addUser(User user)

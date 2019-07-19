@@ -147,12 +147,20 @@ public class Contact
 
 	public List<ContactPhone> getPhones()
 	{
-		return Collections.unmodifiableList(contactPhones);
+		if (this.contactPhones != null)
+		{
+			return Collections.unmodifiableList(contactPhones);			
+		}
+		return null;
 	}
 	
 	public void addPhone(String phoneNumber, String extention, String phoneType) throws InvalidPhoneNumberException
 	{
 		ContactPhone phone = new ContactPhone(phoneNumber, extention, phoneType, this);
+		if (this.contactPhones == null)
+		{
+			this.contactPhones = new ArrayList<>();
+		}
 		this.contactPhones.add(phone);
 	}
 

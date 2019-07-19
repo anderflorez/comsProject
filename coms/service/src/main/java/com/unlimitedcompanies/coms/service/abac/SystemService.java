@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.service.abac;
 import java.util.List;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
@@ -18,7 +19,7 @@ public interface SystemService
 	/*
 	 * Initial setup of resources for the security system
 	 */
-	public void initialSetup() throws DuplicatedResourcePolicyException;
+	public void initialSetup() throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException;
 	public void checkAllResources();
 	public List<String> searchAllResourceNames();	
 	

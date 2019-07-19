@@ -3,7 +3,6 @@ package com.unlimitedcompanies.coms.dao.securityImpl;
 import java.math.BigInteger;
 import java.util.List;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -33,6 +32,7 @@ public class AuthDaoImpl implements AuthDao
 		{
 			Contact contact = em.merge(user.getContact());
 			user.setContact(contact);
+			
 			em.persist(user);
 		} 
 		catch (PersistenceException e)
@@ -61,24 +61,36 @@ public class AuthDaoImpl implements AuthDao
 //		User user = em.find(User.class, userId);
 //		return user == null ? false : true;
 //	}
-//	
-//	@Override
-//	public List<User> getAllUsers()
-//	{
-//		return em.createQuery("select user from User as user", User.class).getResultList();
-//	}
-//	
-//	@Override
-//	public List<User> getUsersByRange(int page, int elements)
-//	{
-//		return em.createQuery("select user from User user order by user.username", User.class)
-//				  .setFirstResult(page * elements)
-//				  .setMaxResults(elements)
-//				  .getResultList();
-//	}
 	
 	@Override
-	public User getUserByUserId(int id, String accessConditions)
+	public List<User> getAllUsers(String accessConditions)
+	{
+		String queryString = "select user from User as user";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " where " + accessConditions;
+		}
+		return em.createQuery(queryString, User.class).getResultList();
+	}
+	
+	@Override
+	public List<User> getAllUsers(int elements, int page, String accessConditions)
+	{
+		String queryString = "select user from User user";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " where " + accessConditions;
+		}
+		queryString += " order by user.username";	
+		
+		return em.createQuery(queryString, User.class)
+				  .setFirstResult(page * elements)
+				  .setMaxResults(elements)
+				  .getResultList();
+	}
+	
+	@Override
+	public User getUserById(int id, String accessConditions)
 	{
 		if (accessConditions != null && !accessConditions.isEmpty())
 		{
@@ -109,30 +121,66 @@ public class AuthDaoImpl implements AuthDao
 		
 		return em.createQuery(queryString, User.class).setParameter("username", username).getSingleResult();
 	}
-//
-//	@Override
-//	public User getUserByContact(Contact contact)
-//	{
-//		return em.createQuery("select user from User user where user.contact = :contact", User.class)
-//							  .setParameter("contact", contact)
-//							  .getSingleResult();
-//	}
-//
-//	@Override
-//	public User getUserByUserIdWithContact(int userId)
-//	{
-//		return em.createQuery("select user from User as user left join fetch user.contact where user.userId = :userId", User.class)
-//				  .setParameter("userId", userId)
-//				  .getSingleResult();
-//	}
-//	
-//	@Override
-//	public User getUserByUsernameWithContact(String username)
-//	{
-//		return em.createQuery("select user from User as user left join fetch user.contact where user.username = :username", User.class)
-//							  .setParameter("username", username)
-//							  .getSingleResult();
-//	}
+
+	@Override
+	public User getUserByIdWithContact(int userId, String userAccessConditions, String contactAccessConditions)
+	{
+		String queryString = "select user from User as user left join fetch user.contact as contact where user.userId = :userId";
+		if (userAccessConditions != null && !userAccessConditions.isEmpty())
+		{
+			queryString += " and " + userAccessConditions;
+		}
+		if (contactAccessConditions != null && !contactAccessConditions.isEmpty())
+		{
+			queryString += " and " + contactAccessConditions;
+		}
+		
+		return em.createQuery(queryString, User.class).setParameter("userId", userId).getSingleResult();
+	}
+	
+	@Override
+	public User getUserByUsernameWithContact(String username, String userAccessConditions, String contactAccessConditions)
+	{
+		String queryString = "select user from User as user left join fetch user.contact as contact where user.username = :username";
+		if (userAccessConditions != null && !userAccessConditions.isEmpty())
+		{
+			queryString += " and " + userAccessConditions;
+		}
+		if (contactAccessConditions != null && !contactAccessConditions.isEmpty())
+		{
+			queryString += " and " + contactAccessConditions;
+		}
+		
+		return em.createQuery(queryString, User.class).setParameter("username", username).getSingleResult();
+	}
+
+	@Override
+	public User getUserByContact(Contact contact, String accessConditions)
+	{
+		String queryString = "select user from User user where user.contact = :contact";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+		
+		return em.createQuery(queryString, User.class).setParameter("contact", contact).getSingleResult();
+	}
+	
+	@Override
+	public User getUserByUsernameWithRoles(String username, String userAccessConditions, String roleAccessConditions)
+	{
+		String queryString = "select user from User as user left join fetch user.roles as role where user.username = :username";
+		if (userAccessConditions != null && !userAccessConditions.isEmpty())
+		{
+			queryString += " and " + userAccessConditions;
+		}
+		if (roleAccessConditions != null && !roleAccessConditions.isEmpty())
+		{
+			queryString += " and " + roleAccessConditions;
+		}
+		
+		return em.createQuery(queryString, User.class).setParameter("username", username).getSingleResult();
+	}
 	
 	@Override
 	public User getFullUserByUsername(String username, String accessConditions)
@@ -147,15 +195,25 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
+	public User getUserWithPathToProjects(int userId)
+	{
+		String queryString = "select user from User as user "
+				+ "left join fetch user.contact as contact "
+				+ "left join fetch contact.employee as employee "
+				+ "left join fetch employee.projectMembers as member "
+				+ "where user.userId = :userId";
+		
+		return em.createQuery(queryString, User.class).setParameter("userId", userId).getSingleResult();
+	}
+	
+	@Override
 	public User getFullUserWithAttribs(int userId)
 	{
 		return em.createQuery("select user from User user "
 				+ "left join fetch user.roles roles "
 				+ "left join fetch user.contact contact "
 				+ "left join fetch contact.employee employee "
-				+ "left join fetch employee.pmProjects pmProjects "
-				+ "left join fetch employee.superintendentProjects superintendentProjects "
-				+ "left join fetch employee.foremanProjects foremanProjects "
+				+ "left join fetch employee.projectMembers projectMembers "
 				+ "where user.userId = :userId", User.class)
 				.setParameter("userId", userId)
 				.getSingleResult();
@@ -176,29 +234,20 @@ public class AuthDaoImpl implements AuthDao
 //							  .setParameter("id", userId)
 //							  .getSingleResult();
 //	}
-//	
-//	@Override
-//	public void updateUser(User user)
-//	{
-//		User foundUser = this.getUserByUserId(user.getUserId());
-//		foundUser.setUsername(user.getUsername());
-//		foundUser.setEnabled(user.isEnabled());
-//	}
-//	
-//	@Override
-//	public void changeUserPassword(int userId, char[] newPassword)
-//	{
-//		User foundUser = this.getUserByUserId(userId);
-//		foundUser.setPassword(newPassword);
-//	}
-//
-//	@Override
-//	public void deleteUser(int userId)
-//	{
-//		// TODO: Find a way to test this operation at running time to show a success or error message to the user
-//		User user = this.getUserByUserId(userId);
-//		em.remove(user);
-//	}
+	
+	@Override
+	public void updateUser(User user)
+	{
+		// TODO: Test and make sure if the user does not exist this method does not create a new user
+		em.merge(user);
+	}
+
+	@Override
+	public void deleteUser(int userId)
+	{
+		User foundUser = em.find(User.class, userId);
+		em.remove(foundUser);
+	}
 
 	@Override
 	public void createRole(Role role)
@@ -304,15 +353,13 @@ public class AuthDaoImpl implements AuthDao
 //	}
 //
 	@Override
-	public Role getRolePathWithFullEmployees(int roleId)
+	public Role getRoleWithPathToProjects(int roleId)
 	{
-		String queryString = "select role from Role role "
-								+ "left join fetch role.users user "
-								+ "left join fetch user.contact contact "
-								+ "left join fetch contact.employee employee "
-								+ "left join fetch employee.pmProjects pmProjects "
-								+ "left join fetch employee.superintendentProjects superintendentProjects "
-								+ "left join fetch employee.foremanProjects foremanProjects "
+		String queryString = "select role from Role as role "
+								+ "left join fetch role.users as user "
+								+ "left join fetch user.contact as contact "
+								+ "left join fetch contact.employee as employee "
+								+ "left join fetch employee.projectMembers as member "
 								+ "where role.roleId = :roleId";
 		
 		return em.createQuery(queryString, Role.class).setParameter("roleId", roleId).getSingleResult();
@@ -348,7 +395,7 @@ public class AuthDaoImpl implements AuthDao
 	public void assignUserToRole(int userId, int roleId)
 	{
 		Role role = this.getRoleById(roleId, null);
-		User user = this.getUserByUserId(userId, null);
+		User user = this.getUserById(userId, null);
 		
 		role.addUser(user);
 	}
@@ -368,5 +415,4 @@ public class AuthDaoImpl implements AuthDao
 		em.flush();
 		em.clear();		
 	}
-	
 }

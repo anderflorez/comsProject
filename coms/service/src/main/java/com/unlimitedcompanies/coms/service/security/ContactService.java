@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.domain.security.ContactPhone;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
@@ -22,9 +23,10 @@ public interface ContactService
 	public Contact searchContactById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException;
 	public Contact searchContactByCharId(String charId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Contact searchContactByEmail(String email, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public Contact searchContactByPhoneId(int phoneId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 //	public boolean hasNextContact(int page, int elements);
 	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException;
 	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException;
-	public void deleteContact(Contact contact, String username) throws RecordNotDeletedException, NoResourceAccessException;
-	
+	public void removeContactPhone(ContactPhone contactPhone, String signedUsername) throws NoResourceAccessException;
+	public void deleteContact(Contact contact, String signedUsername) throws RecordNotDeletedException, NoResourceAccessException;
 }

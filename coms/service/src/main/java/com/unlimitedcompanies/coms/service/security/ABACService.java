@@ -1,12 +1,8 @@
 package com.unlimitedcompanies.coms.service.security;
 
-import java.util.List;
-
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
-import com.unlimitedcompanies.coms.domain.abac.ResourceField;
-import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 
 public interface ABACService

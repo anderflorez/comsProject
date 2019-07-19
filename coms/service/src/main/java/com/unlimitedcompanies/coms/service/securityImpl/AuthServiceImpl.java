@@ -2,13 +2,12 @@ package com.unlimitedcompanies.coms.service.securityImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.NoResultException;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +19,14 @@ import com.unlimitedcompanies.coms.domain.abac.ResourceAttribs;
 import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.employee.Employee;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
@@ -48,10 +50,10 @@ public class AuthServiceImpl implements AuthService
 			throws NoResourceAccessException, RecordNotFoundException, DuplicateRecordException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
-		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.UPDATE);
-		UserAttribs userAttribs = systemService.getUserAttribs(loggedUser.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
 		if (user.getContact() == null || user.getContact().getContactId() == null)
 		{
@@ -59,13 +61,16 @@ public class AuthServiceImpl implements AuthService
 			throw new RecordNotFoundException(exceptionMessage);
 		}
 		
-		if (userPolicy.getModifyPolicy(null, userAttribs, loggedUser) && userPolicy.getCdPolicy().isCreatePolicy())
+		if (userPolicy.getModifyPolicy(null, userAttribs, signedUser) && userPolicy.getCdPolicy().isCreatePolicy())
 		{
 			try
 			{
-				PasswordEncoder pe = new BCryptPasswordEncoder();
-				String encoded = pe.encode(String.valueOf(user.getPassword()));
-				user.setPassword(encoded.toCharArray());
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (restrictedFields.contains("username") || restrictedFields.contains("password") || restrictedFields.contains("contact"))
+				{
+					throw new NoResourceAccessException();
+				}
+				
 				authDao.createUser(user);
 				authDao.clearEntityManager();
 			}
@@ -100,51 +105,92 @@ public class AuthServiceImpl implements AuthService
 //			return true;
 //		}
 //	}
-//
-//	@Override
-//	public List<User> searchAllUsers(String username)
-//	{
-//		Resource resource = abacService.findResourceByName("User");
-//		User currentUser = systemService.findFullUserByUsername(username);
-//		
-//		AbacPolicy policy = abacService.findPolicy(resource, PolicyType.READ, username);
-//		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", currentUser);
-//		
-//		if (readPolicy.isReadGranted())
-//		{
-//			List<User> users = authDao.getAllUsers(readPolicy.getReadConditions());
-//			authDao.clearEntityManager();
-//			return users;
-//		}
-//		else
-//		{
-//			throw new NoResourceAccessException();
-//		}
-//		
-//	}
-//	
-//	@Override
-//	public List<User> searchUsersByRange(int page, int elements)
-//	{
-//		return authDao.getUsersByRange(page - 1, elements);
-//	}
+
+	@Override
+	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			List<User> users = authDao.getAllUsers(readPolicy.getReadConditions());
+			authDao.clearEntityManager();
+			
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				for (User foundUser : users)
+				{
+					foundUser.cleanRestrictedFields(restrictedFields);
+				}
+			}
+			
+			return users;
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
+	
+	@Override
+	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			List<User> users = authDao.getAllUsers(elements, page-1, readPolicy.getReadConditions());
+			authDao.clearEntityManager();
+			
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+			if (restrictedFields.size() > 0)
+			{
+				for (User foundUser : users)
+				{
+					foundUser.cleanRestrictedFields(restrictedFields);
+				}
+			}
+			
+			return users;
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
 
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public User searchUserById(int id, String requestedByUsername) throws RecordNotFoundException, NoResourceAccessException
+	public User searchUserById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException
 	{
-		Resource resource = abacService.searchResourceByName("User");
-		User currentUser = systemService.searchFullUserByUsername(requestedByUsername);
+		Resource userResource = abacService.searchResourceByName("User");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
-		AbacPolicy policy = systemService.searchPolicy(resource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", currentUser);
+		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
 			try
 			{
-				User user = authDao.getUserByUserId(id, readPolicy.getReadConditions());
+				User user = authDao.getUserById(id, readPolicy.getReadConditions());
 				authDao.clearEntityManager();
+				
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(restrictedFields);
+				}
 				return user;
 			} 
 			catch (NoResultException e)
@@ -161,22 +207,28 @@ public class AuthServiceImpl implements AuthService
 
 	@Override
 	@Transactional(rollbackFor = RecordNotFoundException.class)
-	public User searchUserByUsername(String username, String requestedByUsername) 
+	public User searchUserByUsername(String username, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException
 	{
-		Resource resource = abacService.searchResourceByName("User");
-		User user = systemService.searchFullUserByUsername(requestedByUsername);
+		Resource userResource = abacService.searchResourceByName("User");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
-		AbacPolicy policy = systemService.searchPolicy(resource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", user);
+		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
 			try
 			{
-				User foundUser = authDao.getUserByUsername(username, readPolicy.getReadConditions());
+				User user = authDao.getUserByUsername(username, readPolicy.getReadConditions());
 				authDao.clearEntityManager();
-				return foundUser;
+				
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(restrictedFields);
+				}
+				return user;
 			} 
 			catch (NoResultException e)
 			{
@@ -189,175 +241,276 @@ public class AuthServiceImpl implements AuthService
 		}
 		
 	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public User searchUserByContact(Contact contact) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			return authDao.getUserByContact(contact);
-//		} 
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The user could not be found");
-//		}
-//	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public User searchUserByUserIdWithContact(int userId) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			return authDao.getUserByUserIdWithContact(userId);
-//		}
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The user could not be found");
-//		}
-//	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public User searchUserByUsernameWithContact(String username) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			return authDao.getUserByUsernameWithContact(username);
-//		} 
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The user could not be found");
-//		}
-//	}
-//	
-////	@Override
-////	public User searchAUserByIdWithRoles(int userId)
-////	{
-////		return authDao.getAUserByIdWithRoles(userId);
-////	}
-//	
-//	@Override
-//	public User searchFullUserByUserId(int id)
-//	{
-//		return authDao.getFullUserByUserId(id);
-//	}
-//
-//	@Override
-//	public User searchFullUserByUsername(String username)
-//	{
-//		return authDao.getFullUserByUsername(username);
-//	}
-//	
-////	@Override
-////	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException
-////	{
-////		User user = this.searchUserByUserId(userId);
-////		
-////		PasswordEncoder pe = new BCryptPasswordEncoder();
-////		if (pe.matches(String.valueOf(password), String.valueOf(user.getPassword())))
-////		{
-////			return true;
-////		}
-////		else 
-////		{
-////			return false;
-////		}
-////	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public User updateUser(User user) throws RecordNotFoundException
-//	{
-//		authDao.updateUser(user);
-//		return this.searchUserByUserId(user.getUserId());
-//	}
-//	
-//	@Override
-//	public boolean passwordMatch(int userId, char[] password) throws RecordNotFoundException
-//	{
-//		User user = this.searchUserByUserId(userId);
-//		
-//		PasswordEncoder pe = new BCryptPasswordEncoder();
-//		if (pe.matches(String.valueOf(password), String.valueOf(user.getPassword())))
-//		{
-//			return true;
-//		}
-//		else 
-//		{
-//			return false;
-//		}
-//	}
-//	
-//	@Override
-//	public void changeUserPassword(int userId, char[] currentPassword, char[] newPassword) throws RecordNotFoundException, IncorrectPasswordException, RecordNotChangedException
-//	{
-//		if (this.passwordMatch(userId, currentPassword))
-//		{
-//			// Change the password
-//			PasswordEncoder pe = new BCryptPasswordEncoder();
-//			newPassword = pe.encode(String.valueOf(newPassword)).toCharArray();
-//			authDao.changeUserPassword(userId, newPassword);
-//			
-//			// Check if user password was actually changed
-//			if (this.passwordMatch(userId, currentPassword))
-//			{
-//				throw new RecordNotChangedException("Unknown error - The user password was not changed");
-//			}
-//		}
-//		else
-//		{
-//			throw new IncorrectPasswordException();
-//		}
-//	}
-//	
-//
-////	@Override
-////	public void changePassword(int userId, char[] oldPassword, char[] newPassword) throws RecordNotFoundException
-////	{
-////		User user = this.searchUserByUserId(userId);
-////		
-////		PasswordEncoder pe = new BCryptPasswordEncoder();
-////		if (pe.matches(oldPassword.toString(), user.getPassword().toString()))
-////		{
-////			user.setPassword(pe.encode(newPassword.toString()).toCharArray());
-////		}
-////
-////	}
-//
-//	@Override
-//	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
-//	public void deleteUser(int userId) throws RecordNotFoundException, RecordNotDeletedException
-//	{
-//		// TODO: Prevent this method from deleting the last user in the administrator role
-//		// TODO: Provide error message if user tries to delete the last administrator user
-//		
-//		try
-//		{
-//			authDao.deleteUser(userId); 
-//		} 
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The user you are trying to delete could not be found");
-//		}
-//		
-//		if (authDao.existingUser(userId))
-//		{
-//			throw new RecordNotDeletedException("The user could not be deleted");
-//		}
-//	}
+	
+	@Override
+	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public User searchUserByIdWithContact(int userId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		
+		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);		
+		
+		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
+		{
+			try
+			{
+				User user = authDao.getUserByIdWithContact(userId, userReadPolicy.getReadConditions(), contactReadPolicy.getReadConditions());
+				authDao.clearEntityManager();
+				
+				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (contactRestrictedFields.size() > 0)
+				{
+					user.getContact().cleanRestrictedFields(contactRestrictedFields);
+				}
+				
+				List<String> userRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (userRestrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(userRestrictedFields);
+				}
+				
+				return user;
+			} 
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The user could not be found");
+			}			
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public User searchUserByUsernameWithContact(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		
+		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);		
+		
+		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
+		{
+			try
+			{
+				User user = authDao.getUserByUsernameWithContact(username, userReadPolicy.getReadConditions(), contactReadPolicy.getReadConditions());
+				authDao.clearEntityManager();
+				
+				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (contactRestrictedFields.size() > 0)
+				{
+					user.getContact().cleanRestrictedFields(contactRestrictedFields);
+				}
+				
+				List<String> userRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (userRestrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(userRestrictedFields);
+				}
+				
+				return user;
+			} 
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The user could not be found");
+			}			
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public User searchUserByContact(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			try
+			{
+				User user = authDao.getUserByContact(contact, readPolicy.getReadConditions());
+				authDao.clearEntityManager();
+				
+				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (restrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(restrictedFields);
+				}
+				return user;
+			} 
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The user could not be found");
+			}			
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public User searchUserByUsernameWithRoles(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource roleResource = abacService.searchResourceByName("Role");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		
+		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
+		ResourceReadPolicy roleReadPolicy = rolePolicy.getReadPolicy("role", "project", signedUser);
+		
+		if (userReadPolicy.isReadGranted() && roleReadPolicy.isReadGranted())
+		{
+			try
+			{
+				User user = authDao.getUserByUsernameWithRoles(username, userReadPolicy.getReadConditions(), roleReadPolicy.getReadConditions());
+				authDao.clearEntityManager();
+				
+				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), roleResource.getResourceId());
+				if (contactRestrictedFields.size() > 0)
+				{
+					user.getContact().cleanRestrictedFields(contactRestrictedFields);
+				}
+				
+				List<String> userRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (userRestrictedFields.size() > 0)
+				{
+					user.cleanRestrictedFields(userRestrictedFields);
+				}
+				
+				return user;
+			} 
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The user could not be found");
+			}			
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public void updateUser(User user, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		Resource userResource = abacService.searchResourceByName("User");
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.UPDATE);
+		
+		ResourceAttribs resourceAttribs = this.getUserResourceAttribs(user.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (userPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
+		{
+			// Check if there are any restricted fields for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+			restrictedFields.add("password");
+			restrictedFields.add("dateAdded");
+			restrictedFields.add("lastAccess");
+			User foundUser = authDao.getUserById(user.getUserId(), null);
+			user.cleanRestrictedFields(restrictedFields, foundUser);
+			
+			authDao.updateUser(user);
+			authDao.clearEntityManager();
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
+	public void changeUserPassword(User user, String currentPassword, String newPassword, String signedUsername) 
+			throws IncorrectPasswordException, NoResourceAccessException, RecordNotFoundException
+	{
+		if (!user.isPassword(currentPassword))
+		{
+			throw new IncorrectPasswordException();
+		}
+		
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		Resource userResource = abacService.searchResourceByName("User");
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.UPDATE);
+		
+		ResourceAttribs resourceAttribs = this.getUserResourceAttribs(user.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (userPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
+		{
+			// Check if the user password is a restricted field for the requesting user
+			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+			if (restrictedFields.contains("password"))
+			{
+				throw new NoResourceAccessException();
+			}
+			else
+			{
+				user.setPassword(newPassword);
+				authDao.updateUser(user);
+				authDao.clearEntityManager();
+			}
+		}
+	}
+
+	@Override
+	public void deleteUser(int userId, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException, RecordNotDeletedException
+	{
+		// TODO: Prevent this method from deleting the last user in the administrator role
+		// TODO: Provide error message if user tries to delete the last administrator user
+		
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		Resource userResource = abacService.searchResourceByName("User");
+		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.UPDATE);
+		
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		ResourceAttribs resourceAttribs = this.getUserResourceAttribs(userId);
+		
+		if (userPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser) && userPolicy.getCdPolicy().isDeletePolicy())
+		{
+			authDao.deleteUser(userId);
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
 
 	@Override
 	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException
 	{
 		Resource roleResource = abacService.searchResourceByName("Role");
-		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy roleUpdate = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
-		UserAttribs userAttribs = systemService.getUserAttribs(loggedUser.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
-		if (roleUpdate.getModifyPolicy(null, userAttribs, loggedUser))
+		if (roleUpdate.getModifyPolicy(null, userAttribs, signedUser))
 		{
 			// TODO: Return an exception if the role is not created
 			
@@ -590,10 +743,35 @@ public class AuthServiceImpl implements AuthService
 //		// TODO: Create some checking and throw a new exception if the member is not removed.
 //	}
 	
+	private ResourceAttribs getUserResourceAttribs(int userId) throws RecordNotFoundException
+	{		
+		User user;
+		try
+		{
+			user = authDao.getUserWithPathToProjects(userId);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The user could not be found");
+		}
+		Employee employee = user.getContact().getEmployee();
+		
+		ResourceAttribs resourceAttribs = new ResourceAttribs();
+		
+		if (employee != null)
+		{
+			resourceAttribs.addProjectManager(employee.getPMAssociatedProjectNames());
+			resourceAttribs.addProjectSuperintendent(employee.getSuperintendentAssociatedProjectNames());
+			resourceAttribs.addProjectForman(employee.getForemanAssociatedProjectNames());			
+		}
+		
+		return resourceAttribs;
+	}
+	
 	private ResourceAttribs getRoleResourceAttribs(int roleId)
 	{
-		Role role = authDao.getRolePathWithFullEmployees(roleId);
-		List<User> users = role.getUsers();
+		Role role = authDao.getRoleWithPathToProjects(roleId);
+		Set<User> users = role.getUsers();
 		List<Employee> employees = new ArrayList<>();
 		
 		for (User user : users)
@@ -607,9 +785,9 @@ public class AuthServiceImpl implements AuthService
 		ResourceAttribs resourceAttribs = new ResourceAttribs();
 		for (Employee employee : employees)
 		{
-			resourceAttribs.addProjectManager(employee.getPmProjectNames());
-			resourceAttribs.addProjectSuperintendent(employee.getSuperintendentProjectNames());
-			resourceAttribs.addProjectForman(employee.getForemanProjectNames());
+			resourceAttribs.addProjectManager(employee.getPMAssociatedProjectNames());
+			resourceAttribs.addProjectSuperintendent(employee.getSuperintendentAssociatedProjectNames());
+			resourceAttribs.addProjectForman(employee.getForemanAssociatedProjectNames());
 		}
 		
 		return resourceAttribs;

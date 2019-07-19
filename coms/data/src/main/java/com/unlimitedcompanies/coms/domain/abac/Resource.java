@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 
 @Entity
 @Table(name = "resources")
@@ -109,7 +110,7 @@ public class Resource
 		}
 	}
 	
-	public void addPolicy(String policyName, PolicyType policyType) throws DuplicatedResourcePolicyException
+	public void addPolicy(String policyName, PolicyType policyType) throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
 	{
 		new AbacPolicy(policyName, policyType, this);
 	}

@@ -1,7 +1,5 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
-import java.util.List;
-
 import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.abac.SystemService;
-import com.unlimitedcompanies.coms.service.abacImpl.SystemServiceImpl;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 
@@ -65,6 +62,13 @@ public class ABACServiceImpl implements ABACService
 			try
 			{
 				resourceField = systemService.searchResourceFieldById(fieldId);
+				
+				// Fields in the Role resource (roleId and roleName) are not allowed to be restricted
+				if (resourceField.getResource().getResourceName().equals("Role"))
+				{
+					throw new NoResourceAccessException();
+				}
+				
 				role = systemService.searchRoleById(roleId);
 			}
 			catch (NoResultException e)

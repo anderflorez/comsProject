@@ -1,14 +1,15 @@
-package com.unlimitedcompanies.coms.testClient;
+package com.unlimitedcompanies.coms.domain.unitTests;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.service.abac.SystemService;
 
 public class Client
 {
-	public static void main(String[] args) throws DuplicatedResourcePolicyException
+	public static void main(String[] args) throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
 	{
 		// TODO: Create an integration test for general searches
 //		System.out.println(" =========== Search ===========");
