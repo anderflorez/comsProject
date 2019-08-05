@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectPolicy;
 import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.domain.security.User;
 
@@ -288,7 +289,7 @@ public class AbacPolicy
 		return fieldConditions;
 	}
 	
-	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value)
+	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value) throws IncorrectPolicy
 	{
 		if (this.getPolicyType() == PolicyType.READ)
 		{
@@ -302,12 +303,11 @@ public class AbacPolicy
 					return;
 				}
 			}
-			// TODO: throw an exception as the fieldName is not part of the resource
-			System.out.println("ERROR: The referenced field does not belong to the intended resource");			
+			throw new IncorrectPolicy("The indicated field does not belong to the referenced resource");		
 		}
 		else
 		{
-			// TODO: Throw an exception as the Field Conditions are to be used only for read policies
+			throw new IncorrectPolicy("Field Conditions only apply to read policies");
 		}
 		
 	}
@@ -428,8 +428,12 @@ public class AbacPolicy
 	 * =======================================================
 	 */
 	
-	public ResourceReadPolicy getReadPolicy(String resourceAlias, String projectAlias, User user)
+	public ResourceReadPolicy getReadPolicy(Class<?> resourceClass, User user)
 	{
+		String resourceAlias = resourceClass.getSimpleName();
+		resourceAlias = resourceAlias.substring(0, 1).toLowerCase() + resourceAlias.substring(1);
+		String projectAlias = "project";
+		
 		if (this.getLogicOperator() == LogicOperator.AND)
 		{
 			ResourceReadPolicy readPolicy = new ResourceReadPolicy();

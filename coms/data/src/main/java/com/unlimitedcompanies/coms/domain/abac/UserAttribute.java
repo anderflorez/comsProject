@@ -3,7 +3,6 @@ package com.unlimitedcompanies.coms.domain.abac;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 public enum UserAttribute
@@ -23,17 +22,11 @@ public enum UserAttribute
 	{
 		if (this.userField.equals("roleName"))
 		{
-			List<String> roleNames = new ArrayList<>();
-			for (Role next : user.getRoles())
-			{
-				roleNames.add(next.getRoleName());
-			}
-			return roleNames;
+			return user.getRoleNames();
 		}
 		else if (this.userField.equals("projectName"))
 		{
-			// TODO: Add logic here when the project db table and java classes exist
-			return null;
+			return user.getContact().getEmployee().getAssociatedProjectNames();
 		}
 		else
 		{

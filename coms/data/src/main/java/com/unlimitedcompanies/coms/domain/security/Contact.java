@@ -45,7 +45,7 @@ public class Contact
 	@OneToOne(mappedBy = "contact")
 	private User user;
 	
-	@OneToOne(mappedBy = "contact")
+	@OneToOne(mappedBy = "contact", fetch = FetchType.EAGER)
 	private Employee employee;
 	
 	protected Contact()

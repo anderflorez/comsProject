@@ -16,9 +16,9 @@ public interface AuthService
 	public void saveUser(User user, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException, DuplicateRecordException;
 	public int searchNumberOfUsers();
-	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException;
+	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 //	public boolean hasNextUser(int page, int elements);
-	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException;
+	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public User searchUserById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException;
 	public User searchUserByUsername(String username, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException;
@@ -32,11 +32,11 @@ public interface AuthService
 	public void deleteUser(int userId, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException, RecordNotDeletedException;
 	
-	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException;
+	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public int searchNumberOfRoles();
 //	public boolean hasNextRole(int page, int elements);
-	public List<Role> searchAllRoles(String signedUsername) throws NoResourceAccessException;
-	public List<Role> searchAllRoles(int elements, int page, String signedUsername) throws NoResourceAccessException;
+	public List<Role> searchAllRoles(String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public List<Role> searchAllRoles(int elements, int page, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Role searchRoleById(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Role searchRoleByName(String roleName, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Role searchRoleByNameWithRestrictedFields(String roleName, String signedUsername) 
@@ -44,7 +44,7 @@ public interface AuthService
 	public Role searchRoleByIdWithMembers(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Role searchRoleByNameWithMembers(String roleName, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 //	public List<User> searchRoleNonMembers(int roleId, String searchCriteria);
-	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException;
+	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public void deleteRole(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 
 	public void assignUserToRole(int userId, int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;

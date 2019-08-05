@@ -10,6 +10,7 @@ import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
+import com.unlimitedcompanies.coms.data.exceptions.IncorrectPolicy;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.LogicOperator;
@@ -201,6 +202,35 @@ public class ABACAuthenticationUnitTest
 		int b = iterator.next().getFieldConditions().size();
 		assertTrue((a < b && a == 1) || (a > b && a == 3));
 		assertTrue((b < a && b == 1) || (b > a && b == 3));
+	}
+	
+	@Test
+	public void addingFieldConditionToEditingPolicyTest() throws Exception
+	{
+		Resource testResource = new Resource("TestingResource");
+		
+		new ResourceField("TestField1", false, testResource);
+		new ResourceField("TestField2", false, testResource);
+		
+		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.UPDATE, testResource);
+		
+		assertThrows(IncorrectPolicy.class, ()-> policy.addFieldConditions("TestField1", ComparisonOperator.EQUALS, "Field1Value"));
+		
+	}
+	
+	@Test
+	public void addingFieldConditionToPolicyWithNonExistingFieldTest() throws Exception
+	{
+		Resource testResource = new Resource("TestingResource");
+		Resource anotherResource = new Resource("AnotherResource");
+		
+		new ResourceField("TestField1", false, testResource);
+		new ResourceField("TestField2", false, anotherResource);
+		
+		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
+		
+		assertThrows(IncorrectPolicy.class, ()-> policy.addFieldConditions("TestField2", ComparisonOperator.EQUALS, "Field1Value"));
+		
 	}
 	
 }

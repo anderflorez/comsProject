@@ -14,19 +14,22 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 @Transactional
 public interface ContactService
 {
-	public void saveContact(Contact contact, String username) throws DuplicateRecordException, NoResourceAccessException;
+	public void saveContact(Contact contact, String username) 
+			throws DuplicateRecordException, NoResourceAccessException, RecordNotFoundException;
 	public int findNumberOfContacts();
 	public int findNumberOfContactAddresses();
 	public int findNumberOfContactPhones();
-	public List<Contact> searchAllContacts(String signedUsername) throws NoResourceAccessException;
-	public List<Contact> searchContactsByRange(int elements, int page, String signedUsername) throws NoResourceAccessException;
+	public List<Contact> searchAllContacts(String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public List<Contact> searchContactsByRange(int elements, int page, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException;
 	public Contact searchContactById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException;
 	public Contact searchContactByCharId(String charId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Contact searchContactByEmail(String email, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public Contact searchContactByPhoneId(int phoneId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 //	public boolean hasNextContact(int page, int elements);
-	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException;
-	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException;
-	public void removeContactPhone(ContactPhone contactPhone, String signedUsername) throws NoResourceAccessException;
-	public void deleteContact(Contact contact, String signedUsername) throws RecordNotDeletedException, NoResourceAccessException;
+	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public void removeContactPhone(ContactPhone contactPhone, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
+	public void deleteContact(Contact contact, String signedUsername) 
+			throws RecordNotDeletedException, NoResourceAccessException, RecordNotFoundException;
 }

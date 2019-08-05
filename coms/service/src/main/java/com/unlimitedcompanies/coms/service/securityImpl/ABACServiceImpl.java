@@ -16,6 +16,7 @@ import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
@@ -51,7 +52,7 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public void addFieldRestriction(int roleId, int fieldId, String loggedUser) throws NoResourceAccessException
+	public void addFieldRestriction(int roleId, int fieldId, String loggedUser) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource restrictedFieldResource = this.searchResourceByName("RestrictedField");
 		User signedUser = systemService.searchFullUserByUsername(loggedUser);
@@ -90,9 +91,17 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public Resource searchResourceByName(String name)
+	public Resource searchResourceByName(String name) throws RecordNotFoundException
 	{
-		Resource resource = abacDao.getResourceByName(name); 
+		Resource resource;
+		try
+		{
+			resource = abacDao.getResourceByName(name);
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("The resource " + name + " could not be found");
+		}
 		systemService.clearEntityManager();
 		return resource;
 	}
@@ -130,14 +139,15 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public AbacPolicy searchPolicy(Resource requestedResource, PolicyType policyType, String username) throws NoResourceAccessException
+	public AbacPolicy searchPolicy(Resource requestedResource, PolicyType policyType, String username) 
+			throws NoResourceAccessException, RecordNotFoundException
 	{
 		// Check if user has access to read policies
 		User user = systemService.searchFullUserByUsername(username);
 		Resource abacPolicyResource = this.searchResourceByName("AbacPolicy");
 		AbacPolicy policy = systemService.searchPolicy(abacPolicyResource, PolicyType.READ);
 		
-		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy("abacPolicy", "project", user);
+		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, user);
 		
 		// If user has access then read the requested policy and return it
 		if (resourceReadPolicy.isReadGranted())
@@ -153,7 +163,8 @@ public class ABACServiceImpl implements ABACService
 	}
 
 	@Override
-	public AbacPolicy searchModifiablePolicy(Resource requestedResource, PolicyType policyType, String signedUsername) throws NoResourceAccessException
+	public AbacPolicy searchModifiablePolicy(Resource requestedResource, PolicyType policyType, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException
 	{
 		// Check if user has access to read policies
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -161,7 +172,7 @@ public class ABACServiceImpl implements ABACService
 		Resource abacPolicyResource = this.searchResourceByName("AbacPolicy");
 		
 		AbacPolicy policy = systemService.searchPolicy(abacPolicyResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy("abacPolicy", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, signedUser);
 
 		UserAttribs userAttribs = new UserAttribs(signedUsername);
 		AbacPolicy abacPolicy = systemService.searchPolicy(abacPolicyResource, PolicyType.UPDATE);

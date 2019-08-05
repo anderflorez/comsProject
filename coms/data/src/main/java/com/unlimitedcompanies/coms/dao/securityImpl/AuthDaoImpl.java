@@ -194,10 +194,11 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public User getUserWithPathToProjects(int userId)
 	{
-		String queryString = "select user from User as user "
-				+ "left join fetch user.contact as contact "
-				+ "left join fetch contact.employee as employee "
-				+ "left join fetch employee.projectMembers as member "
+		String queryString = "select user from User user "
+				+ "left join fetch user.contact contact "
+				+ "left join fetch contact.employee employee "
+				+ "left join fetch employee.projectMembers projectMember "
+				+ "left join fetch projectMember.project project "
 				+ "where user.userId = :userId";
 		
 		return em.createQuery(queryString, User.class).setParameter("userId", userId).getSingleResult();
@@ -207,10 +208,11 @@ public class AuthDaoImpl implements AuthDao
 	public User getFullUserWithAttribs(int userId)
 	{
 		return em.createQuery("select user from User user "
-				+ "left join fetch user.roles roles "
+				+ "left join fetch user.roles role "
 				+ "left join fetch user.contact contact "
 				+ "left join fetch contact.employee employee "
-				+ "left join fetch employee.projectMembers projectMembers "
+				+ "left join fetch employee.projectMembers projectMember "
+				+ "left join fetch projectMember.project "
 				+ "where user.userId = :userId", User.class)
 				.setParameter("userId", userId)
 				.getSingleResult();
@@ -223,20 +225,17 @@ public class AuthDaoImpl implements AuthDao
 		role.getRestrictedFields();
 		return role;
 	}
-//	
-//	@Override
-//	public User getFullUserByUserId(int userId)
-//	{
-//		return em.createQuery("select user from User user left join fetch user.contact left join fetch user.roles where user.userId = :id", User.class)
-//							  .setParameter("id", userId)
-//							  .getSingleResult();
-//	}
 	
 	@Override
 	public void updateUser(User user)
 	{
-		// TODO: Test and make sure if the user does not exist this method does not create a new user
-		em.merge(user);
+		if (em.find(User.class, user.getUserId()) == null)
+		{
+			throw new NoResultException();
+		}
+		else {
+			em.merge(user);
+		}		
 	}
 
 	@Override
@@ -385,7 +384,8 @@ public class AuthDaoImpl implements AuthDao
 								+ "left join fetch role.users as user "
 								+ "left join fetch user.contact as contact "
 								+ "left join fetch contact.employee as employee "
-								+ "left join fetch employee.projectMembers as member "
+								+ "left join fetch employee.projectMembers as projectMember "
+								+ "left join fetch projectMember.project "
 								+ "where role.roleId = :roleId";
 		
 		return em.createQuery(queryString, Role.class).setParameter("roleId", roleId).getSingleResult();
@@ -407,7 +407,14 @@ public class AuthDaoImpl implements AuthDao
 	@Override
 	public void updateRole(Role role)
 	{
-		em.merge(role);
+		if (em.find(Role.class, role.getRoleId()) == null)
+		{
+			throw new NoResultException();
+		}
+		else
+		{
+			em.merge(role);
+		}
 	}
 
 	@Override

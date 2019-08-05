@@ -24,9 +24,11 @@ import com.unlimitedcompanies.coms.domain.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.domain.abac.ResourceField;
 import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
+import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
@@ -45,6 +47,12 @@ class ABACAuthenticationIntegrationTests
 	
 	@Autowired
 	private AuthService authService;
+	
+	/* 
+	 * TODO: Create some testing using the project names - 
+	 * eg. a user can only access projects that are related to the user itself 
+	 * or a superintendent can see employees related to a project he supervises
+	*/
 	
 	@Test
 	public void numberOfPolicyTests() throws Exception
@@ -65,6 +73,15 @@ class ABACAuthenticationIntegrationTests
 	{
 		systemService.initialSetup();
 		assertEquals(0, abacService.getNumberOfAttributeConditions(), "Number of record conditions found in the db failed");
+	}
+	
+	@Test
+	public void checkExcludedResources() throws Exception
+	{
+		systemService.initialSetup();
+		
+		assertThrows(RecordNotFoundException.class, ()-> abacService.searchResourceByName("ContactAddress"));
+		assertThrows(RecordNotFoundException.class, ()-> abacService.searchResourceByName("ContactPhone"));
 	}
 	
 	@Test
@@ -249,7 +266,7 @@ class ABACAuthenticationIntegrationTests
 		abacService.savePolicy(policy, "administrator");
 		
 		AbacPolicy foundPolicy = abacService.searchPolicy(contactResource, PolicyType.READ, "administrator");
-		ResourceReadPolicy resourceReadPolicy = foundPolicy.getReadPolicy("contact", "project", administratorUser);
+		ResourceReadPolicy resourceReadPolicy = foundPolicy.getReadPolicy(Contact.class, administratorUser);
 		assertEquals(2, foundPolicy.getFieldConditions().size(), 
 				"Policy attribute condition integration test failed");
 		assertTrue(resourceReadPolicy.isReadGranted(), "Policy attribute condition integration test failed");
@@ -412,19 +429,12 @@ class ABACAuthenticationIntegrationTests
 		List<ResourceField> restrictedFields = adminRole.getRestrictedFields();
 		assertEquals(1, restrictedFields.size(), "Retrieve restricted fields for a role test failed");
 	}
-	
-	
-//		@Test
-//		public void checkResourcesTest()
-//		{
-//
-//		}
-	
-		@Test
-		public void findAResourceTest()
-		{
-			systemService.checkAllResources();
-			Resource resource = abacService.searchResourceByName("Contact");
-			assertEquals("Contact", resource.getResourceName(), "Find resource integration test failed");
-		}
+
+	@Test
+	public void findAResourceTest() throws Exception
+	{
+		systemService.checkAllResources();
+		Resource resource = abacService.searchResourceByName("Contact");
+		assertEquals("Contact", resource.getResourceName(), "Find resource integration test failed");
+	}
 }

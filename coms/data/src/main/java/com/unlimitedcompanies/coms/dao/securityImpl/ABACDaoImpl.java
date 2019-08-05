@@ -157,7 +157,6 @@ public class ABACDaoImpl implements ABACDao
 		
 		List<String> resources = this.getAllResourceNames();
 		
-		// TODO: Create a test to make sure the next classes are not saved as resources in the resources db table
 		resources.add("ContactAddress");
 		resources.add("ContactPhone");
 		

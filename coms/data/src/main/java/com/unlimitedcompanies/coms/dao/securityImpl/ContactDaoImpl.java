@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 
@@ -176,7 +177,14 @@ public class ContactDaoImpl implements ContactDao
 	@Override
 	public void updateContact(Contact contact)
 	{
-		em.merge(contact);
+		if (em.find(Contact.class, contact.getContactId()) == null)
+		{
+			throw new NoResultException();
+		}
+		else 
+		{
+			em.merge(contact);
+		}
 	}
 	
 	@Override

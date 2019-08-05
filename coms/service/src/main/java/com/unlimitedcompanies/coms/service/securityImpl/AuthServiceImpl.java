@@ -45,7 +45,6 @@ public class AuthServiceImpl implements AuthService
 	private SystemService systemService;
 
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public void saveUser(User user, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException, DuplicateRecordException
 	{
@@ -107,13 +106,13 @@ public class AuthServiceImpl implements AuthService
 //	}
 
 	@Override
-	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException
+	public List<User> searchAllUsers(String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy(User.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -139,13 +138,13 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException
+	public List<User> searchAllUsers(int elements, int page, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy(User.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -170,14 +169,13 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public User searchUserById(int id, String signedUsername) throws RecordNotFoundException, NoResourceAccessException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy(User.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -206,7 +204,6 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public User searchUserByUsername(String username, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException
 	{
@@ -214,7 +211,7 @@ public class AuthServiceImpl implements AuthService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy(User.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -243,7 +240,6 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
 	public User searchUserByIdWithContact(int userId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
@@ -251,10 +247,10 @@ public class AuthServiceImpl implements AuthService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy(User.class, signedUser);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);		
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);		
 		
 		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
 		{
@@ -296,10 +292,10 @@ public class AuthServiceImpl implements AuthService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy(User.class, signedUser);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);		
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);		
 		
 		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
 		{
@@ -340,7 +336,7 @@ public class AuthServiceImpl implements AuthService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy policy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = policy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy readPolicy = policy.getReadPolicy(User.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -376,13 +372,13 @@ public class AuthServiceImpl implements AuthService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
-		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy(User.class, signedUser);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 		
 		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy roleReadPolicy = rolePolicy.getReadPolicy("role", "project", signedUser);
+		ResourceReadPolicy roleReadPolicy = rolePolicy.getReadPolicy(Role.class, signedUser);
 		
 		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted() && roleReadPolicy.isReadGranted())
 		{
@@ -432,6 +428,7 @@ public class AuthServiceImpl implements AuthService
 		
 		if (userPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
+			
 			// Check if there are any restricted fields for the requesting user
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 			restrictedFields.add("password");
@@ -509,7 +506,7 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException
+	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
@@ -554,13 +551,13 @@ public class AuthServiceImpl implements AuthService
 //	}
 
 	@Override
-	public List<Role> searchAllRoles(String signedUsername) throws NoResourceAccessException
+	public List<Role> searchAllRoles(String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		Resource roleResource = abacService.searchResourceByName("Role");
 		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy("Role", "Project", signedUser);
+		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy(Role.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -576,13 +573,13 @@ public class AuthServiceImpl implements AuthService
 	}
 
 	@Override
-	public List<Role> searchAllRoles(int elements, int page, String signedUsername) throws NoResourceAccessException
+	public List<Role> searchAllRoles(int elements, int page, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		Resource roleResource = abacService.searchResourceByName("Role");
 		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy("Role", "Project", signedUser);
+		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy(Role.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -605,7 +602,7 @@ public class AuthServiceImpl implements AuthService
 		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = roleRead.getReadPolicy("role", "project", loggedUser);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, loggedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -633,7 +630,7 @@ public class AuthServiceImpl implements AuthService
 		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = roleRead.getReadPolicy("role", "project", loggedUser);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, loggedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -662,7 +659,7 @@ public class AuthServiceImpl implements AuthService
 		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = roleRead.getReadPolicy("role", "project", loggedUser);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, loggedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -697,9 +694,9 @@ public class AuthServiceImpl implements AuthService
 		AbacPolicy userRead = systemService.searchPolicy(userResource, PolicyType.READ);
 		AbacPolicy contactRead = systemService.searchPolicy(contactResource, PolicyType.READ);
 		
-		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy("role", "project", signedUser);
-		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy("user", "project", signedUser);
-		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy(Role.class, signedUser);
+		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy(User.class, signedUser);
+		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy(Contact.class, signedUser);
 		
 		if (roleReadPolicy.isReadGranted() && userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
 		{
@@ -753,9 +750,9 @@ public class AuthServiceImpl implements AuthService
 		AbacPolicy userRead = systemService.searchPolicy(userResource, PolicyType.READ);
 		AbacPolicy contactRead = systemService.searchPolicy(contactResource, PolicyType.READ);
 		
-		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy("role", "project", signedUser);
-		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy("user", "project", signedUser);
-		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy(Role.class, signedUser);
+		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy(User.class, signedUser);
+		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy(Contact.class, signedUser);
 		
 		if (roleReadPolicy.isReadGranted() && userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
 		{
@@ -803,7 +800,7 @@ public class AuthServiceImpl implements AuthService
 //	}
 	
 	@Override
-	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException
+	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource roleResource = abacService.searchResourceByName("Role");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -814,7 +811,6 @@ public class AuthServiceImpl implements AuthService
 		
 		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
-			role.clearRestrictedFields();
 			authDao.updateRole(role);
 			systemService.clearEntityManager();
 		}
@@ -884,9 +880,7 @@ public class AuthServiceImpl implements AuthService
 		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
 			authDao.removeUserFromRole(userId, roleId);
-		}
-			
-			
+		}			
 			
 		try
 		{

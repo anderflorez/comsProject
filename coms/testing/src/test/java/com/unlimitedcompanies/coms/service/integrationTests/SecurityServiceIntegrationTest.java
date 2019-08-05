@@ -1782,7 +1782,7 @@ public class SecurityServiceIntegrationTest
 	}
 
 	@Test
-	public void findUserByUserIdTest() throws Exception
+	public void findUserByIdTest() throws Exception
 	{
 		systemService.initialSetup();
 		Resource userResource = abacService.searchResourceByName("User");
@@ -1792,7 +1792,6 @@ public class SecurityServiceIntegrationTest
 		abacService.savePolicy(userReadPolicy, "administrator");
 
 		User foundUser = authService.searchUserByUsername("administrator", "administrator");
-
 		assertEquals("administrator", authService.searchUserById(foundUser.getUserId(), "administrator").getUsername());
 	}
 

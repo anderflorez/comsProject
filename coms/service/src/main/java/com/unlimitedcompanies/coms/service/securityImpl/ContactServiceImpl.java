@@ -42,7 +42,8 @@ public class ContactServiceImpl implements ContactService
 	private ABACService abacService;
 
 	@Override
-	public void saveContact(Contact contact, String signedUsername) throws DuplicateRecordException, NoResourceAccessException
+	public void saveContact(Contact contact, String signedUsername) 
+			throws DuplicateRecordException, NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -100,13 +101,13 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public List<Contact> searchAllContacts(String signedUsername) throws NoResourceAccessException
+	public List<Contact> searchAllContacts(String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 		
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -132,13 +133,14 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public List<Contact> searchContactsByRange(int elements, int page, String signedUsername) throws NoResourceAccessException
+	public List<Contact> searchContactsByRange(int elements, int page, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 		
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -186,7 +188,7 @@ public class ContactServiceImpl implements ContactService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 		
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -222,7 +224,7 @@ public class ContactServiceImpl implements ContactService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -258,7 +260,7 @@ public class ContactServiceImpl implements ContactService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -294,7 +296,7 @@ public class ContactServiceImpl implements ContactService
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
-		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		ResourceReadPolicy resourceReadPolicy = contactPolicy.getReadPolicy(Contact.class, signedUser);
 
 		if (resourceReadPolicy.isReadGranted())
 		{
@@ -324,7 +326,7 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException 
+	public void updateContact(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException 
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -336,11 +338,13 @@ public class ContactServiceImpl implements ContactService
 		
 		if (contactPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
+			// Check and make sure the contact already exists
+			Contact foundContact = contactDao.getContactById(contact.getContactId(), null);
+			
 			// Check if there are any restricted fields for the requesting user
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
 			if (restrictedFields.size() > 0)
 			{
-				Contact foundContact = contactDao.getContactById(contact.getContactId(), null);
 				contact.cleanRestrictedFields(restrictedFields, foundContact);
 			}
 			
@@ -355,7 +359,7 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException
+	public void removeAddress(Contact contact, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -386,7 +390,7 @@ public class ContactServiceImpl implements ContactService
 	}
 	
 	@Override
-	public void removeContactPhone(ContactPhone contactPhone, String signedUsername) throws NoResourceAccessException
+	public void removeContactPhone(ContactPhone contactPhone, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
@@ -419,7 +423,8 @@ public class ContactServiceImpl implements ContactService
 
 	@Override
 //	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class, NoResourceAccessException.class})
-	public void deleteContact(Contact contact, String signedUsername) throws RecordNotDeletedException, NoResourceAccessException
+	public void deleteContact(Contact contact, String signedUsername) 
+			throws RecordNotDeletedException, NoResourceAccessException, RecordNotFoundException
 	{
 		Resource contactResource = abacService.searchResourceByName("Contact");
 		User user = systemService.searchFullUserByUsername(signedUsername);
