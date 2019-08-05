@@ -3,6 +3,7 @@ package com.unlimitedcompanies.coms.service.integrationTests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -25,10 +26,10 @@ import com.unlimitedcompanies.coms.domain.abac.ResourceReadPolicy;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ApplicationConfig.class })
@@ -70,7 +71,7 @@ class ABACAuthenticationIntegrationTests
 	public void saveSingleResourcePolicyTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		AbacPolicy policy = new AbacPolicy("PolicyRead", PolicyType.READ, abacResource);
 		abacService.savePolicy(policy, "Administrator");
@@ -83,7 +84,7 @@ class ABACAuthenticationIntegrationTests
 	{		
 		systemService.initialSetup();
 		Resource abacPolicyResource = abacService.searchResourceByName("AbacPolicy");
-		Resource contactResource = abacService.searchResourceByNameWithFieldsAndPolicy("Contact");
+		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
 		
 		AbacPolicy abacPolicy = new AbacPolicy("PolicyRead", PolicyType.READ, abacPolicyResource);
 		abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -103,7 +104,7 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithMultipleSubPoliciesTest() throws Exception
 	{		
 		systemService.initialSetup();
-		Resource contactResource = abacService.searchResourceByNameWithFieldsAndPolicy("Contact");
+		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
 		
 		AbacPolicy policy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
 		AbacPolicy subPolicy1 = policy.addSubPolicy(LogicOperator.OR);
@@ -125,7 +126,7 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithEntityConditionTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		AbacPolicy policy = new AbacPolicy("AbacPolicyRead", PolicyType.READ, abacPolicyResource);
 		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -141,7 +142,7 @@ class ABACAuthenticationIntegrationTests
 	public void savePolicyWithAttributeConditionTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		AbacPolicy policy = new AbacPolicy("UserRead", PolicyType.READ, abacPolicyResource);
 		policy.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECTS);
@@ -157,7 +158,7 @@ class ABACAuthenticationIntegrationTests
 	public void simplePolicyReadTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		assertThrows(NoResourceAccessException.class, () -> abacService.searchPolicy(abacPolicyResource, PolicyType.UPDATE, "administrator"));
 		
@@ -173,7 +174,7 @@ class ABACAuthenticationIntegrationTests
 	public void simplePolicyNoReadPermissionTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		assertThrows(NoResourceAccessException.class, () -> abacService.searchPolicy(abacPolicyResource, PolicyType.UPDATE, "administrator"));
 	}
@@ -191,7 +192,7 @@ class ABACAuthenticationIntegrationTests
 	public void policyEntityConditionTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
 		
 		AbacPolicy policy = new AbacPolicy("PolicyRead", PolicyType.READ, abacPolicyResource);
 		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -209,8 +210,8 @@ class ABACAuthenticationIntegrationTests
 	public void policyAttributeConditionTest() throws Exception
 	{
 		systemService.initialSetup();
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
-		Resource contactResource = abacService.searchResourceByNameWithFieldsAndPolicy("Contact");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
+		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
 		
 		AbacPolicy abacPolicy = new AbacPolicy("PolicyRead", PolicyType.READ, abacPolicyResource);
 		abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -233,8 +234,8 @@ class ABACAuthenticationIntegrationTests
 	{
 		systemService.initialSetup();
 		User administratorUser = systemService.searchFullUserByUsername("administrator");
-		Resource abacPolicyResource = abacService.searchResourceByNameWithFieldsAndPolicy("AbacPolicy");
-		Resource contactResource = abacService.searchResourceByNameWithFieldsAndPolicy("Contact");
+		Resource abacPolicyResource = abacService.searchResourceByNameWithFields("AbacPolicy");
+		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
 		
 		AbacPolicy abacPolicy = new AbacPolicy("PolicyRead", PolicyType.READ, abacPolicyResource);
 		abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
@@ -252,9 +253,8 @@ class ABACAuthenticationIntegrationTests
 		assertEquals(2, foundPolicy.getFieldConditions().size(), 
 				"Policy attribute condition integration test failed");
 		assertTrue(resourceReadPolicy.isReadGranted(), "Policy attribute condition integration test failed");
-		assertEquals("(contact.lastName = 'Doe' OR contact.firstName = 'Richard')", 
-					 resourceReadPolicy.getReadConditions(), 
-					 "Policy attribute condition integration test failed");
+		assertTrue(resourceReadPolicy.getReadConditions().equals("(contact.lastName = 'Doe' OR contact.firstName = 'Richard')") ||
+				resourceReadPolicy.getReadConditions().equals("(contact.firstName = 'Richard' OR contact.lastName = 'Doe')"));
 	}
 	
 	/*
@@ -412,4 +412,19 @@ class ABACAuthenticationIntegrationTests
 		List<ResourceField> restrictedFields = adminRole.getRestrictedFields();
 		assertEquals(1, restrictedFields.size(), "Retrieve restricted fields for a role test failed");
 	}
+	
+	
+//		@Test
+//		public void checkResourcesTest()
+//		{
+//
+//		}
+	
+		@Test
+		public void findAResourceTest()
+		{
+			systemService.checkAllResources();
+			Resource resource = abacService.searchResourceByName("Contact");
+			assertEquals("Contact", resource.getResourceName(), "Find resource integration test failed");
+		}
 }

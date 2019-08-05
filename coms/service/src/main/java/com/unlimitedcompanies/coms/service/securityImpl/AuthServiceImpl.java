@@ -22,7 +22,6 @@ import com.unlimitedcompanies.coms.domain.employee.Employee;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
@@ -30,6 +29,7 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
+import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @Service
 @Transactional
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService
 				}
 				
 				authDao.createUser(user);
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 			}
 			catch (ConstraintViolationException e)
 			{
@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService
 		if (readPolicy.isReadGranted())
 		{
 			List<User> users = authDao.getAllUsers(readPolicy.getReadConditions());
-			authDao.clearEntityManager();
+			systemService.clearEntityManager();
 			
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 			if (restrictedFields.size() > 0)
@@ -150,7 +150,7 @@ public class AuthServiceImpl implements AuthService
 		if (readPolicy.isReadGranted())
 		{
 			List<User> users = authDao.getAllUsers(elements, page-1, readPolicy.getReadConditions());
-			authDao.clearEntityManager();
+			systemService.clearEntityManager();
 			
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 			if (restrictedFields.size() > 0)
@@ -184,7 +184,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				User user = authDao.getUserById(id, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 				if (restrictedFields.size() > 0)
@@ -221,7 +221,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				User user = authDao.getUserByUsername(username, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 				if (restrictedFields.size() > 0)
@@ -261,7 +261,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				User user = authDao.getUserByIdWithContact(userId, userReadPolicy.getReadConditions(), contactReadPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
 				if (contactRestrictedFields.size() > 0)
@@ -306,7 +306,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				User user = authDao.getUserByUsernameWithContact(username, userReadPolicy.getReadConditions(), contactReadPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
 				if (contactRestrictedFields.size() > 0)
@@ -347,7 +347,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				User user = authDao.getUserByContact(contact, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
 				if (restrictedFields.size() > 0)
@@ -368,24 +368,31 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	public User searchUserByUsernameWithRoles(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	public User searchFullUserByUsername(String username, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource userResource = abacService.searchResourceByName("User");
+		Resource contactResource = abacService.searchResourceByName("Contact");
 		Resource roleResource = abacService.searchResourceByName("Role");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy userPolicy = systemService.searchPolicy(userResource, PolicyType.READ);
 		ResourceReadPolicy userReadPolicy = userPolicy.getReadPolicy("user", "project", signedUser);
 		
+		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.READ);
+		ResourceReadPolicy contactReadPolicy = contactPolicy.getReadPolicy("contact", "project", signedUser);
+		
 		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
 		ResourceReadPolicy roleReadPolicy = rolePolicy.getReadPolicy("role", "project", signedUser);
 		
-		if (userReadPolicy.isReadGranted() && roleReadPolicy.isReadGranted())
+		if (userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted() && roleReadPolicy.isReadGranted())
 		{
 			try
 			{
-				User user = authDao.getUserByUsernameWithRoles(username, userReadPolicy.getReadConditions(), roleReadPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				User user = authDao.getFullUserByUsername(username, 
+															userReadPolicy.getReadConditions(), 
+															contactReadPolicy.getReadConditions(), 
+															roleReadPolicy.getReadConditions());
+				systemService.clearEntityManager();
 				
 				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), roleResource.getResourceId());
 				if (contactRestrictedFields.size() > 0)
@@ -434,7 +441,7 @@ public class AuthServiceImpl implements AuthService
 			user.cleanRestrictedFields(restrictedFields, foundUser);
 			
 			authDao.updateUser(user);
-			authDao.clearEntityManager();
+			systemService.clearEntityManager();
 		}
 		else
 		{
@@ -471,7 +478,7 @@ public class AuthServiceImpl implements AuthService
 			{
 				user.setPassword(newPassword);
 				authDao.updateUser(user);
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 			}
 		}
 	}
@@ -504,19 +511,20 @@ public class AuthServiceImpl implements AuthService
 	@Override
 	public void saveRole(Role role, String signedUsername) throws NoResourceAccessException
 	{
-		Resource roleResource = abacService.searchResourceByName("Role");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+
+		Resource roleResource = abacService.searchResourceByName("Role");		
+		AbacPolicy roleUpdatePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
 		
-		AbacPolicy roleUpdate = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
 		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
-		if (roleUpdate.getModifyPolicy(null, userAttribs, signedUser))
+		if (roleUpdatePolicy.getModifyPolicy(null, userAttribs, signedUser))
 		{
 			// TODO: Return an exception if the role is not created
 			
 			role.clearRestrictedFields();
 			authDao.createRole(role);
-			authDao.clearEntityManager();
+			systemService.clearEntityManager();
 		}
 		else
 		{
@@ -544,21 +552,53 @@ public class AuthServiceImpl implements AuthService
 //			return true;
 //		}
 //	}
-//
-//	@Override
-//	public List<Role> searchAllRoles()
-//	{
-//		return authDao.getAllRoles();
-//	}
-//
-//	@Override
-//	public List<Role> searchRolesByRange(int page, int elements)
-//	{
-//		return authDao.getAllRolesByRange(page - 1, elements);
-//	}
 
 	@Override
-	@Transactional(rollbackFor = RecordNotFoundException.class)
+	public List<Role> searchAllRoles(String signedUsername) throws NoResourceAccessException
+	{
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		Resource roleResource = abacService.searchResourceByName("Role");
+		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy("Role", "Project", signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			List<Role> allRoles = authDao.getAllRoles(readPolicy.getReadConditions());
+			systemService.clearEntityManager();
+			
+			return allRoles;
+		}		
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+
+	@Override
+	public List<Role> searchAllRoles(int elements, int page, String signedUsername) throws NoResourceAccessException
+	{
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		Resource roleResource = abacService.searchResourceByName("Role");
+		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = rolePolicy.getReadPolicy("Role", "Project", signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			List<Role> roles = authDao.getAllRoles(elements, page-1, readPolicy.getReadConditions());
+			systemService.clearEntityManager();
+			
+			return roles;
+		}		
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
+
+	@Override
 	public Role searchRoleById(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource roleResource = abacService.searchResourceByName("Role");
@@ -572,7 +612,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				Role role = authDao.getRoleById(roleId, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				return role;
 			}
 			catch (NoResultException e)
@@ -584,8 +624,6 @@ public class AuthServiceImpl implements AuthService
 		{
 			throw new NoResourceAccessException();
 		}
-		
-		
 	}
 	
 	@Override
@@ -602,7 +640,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				Role role = authDao.getRoleByName(roleName, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				return role;
 			}
 			catch (NoResultException e)
@@ -631,7 +669,7 @@ public class AuthServiceImpl implements AuthService
 			try
 			{
 				Role role = authDao.getRoleByNameWithRestrictedFields(roleName, readPolicy.getReadConditions());
-				authDao.clearEntityManager();
+				systemService.clearEntityManager();
 				return role;
 			}
 			catch (NoResultException e)
@@ -645,21 +683,118 @@ public class AuthServiceImpl implements AuthService
 		}
 		
 	}
-//
-//	// TODO: Check if this method is actually needed - delete it if not being used
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public Role searchRoleByIdWithMembers(int id) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			return authDao.getRoleByIdWithMembers(id);
-//		}
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The role could not be found");
-//		}
-//	}
+
+	@Override
+	public Role searchRoleByIdWithMembers(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+
+		Resource roleResource = abacService.searchResourceByName("Role");
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		
+		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
+		AbacPolicy userRead = systemService.searchPolicy(userResource, PolicyType.READ);
+		AbacPolicy contactRead = systemService.searchPolicy(contactResource, PolicyType.READ);
+		
+		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy("role", "project", signedUser);
+		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy("contact", "project", signedUser);
+		
+		if (roleReadPolicy.isReadGranted() && userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
+		{
+			try
+			{
+				Role role = authDao.getRoleByIdWithMembers(roleId, roleReadPolicy.getReadConditions());
+				systemService.clearEntityManager();
+				
+				List<String> userRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (userRestrictedFields.size() > 0)
+				{
+					for (User user : role.getUsers())
+					{
+						user.cleanRestrictedFields(userRestrictedFields);
+					}
+				}
+				
+				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (contactRestrictedFields.size() > 0)
+				{
+					for (User user : role.getUsers())
+					{
+						user.getContact().cleanRestrictedFields(contactRestrictedFields);
+					}
+				}
+				
+				return role;
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The role could not be found");
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
+	
+	@Override
+	public Role searchRoleByNameWithMembers(String roleName, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+
+		Resource roleResource = abacService.searchResourceByName("Role");
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		
+		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
+		AbacPolicy userRead = systemService.searchPolicy(userResource, PolicyType.READ);
+		AbacPolicy contactRead = systemService.searchPolicy(contactResource, PolicyType.READ);
+		
+		ResourceReadPolicy roleReadPolicy = roleRead.getReadPolicy("role", "project", signedUser);
+		ResourceReadPolicy userReadPolicy = userRead.getReadPolicy("user", "project", signedUser);
+		ResourceReadPolicy contactReadPolicy = contactRead.getReadPolicy("contact", "project", signedUser);
+		
+		if (roleReadPolicy.isReadGranted() && userReadPolicy.isReadGranted() && contactReadPolicy.isReadGranted())
+		{
+			try
+			{
+				Role role = authDao.getRoleByNameWithMembers(roleName, roleReadPolicy.getReadConditions());
+				systemService.clearEntityManager();
+				
+				List<String> userRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), userResource.getResourceId());
+				if (userRestrictedFields.size() > 0)
+				{
+					for (User user : role.getUsers())
+					{
+						user.cleanRestrictedFields(userRestrictedFields);
+					}
+				}
+				
+				List<String> contactRestrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
+				if (contactRestrictedFields.size() > 0)
+				{
+					for (User user : role.getUsers())
+					{
+						user.getContact().cleanRestrictedFields(contactRestrictedFields);
+					}
+				}
+				
+				return role;
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The role could not be found");
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+
 //	
 //	@Override
 //	public List<User> searchRoleNonMembers(int roleId, String searchCriteria)
@@ -668,80 +803,101 @@ public class AuthServiceImpl implements AuthService
 //	}
 	
 	@Override
-	public void updateRole(Role role, String signedUser) throws NoResourceAccessException
+	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException
 	{
 		Resource roleResource = abacService.searchResourceByName("Role");
-		User loggedUser = systemService.searchFullUserByUsername(signedUser);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
 		ResourceAttribs resourceAttribs = this.getRoleResourceAttribs(role.getRoleId());
-		UserAttribs userAttribs = systemService.getUserAttribs(loggedUser.getUserId());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
-		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, loggedUser))
+		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
 			role.clearRestrictedFields();
 			authDao.updateRole(role);
-			authDao.clearEntityManager();
+			systemService.clearEntityManager();
 		}
 		else
 		{
 			throw new NoResourceAccessException();
 		}
 	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = {RecordNotFoundException.class, RecordNotDeletedException.class})
-//	public void deleteRole(int roleId) throws RecordNotFoundException, RecordNotDeletedException
-//	{
-//		// TODO: Prevent this method from deleting the original administrator role
-//		// TODO: Provide an error message if the user tries to delete the original administrator role
-//		
-//		try
-//		{
-//			authDao.deleteRole(roleId);
-//		}
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("The role to be deleted could not be found");
-//		}
-//		
-//		if (authDao.existingRole(roleId))
-//		{
-//			throw new RecordNotDeletedException("Error: The role could not be deleted");
-//		}
-//	}
-//
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public void assignUserToRole(int userId, int roleId) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			authDao.assignUserToRole(userId, roleId);
-//		}
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("Error: The role or some users scheduled to be added as members of the role could not be found");
-//		}
-//		
-//		// TODO: Need to create some checking and throw an exception when the user is not added to the role
-//	}
-//	
-//	@Override
-//	@Transactional(rollbackFor = RecordNotFoundException.class)
-//	public void removeRoleMember(int userId, int roleId) throws RecordNotFoundException
-//	{
-//		try
-//		{
-//			authDao.removeUserFromRole(userId, roleId);
-//		}
-//		catch (NoResultException e)
-//		{
-//			throw new RecordNotFoundException("Error: The role or some members scheduled to be removed from the role could not be found");
-//		}
-//		
-//		// TODO: Create some checking and throw a new exception if the member is not removed.
-//	}
+	
+	@Override
+	public void deleteRole(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		// TODO: Prevent this method from deleting the original administrator role
+		// TODO: Provide an error message if the user tries to delete the original administrator role
+		
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+
+		Resource roleResource = abacService.searchResourceByName("Role");		
+		AbacPolicy roleUpdatePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
+		
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (roleUpdatePolicy.getModifyPolicy(null, userAttribs, signedUser) && roleUpdatePolicy.getCdPolicy().isDeletePolicy())
+		{
+			// TODO: Improve the next method call by creating a new method that receives the signedUser instead of searching for it again
+			Role role = this.searchRoleById(roleId, signedUsername);
+			authDao.deleteRole(role);
+			systemService.clearEntityManager();
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+		
+	}
+
+	@Override
+	public void assignUserToRole(int userId, int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{		
+		Resource roleResource = abacService.searchResourceByName("Role");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
+		ResourceAttribs resourceAttribs = this.getRoleResourceAttribs(roleId);
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
+		{
+			authDao.assignUserToRole(userId, roleId);
+		}
+				
+		// TODO: Need to create some checking and throw an exception when the user is not added to the role
+	}
+	
+	@Override
+	public void removeRoleMember(int userId, int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		// TODO: Prevent this method from removing the last user of the administrators role
+	
+		Resource roleResource = abacService.searchResourceByName("Role");
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
+		
+		AbacPolicy rolePolicy = systemService.searchPolicy(roleResource, PolicyType.UPDATE);
+		ResourceAttribs resourceAttribs = this.getRoleResourceAttribs(roleId);
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
+		
+		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
+		{
+			authDao.removeUserFromRole(userId, roleId);
+		}
+			
+			
+			
+		try
+		{
+		}
+		catch (NoResultException e)
+		{
+			throw new RecordNotFoundException("Error: The role or some members scheduled to be removed from the role could not be found");
+		}
+		
+		// TODO: Create some checking and throw a new exception if the member is not removed.
+	}
 	
 	private ResourceAttribs getUserResourceAttribs(int userId) throws RecordNotFoundException
 	{		

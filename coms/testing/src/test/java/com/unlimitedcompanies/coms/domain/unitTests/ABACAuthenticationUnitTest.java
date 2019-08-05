@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Iterator;
+
 import org.junit.jupiter.api.Test;
 
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
@@ -120,8 +122,8 @@ public class ABACAuthenticationUnitTest
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
 		AbacPolicy subPolicy = policy.addSubPolicy(LogicOperator.OR);
 		
-		assertNull(policy.getSubPolicies().get(0).getPolicyName());
-		assertEquals(subPolicy.getAbacPolicyId(), policy.getSubPolicies().get(0).getAbacPolicyId(), "Adding policy condition group failed");
+		assertNull(policy.getSubPolicies().iterator().next().getPolicyName());
+		assertEquals(subPolicy.getAbacPolicyId(), policy.getSubPolicies().iterator().next().getAbacPolicyId());
 	}
 	
 	@Test
@@ -134,8 +136,8 @@ public class ABACAuthenticationUnitTest
 		AbacPolicy fourthPolicy = thirdPolicy.addSubPolicy(LogicOperator.OR);
 		String id = fourthPolicy.getAbacPolicyId();
 				
-		AbacPolicy foundPolicy = policy.getSubPolicies().get(0).getSubPolicies().get(0).getSubPolicies().get(0);
-		assertEquals(id, foundPolicy.getAbacPolicyId(), "Adding multiple level condition groups unit test");
+		AbacPolicy foundPolicy = policy.getSubPolicies().iterator().next().getSubPolicies().iterator().next().getSubPolicies().iterator().next();
+		assertEquals(id, foundPolicy.getAbacPolicyId());
 	}
 	
 	@Test
@@ -151,10 +153,9 @@ public class ABACAuthenticationUnitTest
 		subPolicy2.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
 		subPolicy2.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
 		
-		assertEquals(2, testResource.getPolicies().get(0).getSubPolicies().get(0).getEntityConditions().size(),
-					 "Adding entity condition to condition group test failed");
-		assertEquals(2, testResource.getPolicies().get(0).getSubPolicies().get(1).getEntityConditions().size(),
-				 "Adding entity condition to condition group test failed");
+		Iterator<AbacPolicy> iterator = testResource.getPolicies().get(0).getSubPolicies().iterator();
+		assertEquals(2, iterator.next().getEntityConditions().size());
+		assertEquals(2, iterator.next().getEntityConditions().size());
 	}
 
 	@Test
@@ -170,10 +171,11 @@ public class ABACAuthenticationUnitTest
 		groupB.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		groupB.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		
-		assertEquals(1, testResource.getPolicies().get(0).getSubPolicies().get(0).getAttributeConditions().size(), 
-				"Adding attribute condition to condition group test failed");
-		assertEquals(3, testResource.getPolicies().get(0).getSubPolicies().get(1).getAttributeConditions().size(), 
-				"Adding attribute condition to condition group test failed");
+		Iterator<AbacPolicy> iterator = testResource.getPolicies().get(0).getSubPolicies().iterator();
+		int a = iterator.next().getAttributeConditions().size();
+		int b = iterator.next().getAttributeConditions().size();
+		assertTrue((a < b && a == 1) || (a > b && a == 3));
+		assertTrue((b < a && b == 1) || (b > a && b == 3));
 	}
 	
 	@Test
@@ -194,10 +196,11 @@ public class ABACAuthenticationUnitTest
 		groupB.addFieldConditions("TestField3", ComparisonOperator.EQUALS, "Field3Value");
 		groupB.addFieldConditions("TestField4", ComparisonOperator.EQUALS, "Field4Value");
 		
-		assertEquals(1, testResource.getPolicies().get(0).getSubPolicies().get(0).getFieldConditions().size(), 
-				"Adding field condition to condition group test failed");
-		assertEquals(3, testResource.getPolicies().get(0).getSubPolicies().get(1).getFieldConditions().size(), 
-				"Adding field condition to condition group test failed");
+		Iterator<AbacPolicy> iterator = testResource.getPolicies().get(0).getSubPolicies().iterator();
+		int a = iterator.next().getFieldConditions().size();
+		int b = iterator.next().getFieldConditions().size();
+		assertTrue((a < b && a == 1) || (a > b && a == 3));
+		assertTrue((b < a && b == 1) || (b > a && b == 3));
 	}
 	
 }

@@ -167,28 +167,25 @@ public class AuthDaoImpl implements AuthDao
 	}
 	
 	@Override
-	public User getUserByUsernameWithRoles(String username, String userAccessConditions, String roleAccessConditions)
+	public User getFullUserByUsername(String username, String userAccessConditions, String contactAccessConditions, String roleAccessConditions)
 	{
-		String queryString = "select user from User as user left join fetch user.roles as role where user.username = :username";
+		// Contact will always be fetch by hibernate because user is parent in the user-contact one to one relationship
+		
+		String queryString = "select user from User as user "
+				+ "left join fetch user.contact as contact "
+				+ "left join fetch user.roles as role "
+				+ "where user.username = :username";
 		if (userAccessConditions != null && !userAccessConditions.isEmpty())
 		{
 			queryString += " and " + userAccessConditions;
 		}
+		if (contactAccessConditions != null && !contactAccessConditions.isEmpty())
+		{
+			queryString += " and " + contactAccessConditions;
+		}
 		if (roleAccessConditions != null && !roleAccessConditions.isEmpty())
 		{
 			queryString += " and " + roleAccessConditions;
-		}
-		
-		return em.createQuery(queryString, User.class).setParameter("username", username).getSingleResult();
-	}
-	
-	@Override
-	public User getFullUserByUsername(String username, String accessConditions)
-	{
-		String queryString = "select user from User user left join fetch user.contact left join fetch user.roles where user.username = :username";
-		if (accessConditions != null && !accessConditions.isEmpty())
-		{
-			queryString += " and " + accessConditions;
 		}
 		
 		return em.createQuery(queryString, User.class).setParameter("username", username).getSingleResult();
@@ -282,21 +279,33 @@ public class AuthDaoImpl implements AuthDao
 //		Role role = em.find(Role.class, roleId);
 //		return role == null ? false : true;
 //	}
-//	
-//	@Override
-//	public List<Role> getAllRoles()
-//	{
-//		return em.createQuery("from Role", Role.class).getResultList();
-//	}
-//	
-//	@Override
-//	public List<Role> getAllRolesByRange(int page, int elements)
-//	{
-//		return em.createQuery("select role from Role role order by role.roleName", Role.class)
-//				  .setFirstResult(page * elements)
-//				  .setMaxResults(elements)
-//				  .getResultList();
-//	}
+	
+	@Override
+	public List<Role> getAllRoles(String accessConditions)
+	{
+		String queryString = "select role from Role as role";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+		return em.createQuery(queryString, Role.class).getResultList();
+	}
+	
+	@Override
+	public List<Role> getAllRoles(int elements, int page, String accessConditions)
+	{
+		String queryString = "select role from Role role";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+		queryString += " order by role.roleName";
+		
+		return em.createQuery(queryString, Role.class)
+				  .setFirstResult(page * elements)
+				  .setMaxResults(elements)
+				  .getResultList();
+	}
 	
 	@Override
 	public Role getRoleById(int roleId, String accessConditions)
@@ -342,16 +351,33 @@ public class AuthDaoImpl implements AuthDao
 
 		return em.createQuery(queryString, Role.class).setParameter("name", roleName).getSingleResult();
 	}
-//	
-//	@Override
-//	public Role getRoleByIdWithMembers(int id)
-//	{
-//		return em.createQuery("select role from Role role left join fetch role.users user left join fetch user.contact contact "
-//				+ "where role.roleId = :roleId", Role.class)
-//				.setParameter("roleId", id)
-//				.getSingleResult();
-//	}
-//
+	
+	@Override
+	public Role getRoleByIdWithMembers(int roleId, String accessConditions)
+	{
+		String queryString = "select role from Role role left join fetch role.users user left join fetch user.contact contact "
+				+ "where role.roleId = :roleId";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+		
+		return em.createQuery(queryString, Role.class).setParameter("roleId", roleId).getSingleResult();
+	}
+	
+	@Override
+	public Role getRoleByNameWithMembers(String roleName, String accessConditions)
+	{
+		String queryString = "select role from Role role left join fetch role.users user left join fetch user.contact contact "
+				+ "where role.roleName = :roleName";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and " + accessConditions;
+		}
+		
+		return em.createQuery(queryString, Role.class).setParameter("roleName", roleName).getSingleResult();
+	}
+
 	@Override
 	public Role getRoleWithPathToProjects(int roleId)
 	{
@@ -383,36 +409,30 @@ public class AuthDaoImpl implements AuthDao
 	{
 		em.merge(role);
 	}
-//
-//	@Override
-//	public void deleteRole(int roleId)
-//	{
-//		Role role = this.getRoleById(roleId);
-//		em.remove(role);
-//	}
+
+	@Override
+	public void deleteRole(Role role)
+	{
+		Role deleteRole = em.merge(role);
+		em.remove(deleteRole);
+	}
 
 	@Override
 	public void assignUserToRole(int userId, int roleId)
 	{
-		Role role = this.getRoleById(roleId, null);
-		User user = this.getUserById(userId, null);
+		Role role = em.find(Role.class, roleId);
+		User user = em.find(User.class, userId);
 		
 		role.addUser(user);
 	}
-//
-//	@Override
-//	public void removeUserFromRole(int userId, int roleId)
-//	{
-//		Role foundRole = this.getRoleById(roleId);
-//		User foundUser = this.getUserByUserId(userId);
-//
-//		foundRole.removeUser(foundUser);
-//	}
 
 	@Override
-	public void clearEntityManager()
+	public void removeUserFromRole(int userId, int roleId)
 	{
-		em.flush();
-		em.clear();		
+		Role role = em.find(Role.class, roleId);
+		User user = em.find(User.class, userId);
+
+		role.removeUser(user);
 	}
+	
 }

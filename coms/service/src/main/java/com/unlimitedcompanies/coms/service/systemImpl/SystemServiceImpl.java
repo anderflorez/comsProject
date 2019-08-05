@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.service.abacImpl;
+package com.unlimitedcompanies.coms.service.systemImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
+import com.unlimitedcompanies.coms.dao.system.SystemDao;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
@@ -25,9 +26,9 @@ import com.unlimitedcompanies.coms.domain.employee.Employee;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
+import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @Service
 @Transactional
@@ -43,6 +44,8 @@ public class SystemServiceImpl implements SystemService
 	@Autowired
 	private AuthDao authDao;
 	
+	@Autowired
+	private SystemDao systemDao;
 	
 	/*
 	 * Initial setup of resources for the security system
@@ -68,7 +71,7 @@ public class SystemServiceImpl implements SystemService
 		{
 			this.checkAllResources();
 			
-			Resource policyResource = abacDao.getResourceByNameWithFieldsAndPolicy("AbacPolicy");
+			Resource policyResource = abacDao.getResourceByNameWithFields("AbacPolicy");
 			AbacPolicy abacPolicy = new AbacPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
 			abacPolicy.setCdPolicy(true, false);
 			abacPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
@@ -86,8 +89,7 @@ public class SystemServiceImpl implements SystemService
 			
 			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());
 			
-			// TODO: Remove the next print line
-			System.out.println("Created Administrator contact, user and role");
+			this.clearEntityManager();
 		}
 	}
 	
@@ -177,7 +179,7 @@ public class SystemServiceImpl implements SystemService
 	@Override
 	public User searchFullUserByUsername(String username)
 	{
-		return authDao.getFullUserByUsername(username, null);
+		return authDao.getFullUserByUsername(username, null, null, null);
 	}
 
 	@Override
@@ -199,4 +201,9 @@ public class SystemServiceImpl implements SystemService
 		return userAttribs;
 	}
 
+	@Override
+	public void clearEntityManager() 
+	{
+		systemDao.clearEntityManager();
+	}
 }

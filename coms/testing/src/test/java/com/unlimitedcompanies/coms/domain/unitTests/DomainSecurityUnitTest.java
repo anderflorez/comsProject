@@ -118,17 +118,26 @@ class DomainSecurityUnitTest
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
 		User user = new User("admin", "mypass", contact);
 		
-		String initialDate = user.getDateAdded().getMonth() + " " + user.getDateAdded().getDayOfMonth() + ", " + user.getDateAdded().getYear();
+		String monthDay = "";
+		if (user.getDateAdded().getDayOfMonth() < 10) monthDay += "0";
+		monthDay += user.getDateAdded().getDayOfMonth();		
+		String initialDate = user.getDateAdded().getMonth() + " " + monthDay + ", " + user.getDateAdded().getYear();
 		
 		ZonedDateTime tmp = user.getLastAccess().withZoneSameInstant(ZoneId.systemDefault());
+		monthDay = "";
+		if (tmp.getDayOfMonth() < 10) monthDay += "0";
+		monthDay += tmp.getDayOfMonth();
 		int hour = tmp.getHour();
+		int minute = tmp.getMinute();
 		String timeOfDay = "AM";
 		if (hour > 11) timeOfDay = "PM";
 		if (hour > 12) hour -= 12;
 		String stringHour = hour < 10 ? "0" : "";
 		stringHour += Integer.valueOf(hour);
-		String initialAccess = tmp.getMonth() + " " + tmp.getDayOfMonth() + ", " + tmp.getYear() 
-								+ " " + stringHour + ":" + tmp.getMinute() + " " + timeOfDay;
+		String stringMinute = minute < 10 ? "0" : "";
+		stringMinute += Integer.valueOf(minute);
+		String initialAccess = tmp.getMonth() + " " + monthDay + ", " + tmp.getYear() 
+								+ " " + stringHour + ":" + stringMinute + " " + timeOfDay;
 		
 		assertTrue(initialDate.equalsIgnoreCase(user.getClientLocalDateAdded()));
 		assertTrue(initialAccess.equalsIgnoreCase(user.getClientLocalLastAccess()));

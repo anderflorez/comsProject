@@ -31,6 +31,4 @@ public interface ContactDao
 //	public void createContactPhone(ContactPhone phone, int contactId);
 //	public List<ContactPhone> searchContactPhonesByNumber(String phoneNumber);
 //	public ContactPhone searchContactPhoneById(int id);
-	
-	public void clearEntityManager();
 }

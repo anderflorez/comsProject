@@ -100,7 +100,7 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public Resource getResourceByName(String name)
 	{
-		return em.createQuery("select resource from Resource resource where resource.resourceName = :name", Resource.class)
+		return em.createQuery("select resource from Resource resource left join fetch resource.policies where resource.resourceName = :name", Resource.class)
 				.setParameter("name", name)
 				.getSingleResult();
 	}
@@ -108,14 +108,7 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public Resource getResourceByNameWithFields(String name)
 	{
-		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields where resource.resourceName = :name",
-				Resource.class).setParameter("name", name).getSingleResult();
-	}
-	
-	@Override
-	public Resource getResourceByNameWithFieldsAndPolicy(String name)
-	{
-		return em.createQuery("select resource from Resource resource left join fetch resource.resourceFields left join fetch resource.policies where resource.resourceName = :name",
+		return em.createQuery("select resource from Resource resource left join fetch resource.policies left join fetch resource.resourceFields where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
 	

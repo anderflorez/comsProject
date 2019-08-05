@@ -22,6 +22,7 @@ open module data
 	exports com.unlimitedcompanies.coms.domain.security.exen;
 	exports com.unlimitedcompanies.coms.domain.employee;
 	exports com.unlimitedcompanies.coms.domain.projects;
+	exports com.unlimitedcompanies.coms.dao.system to service;
 	exports com.unlimitedcompanies.coms.dao.security to service;
 	exports com.unlimitedcompanies.coms.dao.employee to service;
 }

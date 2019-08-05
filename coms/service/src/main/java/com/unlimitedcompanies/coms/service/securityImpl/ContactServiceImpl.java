@@ -20,13 +20,13 @@ import com.unlimitedcompanies.coms.domain.employee.Employee;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.ContactPhone;
 import com.unlimitedcompanies.coms.domain.security.User;
-import com.unlimitedcompanies.coms.service.abac.SystemService;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @Service
 @Transactional
@@ -63,7 +63,7 @@ public class ContactServiceImpl implements ContactService
 			try
 			{
 				contactDao.createContact(contact);
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 			} 
 			catch (ConstraintViolationException e)
 			{
@@ -111,7 +111,7 @@ public class ContactServiceImpl implements ContactService
 		if (resourceReadPolicy.isReadGranted())
 		{
 			List<Contact> contacts = contactDao.getAllContacts(resourceReadPolicy.getReadConditions());
-			contactDao.clearEntityManager();
+			systemService.clearEntityManager();
 			
 			// Check if there are any restricted fields for the requesting user
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -143,7 +143,7 @@ public class ContactServiceImpl implements ContactService
 		if (resourceReadPolicy.isReadGranted())
 		{
 			List<Contact> contacts = contactDao.getContactsByRange(elements, page - 1, resourceReadPolicy.getReadConditions());
-			contactDao.clearEntityManager();
+			systemService.clearEntityManager();
 			
 			// Check if there are any restricted fields for the requesting user
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -193,7 +193,7 @@ public class ContactServiceImpl implements ContactService
 			try
 			{
 				Contact contact = contactDao.getContactById(id, resourceReadPolicy.getReadConditions());
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				// Check if there are any restricted fields for the requesting user
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -229,7 +229,7 @@ public class ContactServiceImpl implements ContactService
 			try
 			{
 				Contact contact = contactDao.getContactByCharId(charId, resourceReadPolicy.getReadConditions());
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				// Check if there are any restricted fields for the requesting user
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -265,7 +265,7 @@ public class ContactServiceImpl implements ContactService
 			try
 			{
 				Contact contact = contactDao.getContactByEmail(email, resourceReadPolicy.getReadConditions());
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				// Check if there are any restricted fields for the requesting user
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -301,7 +301,7 @@ public class ContactServiceImpl implements ContactService
 			try
 			{
 				Contact contact = contactDao.getContactByPhoneId(phoneId, resourceReadPolicy.getReadConditions());
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 				
 				// Check if there are any restricted fields for the requesting user
 				List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -345,7 +345,7 @@ public class ContactServiceImpl implements ContactService
 			}
 			
 			contactDao.updateContact(contact);
-			contactDao.clearEntityManager();
+			systemService.clearEntityManager();
 		}
 		else
 		{
@@ -376,7 +376,7 @@ public class ContactServiceImpl implements ContactService
 			{
 				contactDao.deleteAddress(contact.getAddress());
 				contact.removeAddress();
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 			}
 		}
 		else
@@ -408,7 +408,7 @@ public class ContactServiceImpl implements ContactService
 			{
 				contactDao.deleteContactPhone(contactPhone);
 				contactPhone = null;
-				contactDao.clearEntityManager();
+				systemService.clearEntityManager();
 			}
 		}
 		else

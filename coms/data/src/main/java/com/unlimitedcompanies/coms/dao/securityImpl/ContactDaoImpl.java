@@ -243,13 +243,5 @@ public class ContactDaoImpl implements ContactDao
 //							  .setParameter("id", id)
 //							  .getSingleResult();
 //	}
-
-	@Override
-	public void clearEntityManager()
-	{
-		em.flush();
-		em.clear();		
-	}
-
 	
 }

@@ -1,4 +1,4 @@
-package com.unlimitedcompanies.coms.service.abac;
+package com.unlimitedcompanies.coms.service.system;
 
 import java.util.List;
 
@@ -32,4 +32,5 @@ public interface SystemService
 	
 	public User searchFullUserByUsername(String username);
 	public UserAttribs getUserAttribs(int userId);
+	public void clearEntityManager();
 }

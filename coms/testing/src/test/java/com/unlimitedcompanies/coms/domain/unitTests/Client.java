@@ -5,7 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
 import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
-import com.unlimitedcompanies.coms.service.abac.SystemService;
+import com.unlimitedcompanies.coms.service.system.SystemService;
 
 public class Client
 {

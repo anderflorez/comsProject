@@ -8,6 +8,7 @@ import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 public interface ABACService
 {
 	public void savePolicy(AbacPolicy policy, String username) throws NoResourceAccessException;
+	// No update AbacPolicy should be created 
 	public void addFieldRestriction(int roleId, int fieldId, String loggedUser) throws NoResourceAccessException;
 	
 	public int getNumberOfPolicies();
@@ -17,6 +18,8 @@ public interface ABACService
 
 	public Resource searchResourceByName(String name);
 	public Resource searchResourceByNameWithFields(String name);
-	public Resource searchResourceByNameWithFieldsAndPolicy(String name);
 	public AbacPolicy searchPolicy(Resource requestedResource, PolicyType policyType, String signedUsername) throws NoResourceAccessException;
+	public AbacPolicy searchModifiablePolicy(Resource requestedResource, PolicyType policyType, String signedUsername) 
+			throws NoResourceAccessException;
+	
 }

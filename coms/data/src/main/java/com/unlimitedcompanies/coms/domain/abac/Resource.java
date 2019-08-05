@@ -119,7 +119,7 @@ public class Resource
 	{
 		for (AbacPolicy next : this.policies)
 		{
-			if (next.equals(policy))
+			if (next.getPolicyType() == policy.getPolicyType())
 			{
 				return true;
 			}

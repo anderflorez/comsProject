@@ -1,7 +1,6 @@
 package com.unlimitedcompanies.coms.domain.abac;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,31 +44,31 @@ public class AbacPolicy
 	private Resource resource;
 	
 	@OneToMany(mappedBy = "parentPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	private List<AbacPolicy> subPolicies;
+	private Set<AbacPolicy> subPolicies;
 	
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "abacPolicyId_FK")
 	private AbacPolicy parentPolicy;
 	
-	@OneToMany(mappedBy = "abacPolicy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-	//@LazyCollection(LazyCollectionOption.FALSE)
-	private List<EntityCondition> entityConditions;
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+//	@LazyCollection(LazyCollectionOption.FALSE)
+	private Set<EntityCondition> entityConditions;
 	
-	@OneToMany(mappedBy = "abacPolicy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	//@LazyCollection(LazyCollectionOption.FALSE)
-	private List<AttributeCondition> attributeConditions;
+	private Set<AttributeCondition> attributeConditions;
 	
-	@OneToMany(mappedBy = "abacPolicy", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	//@LazyCollection(LazyCollectionOption.FALSE)
-	private List<FieldCondition> fieldConditions;
+	private Set<FieldCondition> fieldConditions;
 	
 	protected AbacPolicy() 
 	{
 		this.abacPolicyId = UUID.randomUUID().toString();
-		this.subPolicies = new ArrayList<>();
-		this.entityConditions = new ArrayList<>();
-		this.attributeConditions = new ArrayList<>();
-		this.fieldConditions = new ArrayList<>();
+		this.subPolicies = new HashSet<>();
+		this.entityConditions = new HashSet<>();
+		this.attributeConditions = new HashSet<>();
+		this.fieldConditions = new HashSet<>();
 	}
 	
 	public AbacPolicy(String name, PolicyType policyType, Resource resource) 
@@ -92,13 +91,14 @@ public class AbacPolicy
 		{
 			throw new NoParentPolicyOrResourceException();
 		}
-		else {
-			resource.addPolicy(this);			
+		else 
+		{
+			resource.addPolicy(this);
 		}
-		this.subPolicies = new ArrayList<>();
-		this.entityConditions = new ArrayList<>();
-		this.attributeConditions = new ArrayList<>();
-		this.fieldConditions = new ArrayList<>();
+		this.subPolicies = new HashSet<>();
+		this.entityConditions = new HashSet<>();
+		this.attributeConditions = new HashSet<>();
+		this.fieldConditions = new HashSet<>();
 	}
 	
 	private AbacPolicy(PolicyType policyType, AbacPolicy parentPolicy) 
@@ -122,10 +122,10 @@ public class AbacPolicy
 		{
 			throw new NoParentPolicyOrResourceException();
 		}
-		this.subPolicies = new ArrayList<>();
-		this.entityConditions = new ArrayList<>();
-		this.attributeConditions = new ArrayList<>();
-		this.fieldConditions = new ArrayList<>();
+		this.subPolicies = new HashSet<>();
+		this.entityConditions = new HashSet<>();
+		this.attributeConditions = new HashSet<>();
+		this.fieldConditions = new HashSet<>();
 	}
 
 	public String getAbacPolicyId()
@@ -206,7 +206,7 @@ public class AbacPolicy
 		}
 	}
 	
-	public List<AbacPolicy> getSubPolicies()
+	public Set<AbacPolicy> getSubPolicies()
 	{
 		return subPolicies;
 	}
@@ -255,7 +255,7 @@ public class AbacPolicy
 		this.parentPolicy = parentPolicy;
 	}
 	
-	public List<EntityCondition> getEntityConditions()
+	public Set<EntityCondition> getEntityConditions()
 	{
 		return entityConditions;
 	}
@@ -265,11 +265,11 @@ public class AbacPolicy
 		EntityCondition entityCondition = new EntityCondition(this, userAttribute, comparison, value);
 		if (!this.entityConditions.contains(entityCondition))
 		{
-			this.entityConditions.add(entityCondition);			
+			this.entityConditions.add(entityCondition);
 		}
 	}
 	
-	public List<AttributeCondition> getAttributeConditions()
+	public Set<AttributeCondition> getAttributeConditions()
 	{
 		return attributeConditions;
 	}
@@ -283,7 +283,7 @@ public class AbacPolicy
 		}
 	}
 	
-	public List<FieldCondition> getFieldConditions()
+	public Set<FieldCondition> getFieldConditions()
 	{
 		return fieldConditions;
 	}
@@ -353,22 +353,42 @@ public class AbacPolicy
 	private String readAttributePolicies(String projectAlias, User user)
 	{
 		String policy = "";
-		for (int i = 0; i < this.attributeConditions.size(); i++)
+		boolean notFirstAttribute = false;
+		for (AttributeCondition condition : this.attributeConditions)
 		{
-			if (i > 0) policy += " " + this.logicOperator + " ";
-			policy += this.attributeConditions.get(i).getReadPolicy(projectAlias, user);
+			if (notFirstAttribute) 
+			{
+				policy += " " + this.logicOperator + " ";
+			}
+			else
+			{
+				notFirstAttribute = true;
+			}
+			policy += condition.getReadPolicy(projectAlias, user);
+			
 		}
+		
 		return policy;
 	}
 	
 	private String readFieldPolicies(String resourceAlias)
 	{
 		String policy = "";
-		for (int i = 0; i < this.fieldConditions.size(); i++)
+		boolean notFirstAttribute = false;
+		for (FieldCondition condition : this.fieldConditions)
 		{
-			if (i > 0) policy += " " + this.logicOperator + " ";
-			policy += this.fieldConditions.get(i).getReadPolicy(resourceAlias);
+			if (notFirstAttribute) 
+			{
+				policy += " " + this.logicOperator + " ";
+			}
+			else
+			{
+				notFirstAttribute = true;
+			}
+			policy += condition.getReadPolicy(resourceAlias);
+			
 		}
+		
 		return policy;
 	}
 	
@@ -537,6 +557,30 @@ public class AbacPolicy
 			return false;
 		}
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((abacPolicyId == null) ? 0 : abacPolicyId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		AbacPolicy other = (AbacPolicy) obj;
+		if (abacPolicyId == null)
+		{
+			if (other.abacPolicyId != null) return false;
+		}
+		else if (!abacPolicyId.equals(other.abacPolicyId)) return false;
+		return true;
+	}
 	
 	
 	
@@ -668,34 +712,5 @@ public class AbacPolicy
 //	}
 
 	
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((policyType == null) ? 0 : policyType.hashCode());
-		result = prime * result + ((resource == null) ? 0 : resource.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		AbacPolicy other = (AbacPolicy) obj;
-		if (policyType == null)
-		{
-			if (other.policyType != null) return false;
-		}
-		else if (!policyType.equals(other.policyType)) return false;
-		if (resource == null)
-		{
-			if (other.resource != null) return false;
-		}
-		else if (!resource.equals(other.resource)) return false;
-		return true;
-	}
 	
 }
