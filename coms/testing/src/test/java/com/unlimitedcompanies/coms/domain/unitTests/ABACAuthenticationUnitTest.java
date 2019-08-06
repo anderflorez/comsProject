@@ -150,15 +150,15 @@ public class ABACAuthenticationUnitTest
 		AbacPolicy subPolicy1 = policy.addSubPolicy(LogicOperator.OR);
 		AbacPolicy subPolicy2 = policy.addSubPolicy(LogicOperator.AND);
 		subPolicy1.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
-		subPolicy1.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Management");
+		subPolicy1.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Testin Building");
 		subPolicy2.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		subPolicy2.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Sample Project");
+		subPolicy2.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.NOT_EQUALS, "Sample Project");
 		
 		Iterator<AbacPolicy> iterator = testResource.getPolicies().get(0).getSubPolicies().iterator();
 		assertEquals(2, iterator.next().getEntityConditions().size());
 		assertEquals(2, iterator.next().getEntityConditions().size());
 	}
-
+	
 	@Test
 	public void addingAttributeConditionTest() throws Exception
 	{

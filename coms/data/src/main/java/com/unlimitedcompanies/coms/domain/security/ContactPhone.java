@@ -30,11 +30,12 @@ public class ContactPhone
 	protected ContactPhone(String phoneNumber, String extention, String phoneType, Contact contact)
 			throws InvalidPhoneNumberException
 	{
+		// TODO: Implement validation for the phone number input
 		try
 		{
-			// TODO: Create a better way to detect wrong phone number formats
 			Long.parseLong(phoneNumber);
-		} catch (NumberFormatException e)
+		} 
+		catch (NumberFormatException e)
 		{
 			throw new InvalidPhoneNumberException();
 		}

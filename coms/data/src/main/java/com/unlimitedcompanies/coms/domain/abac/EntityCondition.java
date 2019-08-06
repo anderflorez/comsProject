@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.domain.abac;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -82,6 +83,8 @@ public class EntityCondition
 
 	protected boolean entityConditionAccessGranted(User user)
 	{
+		// TODO: Test all possible situations in this method after the code to save employees and projects has been completed
+		
 		if (this.comparison == ComparisonOperator.EQUALS)
 		{
 			if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
@@ -103,7 +106,19 @@ public class EntityCondition
 			}
 			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
 			{
-				// TODO: Write the actual code when the attribute is available
+				if (this.value.equals("ANY"))
+				{
+					return true;
+				}
+
+				List<String> projectNames = user.getContact().getEmployee().getAssociatedProjectNames();
+				for (String project : projectNames)
+				{
+					if (project.equals(this.value))
+					{
+						return true;
+					}
+				}
 				
 				return false;
 			} 
@@ -119,15 +134,25 @@ public class EntityCondition
 			{
 				for (Role next : user.getRoles())
 				{
-					if (next.getRoleName().equals(value)) return false;
+					if (next.getRoleName().equals(value))
+					{
+						return false;
+					}
 				}
 				return true;
 			}
 			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
 			{
-				// TODO: Write the actual code when the attribute is available
+				List<String> projectNames = user.getContact().getEmployee().getAssociatedProjectNames();
+				for (String project : projectNames)
+				{
+					if (project.equals(this.value))
+					{
+						return false;
+					}
+				}
 				
-				return false;
+				return true;
 			} 
 			else // USERNAME being the only option left here
 			{

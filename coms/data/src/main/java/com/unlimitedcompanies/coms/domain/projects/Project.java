@@ -65,7 +65,7 @@ public class Project
 	
 	public void addProjectMember(Employee employee, ProjectAccess projectAccess)
 	{
-		// TODO: Make sure this does NOT add a new employee - only existing employees in the db
+		// This method requires an existing employee in the db as it uses an int as id, the project must have an id already as well.
 		ProjectMember member = new ProjectMember(employee, this, projectAccess);
 		if (this.projectMembers == null)
 		{

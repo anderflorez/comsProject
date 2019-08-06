@@ -51,8 +51,6 @@ public class ContactServiceImpl implements ContactService
 		AbacPolicy contactPolicy = systemService.searchPolicy(contactResource, PolicyType.UPDATE);;
 		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
-		// TODO: Add the projects that are associated to the user
-		
 		if (contactPolicy.getModifyPolicy(null, userAttribs, signedUser) && contactPolicy.getCdPolicy().isCreatePolicy())
 		{
 			List<String> restrictedFields = systemService.searchRestrictedFields(signedUser.getUserId(), contactResource.getResourceId());
@@ -443,12 +441,6 @@ public class ContactServiceImpl implements ContactService
 			{
 				throw new RecordNotDeletedException("The contact provided to be deleted is an illegal entity");
 			}
-			
-			// TODO: Possibly create a checking method to ensure the record was deleted
-//			if (contactDao.existingContact(contactId))
-//			{
-//				throw new RecordNotDeletedException("The contact could not be deleted");
-//			}
 		}
 		
 	}

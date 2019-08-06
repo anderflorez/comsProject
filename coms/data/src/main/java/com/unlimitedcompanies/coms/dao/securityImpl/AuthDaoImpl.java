@@ -54,6 +54,16 @@ public class AuthDaoImpl implements AuthDao
 		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM users").getSingleResult();
 		return bigInt.intValue();
 	}
+	
+	@Override
+	public int getNumberOfRoleMembers(int roleId)
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(userId) FROM users LEFT JOIN users_roles "
+				+ "ON users.userId = users_roles.userId_FK WHERE users_roles.roleId_FK = :roleId")
+				.setParameter("roleId", roleId)
+				.getSingleResult();
+		return bigInt.intValue();
+	}
 //	
 //	@Override
 //	public boolean existingUser(int userId)
@@ -434,11 +444,8 @@ public class AuthDaoImpl implements AuthDao
 	}
 
 	@Override
-	public void removeUserFromRole(int userId, int roleId)
+	public void removeUserFromRole(User user, Role role)
 	{
-		Role role = em.find(Role.class, roleId);
-		User user = em.find(User.class, userId);
-
 		role.removeUser(user);
 	}
 	

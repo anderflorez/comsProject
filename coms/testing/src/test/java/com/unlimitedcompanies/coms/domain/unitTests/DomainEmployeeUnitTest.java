@@ -20,7 +20,5 @@ class DomainEmployeeUnitTest
 
 		assertEquals("John", employee.getContact().getFirstName());
 	}
-	
-	// TODO: Make sure to test assigning employees to the corresponding project relationship
 
 }

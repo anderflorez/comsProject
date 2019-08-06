@@ -38,9 +38,7 @@ public class ABACServiceImpl implements ABACService
 
 		Resource policyResource = this.searchResourceByNameWithFields("AbacPolicy");
 		
-		UserAttribs userAttribs = new UserAttribs(signedUsername);
-		// TODO: Verify why the next line is there - it seems like it shouldn't be there
-		userAttribs.setRoles(signedUser.getRoleNames());
+		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
 		AbacPolicy abacPolicy = systemService.searchPolicy(policyResource, PolicyType.UPDATE);
 		if (abacPolicy.getModifyPolicy(null, userAttribs, signedUser) && abacPolicy.getCdPolicy().isCreatePolicy())
@@ -48,7 +46,10 @@ public class ABACServiceImpl implements ABACService
 			abacDao.savePolicy(policy);
 			systemService.clearEntityManager();
 		}
-		
+		else
+		{
+			throw new NoResourceAccessException();
+		}
 	}
 	
 	@Override

@@ -29,6 +29,10 @@ public class Client
 // MAIN SYSTEM AND SECURITY
 
 // TODO: Pay attention to the annotation @Transactional(rollbackFor = SomeException.class) - it presented errors before and it is being removed now
+// TODO: Make sure there are safety checks to prevent loosing the last administrator
+// TODO: Make sure the methods in the system service are not visible from the client nor web service module
+// TODO: Create some checking and return feedback on services that create, update or delete records
 // TODO: Design a task system
 // TODO: if possible design and implement a logging system
+// TODO: Make sure to test assigning employees to the corresponding project relationship
 

@@ -31,6 +31,7 @@ import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.LastAdminRemovalException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.ABACService;
@@ -2452,7 +2453,51 @@ public class SecurityServiceIntegrationTest
 		Role adminRole = authService.searchRoleByIdWithMembers(roleId, "administrator");		
 		assertFalse(adminRole.getUsers().contains(user));
 
-		// TODO: this should also test if the role was removed from the user;
+		user = authService.searchFullUserByUsername(user.getUsername(), "administrator");
+		assertFalse(user.getRoles().contains(adminRole));
+		
+	}
+	
+	@Test
+	public void removeLastUserFromAdminRoleTest() throws Exception
+	{
+		systemService.initialSetup();
+		Resource contactResource = abacService.searchResourceByName("Contact");
+		Resource userResource = abacService.searchResourceByName("User");
+		Resource roleResource = abacService.searchResourceByName("Role");
+
+		AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+		contactUpdatePolicy.setCdPolicy(true, false);
+		contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactUpdatePolicy, "administrator");
+
+		AbacPolicy contactReadPolicy = new AbacPolicy("contactRead", PolicyType.READ, contactResource);
+		contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(contactReadPolicy, "administrator");
+
+		AbacPolicy userUpdatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+		userUpdatePolicy.setCdPolicy(true, false);
+		userUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userUpdatePolicy, "administrator");
+		
+		AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
+		userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(userReadPolicy, "administrator");
+		
+		AbacPolicy roleUpdate = new AbacPolicy("RoleUpdate", PolicyType.UPDATE, roleResource);
+		roleUpdate.setCdPolicy(true, false);
+		roleUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleUpdate, "administrator");
+		
+		AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
+		roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(roleRead, "administrator");
+
+		User user = authService.searchUserByUsername("administrator", "administrator");
+		Role role = authService.searchRoleByName("Administrators", "administrator");
+		
+		assertThrows(LastAdminRemovalException.class, 
+				()-> authService.removeRoleMember(user.getUserId(), role.getRoleId(), "administrator"));
 	}
 
 }

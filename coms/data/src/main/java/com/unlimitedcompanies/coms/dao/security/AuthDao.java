@@ -10,6 +10,7 @@ public interface AuthDao
 {
 	public void createUser(User user);
 	public int getNumberOfUsers();
+	public int getNumberOfRoleMembers(int roleId);
 //	boolean existingUser(int userId);
 	public List<User> getAllUsers(String accessConditions);
 	public List<User> getAllUsers(int elements, int page, String accessConditions);
@@ -41,6 +42,6 @@ public interface AuthDao
 	public void deleteRole(Role role);
 
 	public void assignUserToRole(int userId, int roleId);
-	public void removeUserFromRole(int userId, int roleId);
+	public void removeUserFromRole(User user, Role role);
 
 }

@@ -34,11 +34,9 @@ public class User
 	
 	private String username;
 	
-	@SuppressWarnings("unused")
 	private char[] password;
 	
 	private Boolean enabled;
-	// TODO: Test the methods related to the ZonedDateTime attributes
 	private ZonedDateTime dateAdded;
 	private ZonedDateTime lastAccess;
 	
@@ -75,12 +73,6 @@ public class User
 		return userId;
 	}
 
-	// TODO: Delete this method
-	public void setUserId(Integer userId)
-	{
-		this.userId = userId;
-	}
-
 	public String getUsername()
 	{
 		return username;
@@ -90,12 +82,6 @@ public class User
 	{
 		this.username = username;
 	}	
-
-	@SuppressWarnings("unused")
-	private char[] getPassword()
-	{
-		return null;
-	}
 	
 	public boolean isPassword(String password)
 	{
@@ -277,7 +263,6 @@ public class User
 		}
 		if (restrictedFields.contains("password"))
 		{
-			// TODO: review this next line
 			this.password = user.password;
 		}
 		if (restrictedFields.contains("enabled"))

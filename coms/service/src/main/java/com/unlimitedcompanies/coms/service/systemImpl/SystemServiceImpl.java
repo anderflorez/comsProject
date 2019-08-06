@@ -127,7 +127,6 @@ public class SystemServiceImpl implements SystemService
 	@Override
 	public Role searchRoleById(int roleId) throws NoResourceAccessException
 	{
-		// TODO: This method has not been tested
 		try
 		{
 			return authDao.getRoleById(roleId, null);
@@ -152,7 +151,6 @@ public class SystemServiceImpl implements SystemService
 	@Override
 	public ResourceField searchResourceFieldById(int fieldId) throws NoResourceAccessException
 	{
-		// TODO: This method has not been tested
 		try
 		{
 			return abacDao.getResourceFieldById(fieldId);

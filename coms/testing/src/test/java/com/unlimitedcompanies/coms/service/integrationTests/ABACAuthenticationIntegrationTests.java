@@ -49,7 +49,8 @@ class ABACAuthenticationIntegrationTests
 	private AuthService authService;
 	
 	/* 
-	 * TODO: Create some testing using the project names - 
+	 * TODO: Create some testing using the project names (when the code to save projects is ready) and 
+	 * fully test the policies with entityConditions, attributeConditions and fieldCoditions 
 	 * eg. a user can only access projects that are related to the user itself 
 	 * or a superintendent can see employees related to a project he supervises
 	*/
@@ -122,21 +123,25 @@ class ABACAuthenticationIntegrationTests
 	{		
 		systemService.initialSetup();
 		Resource contactResource = abacService.searchResourceByNameWithFields("Contact");
+		Resource abacResource = abacService.searchResourceByName("AbacPolicy");
 		
-		AbacPolicy policy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
-		AbacPolicy subPolicy1 = policy.addSubPolicy(LogicOperator.OR);
+		AbacPolicy readPolicies = new AbacPolicy("PolicyRead", PolicyType.READ, abacResource);
+		readPolicies.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		abacService.savePolicy(readPolicies, "Administrator");
+		
+		AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
+		AbacPolicy subPolicy1 = contactReadPolicy.addSubPolicy(LogicOperator.OR);
 		subPolicy1.addSubPolicy(LogicOperator.AND);
 		subPolicy1.addSubPolicy(LogicOperator.OR);
 		subPolicy1.addSubPolicy(LogicOperator.AND);
-		policy.addSubPolicy(LogicOperator.AND);
-		policy.addSubPolicy(LogicOperator.OR);
+		contactReadPolicy.addSubPolicy(LogicOperator.AND);
+		contactReadPolicy.addSubPolicy(LogicOperator.OR);
 		
-		abacService.savePolicy(policy, "administrator");
+		abacService.savePolicy(contactReadPolicy, "administrator");
 		
-		assertEquals(8, abacService.getNumberOfPolicies(), 
-				"Saving policy with multiple condition group integration test failed");
+		assertEquals(9, abacService.getNumberOfPolicies());
 		
-		// TODO: Add assertEquals for subpolicies
+		assertEquals(3, abacService.searchPolicy(contactResource, PolicyType.READ, "administrator").getSubPolicies().size());
 	}
 	
 	@Test
@@ -218,9 +223,8 @@ class ABACAuthenticationIntegrationTests
 		
 		AbacPolicy foundPolicy = abacService.searchPolicy(abacPolicyResource, PolicyType.READ, "administrator");
 		
-		assertEquals(2, foundPolicy.getEntityConditions().size(),
-				"Simple read permission integration test failed");
-		assertEquals("PolicyRead", foundPolicy.getPolicyName(), "Simple read permission integration test failed");
+		assertEquals(2, foundPolicy.getEntityConditions().size());
+		assertEquals("PolicyRead", foundPolicy.getPolicyName());
 	}
 	
 	@Test

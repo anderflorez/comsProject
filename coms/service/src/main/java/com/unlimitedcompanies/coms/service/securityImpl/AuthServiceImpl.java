@@ -24,6 +24,7 @@ import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
+import com.unlimitedcompanies.coms.service.exceptions.LastAdminRemovalException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -482,11 +483,8 @@ public class AuthServiceImpl implements AuthService
 
 	@Override
 	public void deleteUser(int userId, String signedUsername) 
-			throws NoResourceAccessException, RecordNotFoundException, RecordNotDeletedException
-	{
-		// TODO: Prevent this method from deleting the last user in the administrator role
-		// TODO: Provide error message if user tries to delete the last administrator user
-		
+			throws NoResourceAccessException, RecordNotFoundException, RecordNotDeletedException, LastAdminRemovalException
+	{		
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		Resource userResource = abacService.searchResourceByName("User");
@@ -497,6 +495,19 @@ public class AuthServiceImpl implements AuthService
 		
 		if (userPolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser) && userPolicy.getCdPolicy().isDeletePolicy())
 		{
+			Set<User> users = authDao.getRoleByNameWithMembers("Administrators", null).getUsers();
+			if (users.size() < 2)
+			{
+				for (User user : users)
+				{
+					if (user.getUserId() == userId)
+					{
+						throw new LastAdminRemovalException();
+					}
+
+				}
+			}
+			
 			authDao.deleteUser(userId);
 		}
 		else
@@ -516,9 +527,7 @@ public class AuthServiceImpl implements AuthService
 		UserAttribs userAttribs = systemService.getUserAttribs(signedUser.getUserId());
 		
 		if (roleUpdatePolicy.getModifyPolicy(null, userAttribs, signedUser))
-		{
-			// TODO: Return an exception if the role is not created
-			
+		{			
 			role.clearRestrictedFields();
 			authDao.createRole(role);
 			systemService.clearEntityManager();
@@ -599,10 +608,10 @@ public class AuthServiceImpl implements AuthService
 	public Role searchRoleById(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Resource roleResource = abacService.searchResourceByName("Role");
-		User loggedUser = systemService.searchFullUserByUsername(signedUsername);
+		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
 		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
-		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, loggedUser);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, signedUser);
 		
 		if (readPolicy.isReadGranted())
 		{
@@ -610,6 +619,31 @@ public class AuthServiceImpl implements AuthService
 			{
 				Role role = authDao.getRoleById(roleId, readPolicy.getReadConditions());
 				systemService.clearEntityManager();
+				return role;
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The role could not be found");
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	private Role searchRoleById(int roleId, User signedUser) throws NoResourceAccessException, RecordNotFoundException
+	{
+		Resource roleResource = abacService.searchResourceByName("Role");
+		
+		AbacPolicy roleRead = systemService.searchPolicy(roleResource, PolicyType.READ);
+		ResourceReadPolicy readPolicy = roleRead.getReadPolicy(Role.class, signedUser);
+		
+		if (readPolicy.isReadGranted())
+		{
+			try
+			{
+				Role role = authDao.getRoleById(roleId, readPolicy.getReadConditions());
 				return role;
 			}
 			catch (NoResultException e)
@@ -800,8 +834,8 @@ public class AuthServiceImpl implements AuthService
 //	}
 	
 	@Override
-	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
-	{
+	public void updateRole(Role role, String signedUsername) throws NoResourceAccessException, RecordNotFoundException, LastAdminRemovalException
+	{		
 		Resource roleResource = abacService.searchResourceByName("Role");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
@@ -811,6 +845,11 @@ public class AuthServiceImpl implements AuthService
 		
 		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
+			Role foundRole = this.searchRoleById(role.getRoleId(), signedUser);
+			if (foundRole.getRoleName().equals("Administrator"))
+			{
+				throw new LastAdminRemovalException();
+			}
 			authDao.updateRole(role);
 			systemService.clearEntityManager();
 		}
@@ -821,11 +860,8 @@ public class AuthServiceImpl implements AuthService
 	}
 	
 	@Override
-	public void deleteRole(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	public void deleteRole(int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException, LastAdminRemovalException
 	{
-		// TODO: Prevent this method from deleting the original administrator role
-		// TODO: Provide an error message if the user tries to delete the original administrator role
-		
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
 		Resource roleResource = abacService.searchResourceByName("Role");		
@@ -835,8 +871,11 @@ public class AuthServiceImpl implements AuthService
 		
 		if (roleUpdatePolicy.getModifyPolicy(null, userAttribs, signedUser) && roleUpdatePolicy.getCdPolicy().isDeletePolicy())
 		{
-			// TODO: Improve the next method call by creating a new method that receives the signedUser instead of searching for it again
-			Role role = this.searchRoleById(roleId, signedUsername);
+			Role role = this.searchRoleById(roleId, signedUser);
+			if (role.getRoleName().equals("Administrator"))
+			{
+				throw new LastAdminRemovalException();
+			}
 			authDao.deleteRole(role);
 			systemService.clearEntityManager();
 		}
@@ -861,15 +900,12 @@ public class AuthServiceImpl implements AuthService
 		{
 			authDao.assignUserToRole(userId, roleId);
 		}
-				
-		// TODO: Need to create some checking and throw an exception when the user is not added to the role
 	}
 	
 	@Override
-	public void removeRoleMember(int userId, int roleId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
-	{
-		// TODO: Prevent this method from removing the last user of the administrators role
-	
+	public void removeRoleMember(int userId, int roleId, String signedUsername) 
+			throws NoResourceAccessException, RecordNotFoundException, LastAdminRemovalException
+	{	
 		Resource roleResource = abacService.searchResourceByName("Role");
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 		
@@ -879,18 +915,22 @@ public class AuthServiceImpl implements AuthService
 		
 		if (rolePolicy.getModifyPolicy(resourceAttribs, userAttribs, signedUser))
 		{
-			authDao.removeUserFromRole(userId, roleId);
-		}			
-			
-		try
-		{
+			try
+			{
+				User user = authDao.getUserById(userId, null);
+				Role role = authDao.getRoleByIdWithMembers(roleId, null);
+				if (role.getRoleName().equals("Administrators") && authDao.getNumberOfRoleMembers(role.getRoleId()) <= 1)
+				{
+					throw new LastAdminRemovalException();
+				}
+				authDao.removeUserFromRole(user, role);
+				systemService.clearEntityManager();
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The referenced role or user member could not be found");
+			}
 		}
-		catch (NoResultException e)
-		{
-			throw new RecordNotFoundException("Error: The role or some members scheduled to be removed from the role could not be found");
-		}
-		
-		// TODO: Create some checking and throw a new exception if the member is not removed.
 	}
 	
 	private ResourceAttribs getUserResourceAttribs(int userId) throws RecordNotFoundException
