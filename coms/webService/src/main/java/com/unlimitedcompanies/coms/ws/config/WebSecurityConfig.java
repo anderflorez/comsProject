@@ -42,8 +42,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception
 	{
-		String user = "select username, password, enabled from user where username = ?";
-		String authorities = "select * from role INNER JOIN user_role ON user_role.role_FK = role.roleId INNER JOIN user ON user.username = ?";
+		String user = "select username, password, enabled from users where username = ?";
+		String authorities = "select * from roles INNER JOIN users_roles ON users_roles.roleId_FK = roles.roleId INNER JOIN users ON users.username = ?";
 		PasswordEncoder pe = new BCryptPasswordEncoder();
 
 		// Database user authentication

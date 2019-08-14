@@ -12,6 +12,8 @@ open module service
 	exports com.unlimitedcompanies.coms.service.security;
 	exports com.unlimitedcompanies.coms.service.employee;
 	exports com.unlimitedcompanies.coms.service.exceptions;
-	exports com.unlimitedcompanies.coms.service.system to testing;
+	
+	// TODO: Evaluate if the next line is needed - it supports the CLI client being capable of running initial setup
+	exports com.unlimitedcompanies.coms.service.system to testing, uiCLI;
 	
 }

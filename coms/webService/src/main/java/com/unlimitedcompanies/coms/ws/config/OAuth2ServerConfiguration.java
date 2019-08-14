@@ -45,6 +45,7 @@ public class OAuth2ServerConfiguration
 						.authorizedGrantTypes("authorization_code")
 						.authorities("TRUSTED_CLIENT")
 						.scopes("read", "write", "trusted")
+						// TODO: use a proper secure password
 						.secret("{noop}somesecret")
 						.resourceIds(SERVER_RESOURCE_ID)
 						.autoApprove(true)

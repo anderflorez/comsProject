@@ -40,17 +40,10 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 
-<!-- 		<dependency>
+		<!-- <dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 		</dependency> -->
-		
-		<dependency>
-		    <groupId>org.hibernate.javax.persistence</groupId>
-		    <artifactId>hibernate-jpa-2.2-api</artifactId>
-		    <type>pom</type>
-		</dependency>
-
 
 		<!-- Spring Framework -->
 		<dependency>

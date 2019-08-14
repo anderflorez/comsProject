@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
@@ -32,12 +36,12 @@ import com.unlimitedcompanies.coms.ws.security.reps.ErrorRep;
 @RestController
 public class ContactRestController
 {
-//	@Autowired
-//	ContactService contactService;
-//	
-//	@Autowired
-//	AuthService authService;
-//	
+	@Autowired
+	ContactService contactService;
+	
+	@Autowired
+	AuthService authService;
+	
 //	@RequestMapping(value = RestLinks.URI_BASE + "contacts", method = RequestMethod.GET)
 //	public ContactCollectionResponse allContacts(@RequestParam(name = "pag", required = false) Integer pag,
 //												 @RequestParam(name = "epp", required = false) Integer epp)
@@ -86,16 +90,29 @@ public class ContactRestController
 //		return allContacts;
 //	}
 //
-//	@RequestMapping(value = RestLinks.URI_BASE + "contact/{id}", method = RequestMethod.GET)
-//	public ContactDTO findContactById(@PathVariable Integer id) throws RecordNotFoundException
-//	{
-//		Contact foundContact = contactService.searchContactById(id);
-//		ContactDTO contact = new ContactDTO(foundContact);
-//		Link selfLink = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
-//		contact.add(selfLink);
-//		return contact;
-//	}
-//	
+	@RequestMapping(value = RestLinks.URI_BASE + "contact/{id}", method = RequestMethod.GET)
+	public ContactDTO findContactById(@PathVariable Integer id) throws RecordNotFoundException
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
+		// TODO: remove this try - catch block and use an exception handler
+		Contact foundContact = null;
+		try
+		{
+			foundContact = contactService.searchContactById(id, userDetails.getUsername());
+		}
+		catch (NoResourceAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ContactDTO contact = new ContactDTO(foundContact);
+		Link selfLink = linkTo(methodOn(ContactRestController.class).findContactById(id)).withSelfRel();
+		contact.add(selfLink);
+		return contact;
+	}
+	
 //	@RequestMapping(value = RestLinks.URI_BASE + "contact", method = RequestMethod.POST)
 //	@ResponseStatus(value = HttpStatus.CREATED)
 //	public ContactDTO saveNewContact(@RequestBody Contact newContact) 

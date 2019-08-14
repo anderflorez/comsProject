@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.unlimitedcompanies.coms.domain.security.Contact;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
-import com.unlimitedcompanies.coms.service.exceptions.RecordNotChangedException;
+import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
@@ -39,30 +39,40 @@ import com.unlimitedcompanies.coms.ws.security.reps.UserPasswordDTO;
 @RestController
 public class UserRestController
 {
-//	@Autowired
-//	AuthService authService;
-//	
-//	@Autowired
-//	ContactService contactService;
-//	
-//	private final String resource = "user";
-//	
-//	@RequestMapping(value = RestLinks.URI_BASE + "loggedUser", method = RequestMethod.GET)
-//	public UserDTO getUserInfo() throws RecordNotFoundException
-//	{
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-//		
-//		User user = authService.searchUserByUsernameWithContact(userDetails.getUsername());
-//		UserDTO loggedUser = new UserDTO(user);
-//		
-//		Link selfLink = linkTo(methodOn(UserRestController.class).findUserById(loggedUser.getUserId())).withSelfRel();
-//		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(user.getContact().getContactId())).withRel("contact");
-//		loggedUser.add(selfLink, contactLink);
-//		
-//		return loggedUser;
-//	}
-//	
+	@Autowired
+	AuthService authService;
+	
+	@Autowired
+	ContactService contactService;
+	
+	private final String resource = "user";
+	
+	@RequestMapping(value = RestLinks.URI_BASE + "loggedUser", method = RequestMethod.GET)
+	public UserDTO getUserInfo() throws RecordNotFoundException
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
+		// TODO: remove this try - catch block and use an exception handler
+		User user = null;
+		try
+		{
+			user = authService.searchUserByUsernameWithContact(userDetails.getUsername(), userDetails.getUsername());
+		}
+		catch (NoResourceAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		UserDTO loggedUser = new UserDTO(user);
+		
+		Link selfLink = linkTo(methodOn(UserRestController.class).findUserById(loggedUser.getUserId())).withSelfRel();
+		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(user.getContact().getContactId())).withRel("contact");
+		loggedUser.add(selfLink, contactLink);
+		
+		return loggedUser;
+	}
+	
 //	@RequestMapping(value = RestLinks.URI_BASE + resource + "s", method = RequestMethod.GET)
 //	public UserCollectionResponse allUsers(@RequestParam(name = "pag", required = false) Integer pag,
 //										   @RequestParam(name = "epp", required = false) Integer epp)
@@ -102,19 +112,32 @@ public class UserRestController
 //		return foundUsers;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
-//	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
-//	{
-//		User user = authService.searchUserByUserIdWithContact(id);
-//		UserDTO userResponse = new UserDTO(user);
-//		
-//		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
-//		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(userResponse.getUserId())).withRel("contact");
-//		userResponse.add(userLink, contactLink);
-//		
-//		return userResponse;
-//	}
-//	
+	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
+	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
+		// TODO: remove this try - catch block and use an exception handler
+		User user = null;
+		try
+		{
+			user = authService.searchUserByIdWithContact(id, userDetails.getUsername());
+		}
+		catch (NoResourceAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		UserDTO userResponse = new UserDTO(user);
+		
+		Link userLink = linkTo(methodOn(UserRestController.class).findUserById(id)).withSelfRel();
+		Link contactLink = linkTo(methodOn(ContactRestController.class).findContactById(userResponse.getUserId())).withRel("contact");
+		userResponse.add(userLink, contactLink);
+		
+		return userResponse;
+	}
+	
 //	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
 //	@ResponseStatus(value = HttpStatus.CREATED)
 //	public UserDTO saveNewUser(@RequestBody UserDTO newUser) throws RecordNotFoundException, RecordNotCreatedException
