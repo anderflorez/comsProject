@@ -1,0 +1,21 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f66246bcfb2, pid=21159, tid=21183
+#
+# JRE version: Java(TM) SE Runtime Environment (10.0.2+13) (build 10.0.2+13)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (10.0.2+13, mixed mode, tiered, compressed oops, g1 gc, linux-amd64)
+# Problematic frame:
+# C  [libjimage.so+0x3fb2]  ImageStrings::find(Endian*, char const*, int*, unsigned int)+0x42
+#
+# Core dump will be written. Default location: Core dumps may be processed with "/usr/share/apport/apport %p %s %c %d %P" (or dumping to /home/anderson/Documents/ManagementProject/comsProject/coms/testing/core.21159)
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:38053 -ea --add-opens=testing/com.unlimitedcompanies.coms.service.integrationTests=ALL-UNNAMED -javaagent:/home/anderson/eclipse/jee-2018-09/eclipse/configuration/org.eclipse.osgi/1468/0/.cp/lib/javaagent-shaded.jar --add-modules=ALL-MODULE-PATH -Dfile.encoding=UTF-8 --module-path=/home/anderson/Documents/ManagementProject/comsProject/coms/testing/target/test-classes:/home/anderson/Documents/ManagementProject/comsProject/coms/data/target/classes:/home/anderson/.m2/repository/org/apache/tomcat/tomcat-jdbc/9.0.22/tomcat-jdbc-9.0.22.jar:/home/anderson/.m2/repository/org/hibernate/hibernate-core/5.3.10.Final/hibernate-core-5.3.10.Final.jar:/home/anderson/.m2/repository/javax/persistence/javax.persistence-api/2.2/javax.persistence-api-2.2.jar:/home/anderson/.m2/repository/javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar:/home/anderson/.m2/repository/org/springframework/spring-core/5.1.7.RELEASE/spring-core-5.1.7.RELEASE.jar:/home/anderson/.m2/repository/org/springframework/spring-beans/5.1.7.RELEASE/spring-beans-5.1.7.RELEASE.jar:/home/anderson/.m2/repository/org/springframework/spring-context/5.1.7.RELEASE/spring-context-5.1.7.RELEASE.jar:/home/anderson/.m2/repository/org/springframework/spring-tx/5.1.7.RELEASE/spring-tx-5.1.7.RELEASE.jar:/home/anderson/.m2/repository/org/springframework/spring-orm/5.1.7.RELEASE/spring-orm-5.1.7.RELEASE.jar:/home/anderson/.m2/repository/org/springframework/security/spring-security-core/5.1.5.RELEASE/spring-security-core-5.1.5.RELEASE.jar:/home/anderson/.m2/repository/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar:/home/anderson/.m2/repository/org/glassfish/jaxb/jaxb-runtime/2.3.1/jaxb-runtime-2.3.1.jar:/home/anderson/.m2/repository/org/glassfish/jaxb/txw2/2.3.1/txw2-2.3.1.jar:/home/anderson/.m2/repository/com/sun/istack/istack-commons-runtime/3.0.7/istack-commons-runtime-3.0.7.jar:/home/anderson/.m2/repository/org/jvnet/staxex/stax-ex/1.8/stax-ex-1.8.jar:/home/anderson/.m2/repository/com/sun/xml/fastinfoset/FastInfoset/1.2.15/FastInfoset-1.2.15.jar:/home/anderson/.m2/repository/javax/validation/validation-api/2.0.1.Final/validation-api-2.0.1.Final.jar:/home/anderson/Documents/ManagementProject/comsProject/coms/service/target/classes --patch-module=testing=/home/anderson/Documents/ManagementProject/comsProject/coms/testing/target/classes --patch-module=data=/home/anderson/Documents/ManagementProject/comsProject/coms/data/target/test-classes --add-reads=testing=ALL-UNNAMED --add-reads=data=ALL-UNNAMED --add-reads=service=ALL-UNNAMED org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 36855 -testLoaderClass org.eclipse.jdt.internal.junit5.runner.JUnit5TestLoader -loaderpluginname org.eclipse.jdt.junit5.runtime -test com.unlimitedcompanies.coms.service.integrationTests.ABACAuthenticationIntegrationTests:policyFieldConditionTest -uniqueId [engine:junit-jupiter]/[class:com.unlimitedcompanies.coms.service.integrationTests.ABACAuthenticationIntegrationTests]/[method:policyFieldConditionTest()]
+
+Host: 

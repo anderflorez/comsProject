@@ -37,29 +37,29 @@ public class AbacPolicy
 	@Column(unique=false, nullable=false)
 	private String logicOperator;
 	
-	@OneToOne(mappedBy="policy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToOne(mappedBy="policy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	private CdPolicy cdPolicy;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="resourceId_FK")
 	private Resource resource;
 	
-	@OneToMany(mappedBy = "parentPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "parentPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	private Set<AbacPolicy> subPolicies;
 	
-	@ManyToOne(cascade = CascadeType.PERSIST)
+	@ManyToOne//(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "abacPolicyId_FK")
 	private AbacPolicy parentPolicy;
 	
-	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 //	@LazyCollection(LazyCollectionOption.FALSE)
 	private Set<EntityCondition> entityConditions;
 	
-	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	//@LazyCollection(LazyCollectionOption.FALSE)
 	private Set<AttributeCondition> attributeConditions;
 	
-	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "abacPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	//@LazyCollection(LazyCollectionOption.FALSE)
 	private Set<FieldCondition> fieldConditions;
 	

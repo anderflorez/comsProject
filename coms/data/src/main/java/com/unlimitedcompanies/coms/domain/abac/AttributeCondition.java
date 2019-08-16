@@ -29,7 +29,7 @@ public class AttributeCondition
 	@Column(unique=false, nullable=false)
 	private ComparisonOperator comparison;
 	
-	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@ManyToOne//(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	@JoinColumn(name = "abacPolicyId_FK")
 	private AbacPolicy abacPolicy;
 	

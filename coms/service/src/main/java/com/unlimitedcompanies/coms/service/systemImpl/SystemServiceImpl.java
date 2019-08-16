@@ -54,7 +54,7 @@ public class SystemServiceImpl implements SystemService
 	@Override
 	public void initialSetup() throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
 	{
-		// Check and make sure there are no risks by performing this operation
+		// TODO: Check and make sure there are no risks by performing this operation
 		// Get the number of records for several important resources
 		// This code will run only for initial setup; it will run if and only if the app has never been used before		
 		
@@ -72,10 +72,45 @@ public class SystemServiceImpl implements SystemService
 			this.checkAllResources();
 			
 			Resource policyResource = abacDao.getResourceByNameWithFields("AbacPolicy");
+			Resource contactResource = abacDao.getResourceByName("Contact");
+			Resource userResource = abacDao.getResourceByName("User");
+			Resource roleResource = abacDao.getResourceByName("Role");
+			
 			AbacPolicy abacUpdatePolicy = new AbacPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
-			abacUpdatePolicy.setCdPolicy(true, false);
-			abacUpdatePolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
+			abacUpdatePolicy.setCdPolicy(true, true);
+			abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(abacUpdatePolicy);
+			
+			AbacPolicy abacPolicy = new AbacPolicy("PolicyRead", PolicyType.READ, policyResource);
+			abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(abacPolicy);
+			
+			AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
+			contactUpdatePolicy.setCdPolicy(true, true);
+			contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(contactUpdatePolicy);
+			
+			AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
+			contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(contactReadPolicy);
+			
+			AbacPolicy userCreatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
+			userCreatePolicy.setCdPolicy(true, true);
+			userCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(userCreatePolicy);
+			
+			AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
+			userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(userReadPolicy);
+			
+			AbacPolicy roleUpdate = new AbacPolicy("RoleUpdate", PolicyType.UPDATE, roleResource);
+			roleUpdate.setCdPolicy(true, true);
+			roleUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(roleUpdate);
+			
+			AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
+			roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacDao.savePolicy(roleRead);
 			
 			authDao.createRole(new Role("Administrators"));
 			Role adminRole = authDao.getRoleByName("Administrators", null);
@@ -88,18 +123,6 @@ public class SystemServiceImpl implements SystemService
 			User adminUser = authDao.getUserByUsername("administrator", null);
 			
 			authDao.assignUserToRole(adminUser.getUserId(), adminRole.getRoleId());
-			
-			Resource userResource = abacDao.getResourceByName("User");
-			AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
-			userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-			abacDao.savePolicy(userReadPolicy);
-			
-			Resource contactResource = abacDao.getResourceByName("Contact");
-			AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
-			contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-			abacDao.savePolicy(contactReadPolicy);
-			
-			System.out.println("INITIAL SETUP RAN");
 			
 			this.clearEntityManager();
 		}

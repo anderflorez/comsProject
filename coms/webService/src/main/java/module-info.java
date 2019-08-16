@@ -18,5 +18,5 @@ module webService
 	requires java.xml.bind;
 	requires javax.servlet.api;
 
-	exports com.unlimitedcompanies.coms.ws.security.reps;
+	exports com.unlimitedcompanies.coms.ws.reps;
 }

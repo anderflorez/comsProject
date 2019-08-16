@@ -91,6 +91,42 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
+	public AbacPolicy getPolicyWithRestrictedFields(Resource resource, PolicyType policyType, String accessConditions)
+	{
+		String queryString = "select policy from AbacPolicy as policy "
+				+ "left join fetch policy.resource as resource left join fetch resource.resourceFields as resourceFields "
+				+ "where resource = :resource and policy.policyType = :policyType";
+		
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and (" + accessConditions + ")";
+		}		
+
+		return em.createQuery(queryString, AbacPolicy.class)
+				 .setParameter("resource", resource)
+				 .setParameter("policyType", policyType.toString())
+				 .getSingleResult();
+	}
+	
+	@Override
+	public List<AbacPolicy> getPoliciesByRange(int elements, int page, String accessConditions)
+	{
+		String queryString = "select policy from AbacPolicy as policy";
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " where " + accessConditions;
+		}
+		queryString += " order by policy.policyName";
+		
+		List<AbacPolicy> policies = em.createQuery(queryString, AbacPolicy.class)
+				 .setFirstResult(page * elements)
+				 .setMaxResults(elements)
+				 .getResultList();
+		
+		return policies;
+	}
+	
+	@Override
 	public List<String> getAllResourceNames()
 	{
 		return em.createQuery("select resource.resourceName from Resource resource", String.class)
@@ -108,7 +144,10 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public Resource getResourceByNameWithFields(String name)
 	{
-		return em.createQuery("select resource from Resource resource left join fetch resource.policies left join fetch resource.resourceFields where resource.resourceName = :name",
+		return em.createQuery("select resource from Resource resource "
+				+ "left join fetch resource.policies "
+				+ "left join fetch resource.resourceFields "
+				+ "where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
 	}
 	
@@ -144,6 +183,13 @@ public class ABACDaoImpl implements ABACDao
 				 .setParameter("resourceId", resourceId)
 				 .setParameter("userId", userId)
 				 .getResultList();
+	}
+	
+	@Override
+	public void deletePolicy(String abacPolicyId)
+	{
+		AbacPolicy policy = em.find(AbacPolicy.class, abacPolicyId);
+		em.remove(policy);
 	}
 	
 	@Override
