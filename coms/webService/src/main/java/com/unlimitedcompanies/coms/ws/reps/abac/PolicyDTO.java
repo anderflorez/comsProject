@@ -1,8 +1,12 @@
 package com.unlimitedcompanies.coms.ws.reps.abac;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
@@ -13,6 +17,7 @@ import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
 import com.unlimitedcompanies.coms.domain.abac.ResourceAttribute;
 import com.unlimitedcompanies.coms.domain.abac.UserAttribute;
+import com.unlimitedcompanies.coms.ws.controllers.abac.PolicyRestController;
 
 @XmlRootElement(name = "policy")
 public class PolicyDTO extends ResourceSupport
@@ -33,6 +38,20 @@ public class PolicyDTO extends ResourceSupport
 	public PolicyDTO(AbacPolicy policy)
 	{		
 		this.abacPolicyId = policy.getAbacPolicyId();
+		if (this.abacPolicyId != null)
+		{
+			Link selfLink = null;
+			try
+			{
+				selfLink = linkTo(methodOn(PolicyRestController.class).getPolicyById(this.abacPolicyId)).withSelfRel();
+			}
+			catch (Exception e) 
+			{
+				// No exception will ever be thrown as the method won't be called - this is just for heateos reference to the end point
+			}
+			this.add(selfLink);
+		}
+		
 		this.policyName = policy.getPolicyName();
 		this.policyType = policy.getPolicyType().toString();
 		this.logicOperator = policy.getLogicOperator().toString();
@@ -69,6 +88,20 @@ public class PolicyDTO extends ResourceSupport
 	public void setAbacPolicyId(String abacPolicyId)
 	{
 		this.abacPolicyId = abacPolicyId;
+		if (this.abacPolicyId != null)
+		{
+			Link selfLink = null;
+			try
+			{
+				selfLink = linkTo(methodOn(PolicyRestController.class).getPolicyById(this.abacPolicyId)).withSelfRel();
+			}
+			catch (Exception e) 
+			{
+				// No exception will ever be thrown as the method won't be called - this is just for heateos reference to the end point
+			}
+			this.removeLinks();
+			this.add(selfLink);
+		}
 	}
 
 	public String getPolicyName()

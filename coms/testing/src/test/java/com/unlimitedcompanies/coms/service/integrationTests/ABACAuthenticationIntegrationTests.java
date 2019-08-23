@@ -148,7 +148,7 @@ class ABACAuthenticationIntegrationTests
 		abacService.savePolicy(employeeReadPolicy, "administrator");
 		
 		assertEquals(21, abacService.getNumberOfPolicies());
-//		assertEquals(3, abacService.searchPolicy(employeeResource, PolicyType.READ, "administrator").getSubPolicies().size());
+		assertEquals(3, abacService.searchPolicy(employeeResource, PolicyType.READ, "administrator").getSubPolicies().size());
 		
 		AbacPolicy foundPolicy = abacService.searchPolicyById(employeeReadPolicy.getAbacPolicyId(), "administrator");
 		assertEquals(3, foundPolicy.getSubPolicies().size());

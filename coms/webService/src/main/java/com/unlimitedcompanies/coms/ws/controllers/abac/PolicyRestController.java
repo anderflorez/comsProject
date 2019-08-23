@@ -2,7 +2,11 @@ package com.unlimitedcompanies.coms.ws.controllers.abac;
 
 import java.util.List;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -49,6 +53,8 @@ public class PolicyRestController
 		PolicyCollectionResponse policyCollection = new PolicyCollectionResponse(policies);
 		
 		// TODO: Add support for links as well as for previous and next page links
+		Link selfLink = linkTo(methodOn(PolicyRestController.class).getAllPolicies(epp, pag)).withSelfRel();
+		policyCollection.add(selfLink);
 		
 		return policyCollection;
 	}
@@ -62,8 +68,6 @@ public class PolicyRestController
 		AbacPolicy abacPolicy = abacService.searchPolicyById(id, userDetails.getUsername());
 		
 		PolicyDTO policyDTO = new PolicyDTO(abacPolicy);
-		
-		// TODO: Add support for hateos links when the save new policy resource method is ready
 		
 		return policyDTO;
 	}

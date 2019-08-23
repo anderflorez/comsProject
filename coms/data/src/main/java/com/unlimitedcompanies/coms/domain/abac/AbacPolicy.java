@@ -549,6 +549,38 @@ public class AbacPolicy
 		}
 	}
 
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((abacPolicyId == null) ? 0 : abacPolicyId.hashCode());
+		result = prime * result + ((policyName == null) ? 0 : policyName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		AbacPolicy other = (AbacPolicy) obj;
+		if (abacPolicyId == null)
+		{
+			if (other.abacPolicyId != null) return false;
+		}
+		else if (!abacPolicyId.equals(other.abacPolicyId)) return false;
+		if (policyName == null)
+		{
+			if (other.policyName != null) return false;
+		}
+		else if (!policyName.equals(other.policyName)) return false;
+		return true;
+	}
+
+
+
 //	@Override
 //	public int hashCode()
 //	{
@@ -564,50 +596,50 @@ public class AbacPolicy
 //		return result;
 //	}
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		AbacPolicy other = (AbacPolicy) obj;
-		if (attributeConditions == null)
-		{
-			if (other.attributeConditions != null) return false;
-		}
-		else if (!attributeConditions.equals(other.attributeConditions)) return false;
-		if (cdPolicy == null)
-		{
-			if (other.cdPolicy != null) return false;
-		}
-		else if (!cdPolicy.equals(other.cdPolicy)) return false;
-		if (entityConditions == null)
-		{
-			if (other.entityConditions != null) return false;
-		}
-		else if (!entityConditions.equals(other.entityConditions)) return false;
-		if (fieldConditions == null)
-		{
-			if (other.fieldConditions != null) return false;
-		}
-		else if (!fieldConditions.equals(other.fieldConditions)) return false;
-		if (logicOperator == null)
-		{
-			if (other.logicOperator != null) return false;
-		}
-		else if (!logicOperator.equals(other.logicOperator)) return false;
-		if (resource == null)
-		{
-			if (other.resource != null) return false;
-		}
-		else if (!resource.equals(other.resource)) return false;
-		if (subPolicies == null)
-		{
-			if (other.subPolicies != null) return false;
-		}
-		else if (!subPolicies.equals(other.subPolicies)) return false;
-		return true;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		if (this == obj) return true;
+//		if (obj == null) return false;
+//		if (getClass() != obj.getClass()) return false;
+//		AbacPolicy other = (AbacPolicy) obj;
+//		if (attributeConditions == null)
+//		{
+//			if (other.attributeConditions != null) return false;
+//		}
+//		else if (!attributeConditions.equals(other.attributeConditions)) return false;
+//		if (cdPolicy == null)
+//		{
+//			if (other.cdPolicy != null) return false;
+//		}
+//		else if (!cdPolicy.equals(other.cdPolicy)) return false;
+//		if (entityConditions == null)
+//		{
+//			if (other.entityConditions != null) return false;
+//		}
+//		else if (!entityConditions.equals(other.entityConditions)) return false;
+//		if (fieldConditions == null)
+//		{
+//			if (other.fieldConditions != null) return false;
+//		}
+//		else if (!fieldConditions.equals(other.fieldConditions)) return false;
+//		if (logicOperator == null)
+//		{
+//			if (other.logicOperator != null) return false;
+//		}
+//		else if (!logicOperator.equals(other.logicOperator)) return false;
+//		if (resource == null)
+//		{
+//			if (other.resource != null) return false;
+//		}
+//		else if (!resource.equals(other.resource)) return false;
+//		if (subPolicies == null)
+//		{
+//			if (other.subPolicies != null) return false;
+//		}
+//		else if (!subPolicies.equals(other.subPolicies)) return false;
+//		return true;
+//	}
 	
 }
 

@@ -32,11 +32,6 @@ public interface AbacService
 	public AbacPolicy searchPolicyById(String abacPolicyId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
 	public List<AbacPolicy> searchPoliciesByRange(int elements, int page, String signedUsername) 
 			throws NoResourceAccessException, RecordNotFoundException;
-	//TODO: Make sure the next method is not available to the users. It could be available to testing only
-//	public AbacPolicy searchModifiablePolicy(Resource requestedResource, PolicyType policyType, String signedUsername) 
-//			throws NoResourceAccessException, RecordNotFoundException;
-	
-	// No update AbacPolicy should be created 
 	public void updatePolicy(String existingPolicyId, AbacPolicy updatedPolicy, String signedUsername) 
 			throws NoResourceAccessException, InvalidPolicyException, RecordNotCreatedException;
 	public void deletePolicy(String policyId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException;
