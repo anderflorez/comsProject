@@ -179,7 +179,7 @@ public class UserRestController
 	}
 	
 	@ExceptionHandler(RecordNotFoundException.class)
-	public ResponseEntity<ErrorRep> userNotFoundExceptionHandler(RecordNotFoundException e) 
+	public ResponseEntity<ErrorRep> recordNotFoundExceptionHandler(RecordNotFoundException e) 
 	{
 		ErrorRep error = new ErrorRep();
 		error.setStatusCode(HttpStatus.NOT_FOUND.value());

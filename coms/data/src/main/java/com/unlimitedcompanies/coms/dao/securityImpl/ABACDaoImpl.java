@@ -77,7 +77,11 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions)
 	{
-		String queryString = "select policy from AbacPolicy as policy where policy.resource = :resource and policy.policyType = :policyType";
+		String queryString = "select p1 from AbacPolicy p1 "
+				+ "left join fetch p1.subPolicies p2 "
+				+ "left join fetch p2.subPolicies p3 "
+				+ "left join fetch p3.subPolicies p4 "
+				+ "where p1.resource = :resource and p1.policyType = :policyType";
 		
 		if (accessConditions != null && !accessConditions.isEmpty())
 		{
@@ -87,15 +91,19 @@ public class ABACDaoImpl implements ABACDao
 		return em.createQuery(queryString, AbacPolicy.class)
 				 .setParameter("resource", resource)
 				 .setParameter("policyType", policyType.toString())
-				 .getSingleResult();
+				 .getSingleResult();		
 	}
 	
 	@Override
 	public AbacPolicy getPolicyWithRestrictedFields(Resource resource, PolicyType policyType, String accessConditions)
 	{
-		String queryString = "select policy from AbacPolicy as policy "
-				+ "left join fetch policy.resource as resource left join fetch resource.resourceFields as resourceFields "
-				+ "where resource = :resource and policy.policyType = :policyType";
+		String queryString = "select p1 from AbacPolicy p1 "
+				+ "left join fetch p1.subPolicies p2 "
+				+ "left join fetch p2.subPolicies p3 "
+				+ "left join fetch p3.subPolicies p4 "
+				+ "left join fetch p1.resource resource "
+				+ "left join fetch resource.resourceFields resourceFields "
+				+ "where resource = :resource and p1.policyType = :policyType";
 		
 		if (accessConditions != null && !accessConditions.isEmpty())
 		{
@@ -109,21 +117,38 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
+	public AbacPolicy getPolicyById(String abacPolicyId, String accessConditions)
+	{
+		String queryString = "select p1 from AbacPolicy p1 "
+				+ "left join fetch p1.subPolicies p2 "
+				+ "left join fetch p2.subPolicies p3 "
+				+ "left join fetch p3.subPolicies p4 "
+				+ "where p1.abacPolicyId = :id";
+		
+		if (accessConditions != null && !accessConditions.isEmpty())
+		{
+			queryString += " and (" + accessConditions + ")";
+		}
+
+		return em.createQuery(queryString, AbacPolicy.class)
+					.setParameter("id", abacPolicyId)
+					.getSingleResult();
+	}
+	
+	@Override
 	public List<AbacPolicy> getPoliciesByRange(int elements, int page, String accessConditions)
 	{
-		String queryString = "select policy from AbacPolicy as policy";
+		String queryString = "select policy from AbacPolicy policy where policy.resource != null";
 		if (accessConditions != null && !accessConditions.isEmpty())
 		{
 			queryString += " where " + accessConditions;
 		}
 		queryString += " order by policy.policyName";
 		
-		List<AbacPolicy> policies = em.createQuery(queryString, AbacPolicy.class)
+		return em.createQuery(queryString, AbacPolicy.class)
 				 .setFirstResult(page * elements)
 				 .setMaxResults(elements)
 				 .getResultList();
-		
-		return policies;
 	}
 	
 	@Override
@@ -136,7 +161,12 @@ public class ABACDaoImpl implements ABACDao
 	@Override
 	public Resource getResourceByName(String name)
 	{
-		return em.createQuery("select resource from Resource resource left join fetch resource.policies where resource.resourceName = :name", Resource.class)
+		return em.createQuery("select resource from Resource resource "
+				+ "left join fetch resource.policies p1 "
+				+ "left join fetch p1.subPolicies p2 "
+				+ "left join fetch p2.subPolicies p3 "
+				+ "left join fetch p3.subPolicies p4 "
+				+ "where resource.resourceName = :name", Resource.class)
 				.setParameter("name", name)
 				.getSingleResult();
 	}
@@ -145,7 +175,10 @@ public class ABACDaoImpl implements ABACDao
 	public Resource getResourceByNameWithFields(String name)
 	{
 		return em.createQuery("select resource from Resource resource "
-				+ "left join fetch resource.policies "
+				+ "left join fetch resource.policies p1 "
+				+ "left join fetch p1.subPolicies p2 "
+				+ "left join fetch p2.subPolicies p3 "
+				+ "left join fetch p3.subPolicies p4 "
 				+ "left join fetch resource.resourceFields "
 				+ "where resource.resourceName = :name",
 				Resource.class).setParameter("name", name).getSingleResult();
@@ -189,6 +222,7 @@ public class ABACDaoImpl implements ABACDao
 	public void deletePolicy(String abacPolicyId)
 	{
 		AbacPolicy policy = em.find(AbacPolicy.class, abacPolicyId);
+		if (policy == null) throw new NoResultException();
 		em.remove(policy);
 	}
 	

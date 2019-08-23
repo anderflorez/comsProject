@@ -40,6 +40,11 @@ public class CdPolicy
 		this.policy = policy;
 	}
 
+	public String getCdPolicyId()
+	{
+		return cdPolicyId;
+	}
+
 	public boolean isCreatePolicy()
 	{
 		return createPolicy;
@@ -60,13 +65,30 @@ public class CdPolicy
 		this.deletePolicy = deletePolicy;
 	}
 
-	public String getAddPolicyId()
-	{
-		return cdPolicyId;
-	}
-
 	public AbacPolicy getPolicy()
 	{
 		return policy;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (createPolicy ? 1231 : 1237);
+		result = prime * result + (deletePolicy ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		CdPolicy other = (CdPolicy) obj;
+		if (createPolicy != other.createPolicy) return false;
+		if (deletePolicy != other.deletePolicy) return false;
+		return true;
 	}
 }

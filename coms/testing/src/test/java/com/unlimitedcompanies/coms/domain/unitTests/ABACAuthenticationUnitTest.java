@@ -9,8 +9,7 @@ import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.data.exceptions.IncorrectPolicy;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.LogicOperator;
@@ -90,17 +89,6 @@ public class ABACAuthenticationUnitTest
 		userResource.addPolicy("UserUpdate", PolicyType.UPDATE);
 		
 		assertEquals(2, userResource.getPolicies().size(), "Creating a multiple resource policy test failed");
-	}
-	
-	@Test
-	public void duplicateResourcePolicyNotAllowedUnitTest() throws Exception
-	{
-		Resource userResource = new Resource("UserResource");
-		
-		userResource.addPolicy("UserRead", PolicyType.READ);
-		userResource.addPolicy("UserUpdate", PolicyType.UPDATE);
-		
-		assertThrows(DuplicatedResourcePolicyException.class, () -> userResource.addPolicy("TestCreate", PolicyType.UPDATE));
 	}
 	
 	@Test
@@ -214,7 +202,7 @@ public class ABACAuthenticationUnitTest
 		
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.UPDATE, testResource);
 		
-		assertThrows(IncorrectPolicy.class, ()-> policy.addFieldConditions("TestField1", ComparisonOperator.EQUALS, "Field1Value"));
+		assertThrows(InvalidPolicyException.class, ()-> policy.addFieldConditions("TestField1", ComparisonOperator.EQUALS, "Field1Value"));
 		
 	}
 	
@@ -229,7 +217,7 @@ public class ABACAuthenticationUnitTest
 		
 		AbacPolicy policy = new AbacPolicy("TestPolicy", PolicyType.READ, testResource);
 		
-		assertThrows(IncorrectPolicy.class, ()-> policy.addFieldConditions("TestField2", ComparisonOperator.EQUALS, "Field1Value"));
+		assertThrows(InvalidPolicyException.class, ()-> policy.addFieldConditions("TestField2", ComparisonOperator.EQUALS, "Field1Value"));
 		
 	}
 	

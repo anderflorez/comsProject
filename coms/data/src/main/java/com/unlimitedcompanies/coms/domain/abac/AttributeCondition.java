@@ -209,4 +209,36 @@ public class AttributeCondition
 		}
 	}
 
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((comparison == null) ? 0 : comparison.hashCode());
+		result = prime * result + ((resourceAttribute == null) ? 0 : resourceAttribute.hashCode());
+		result = prime * result + ((userAttribute == null) ? 0 : userAttribute.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		AttributeCondition other = (AttributeCondition) obj;
+		if (comparison != other.comparison) return false;
+		if (resourceAttribute == null)
+		{
+			if (other.resourceAttribute != null) return false;
+		}
+		else if (!resourceAttribute.equals(other.resourceAttribute)) return false;
+		if (userAttribute == null)
+		{
+			if (other.userAttribute != null) return false;
+		}
+		else if (!userAttribute.equals(other.userAttribute)) return false;
+		return true;
+	}
+
 }

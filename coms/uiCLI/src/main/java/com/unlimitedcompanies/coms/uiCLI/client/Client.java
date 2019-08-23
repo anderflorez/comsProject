@@ -3,13 +3,12 @@ package com.unlimitedcompanies.coms.uiCLI.client;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
 public class Client
 {
-	public static void main(String[] args) throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
+	public static void main(String[] args) throws InvalidPolicyException
 	{
 		AnnotationConfigApplicationContext container = new AnnotationConfigApplicationContext();
 		container.getEnvironment().setActiveProfiles("production");

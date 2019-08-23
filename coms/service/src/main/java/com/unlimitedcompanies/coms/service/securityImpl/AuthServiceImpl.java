@@ -28,7 +28,7 @@ import com.unlimitedcompanies.coms.service.exceptions.LastAdminRemovalException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
-import com.unlimitedcompanies.coms.service.security.ABACService;
+import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService
 	private AuthDao authDao;
 	
 	@Autowired
-	private ABACService abacService;
+	private AbacService abacService;
 	
 	@Autowired
 	private SystemService systemService;

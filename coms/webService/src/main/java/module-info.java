@@ -1,4 +1,4 @@
-module webService
+open module webService
 {
 	requires transitive data;
 	requires transitive service;
@@ -8,6 +8,7 @@ module webService
 	requires spring.context;
 	requires spring.web;
 	requires spring.webmvc;
+	requires spring.jdbc;
 	requires spring.security.core;
 	requires spring.security.web;
 	requires spring.security.config;
@@ -17,6 +18,8 @@ module webService
 	
 	requires java.xml.bind;
 	requires javax.servlet.api;
+	requires com.fasterxml.jackson.databind;
+	requires com.fasterxml.jackson.core;
 
 	exports com.unlimitedcompanies.coms.ws.reps;
 }

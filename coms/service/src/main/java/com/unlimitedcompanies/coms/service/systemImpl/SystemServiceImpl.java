@@ -13,8 +13,7 @@ import com.unlimitedcompanies.coms.dao.security.ABACDao;
 import com.unlimitedcompanies.coms.dao.security.AuthDao;
 import com.unlimitedcompanies.coms.dao.security.ContactDao;
 import com.unlimitedcompanies.coms.dao.system.SystemDao;
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
@@ -52,7 +51,7 @@ public class SystemServiceImpl implements SystemService
 	 */
 	
 	@Override
-	public void initialSetup() throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
+	public void initialSetup() throws InvalidPolicyException
 	{
 		// TODO: Check and make sure there are no risks by performing this operation
 		// Get the number of records for several important resources
@@ -126,6 +125,28 @@ public class SystemServiceImpl implements SystemService
 			
 			this.clearEntityManager();
 		}
+		
+//		Resource projectResource = abacDao.getResourceByNameWithFields("Project");
+//		
+//		AbacPolicy abacUpdatePolicy = new AbacPolicy("ProjectRead", PolicyType.READ, projectResource);
+//		abacUpdatePolicy.setCdPolicy(true, true);
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Managers");
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "RootGroup");
+//		abacUpdatePolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
+//		abacUpdatePolicy.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.NOT_EQUALS, UserAttribute.USERNAME);
+//		abacUpdatePolicy.addFieldConditions("jobNumber", ComparisonOperator.EQUALS, "36549651");
+//		abacUpdatePolicy.addFieldConditions("projectName", ComparisonOperator.EQUALS, "Sample Project");
+//		abacUpdatePolicy.addSubPolicy();
+//		abacUpdatePolicy.addSubPolicy();
+//		AbacPolicy subpolicy = abacUpdatePolicy.addSubPolicy(LogicOperator.OR);
+//		subpolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+//		subpolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Managers");
+//		subpolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
+//		subpolicy.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.NOT_EQUALS, UserAttribute.USERNAME);
+//		subpolicy.addFieldConditions("jobNumber", ComparisonOperator.EQUALS, "36549651");
+//		subpolicy.addFieldConditions("projectName", ComparisonOperator.EQUALS, "Sample Project");
+//		abacDao.savePolicy(abacUpdatePolicy);
 	}
 	
 	@Override

@@ -15,9 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.data.exceptions.IncorrectPolicy;
-import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 import com.unlimitedcompanies.coms.domain.security.User;
 
 @Entity
@@ -44,7 +42,7 @@ public class AbacPolicy
 	@JoinColumn(name="resourceId_FK")
 	private Resource resource;
 	
-	@OneToMany(mappedBy = "parentPolicy", fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+	@OneToMany(mappedBy = "parentPolicy", cascade = {CascadeType.ALL})
 	private Set<AbacPolicy> subPolicies;
 	
 	@ManyToOne//(cascade = CascadeType.PERSIST)
@@ -73,13 +71,17 @@ public class AbacPolicy
 	}
 	
 	public AbacPolicy(String name, PolicyType policyType, Resource resource) 
-			throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException 
+			throws InvalidPolicyException 
 	{
 		this.abacPolicyId = UUID.randomUUID().toString();
 		this.policyName = name;
 		if (policyType != null)
 		{
-			this.policyType = policyType.toString();			
+			this.policyType = policyType.toString();
+		}
+		else
+		{
+			throw new InvalidPolicyException("No policy type was provided for the resource main policy");
 		}
 		if (policyType == PolicyType.UPDATE)
 		{
@@ -90,28 +92,30 @@ public class AbacPolicy
 		this.resource = resource;
 		if (this.resource == null)
 		{
-			throw new NoParentPolicyOrResourceException();
+			throw new InvalidPolicyException("No related resource found in main resource policy");
 		}
 		else 
 		{
 			resource.addPolicy(this);
 		}
+		this.parentPolicy = null;
 		this.subPolicies = new HashSet<>();
 		this.entityConditions = new HashSet<>();
 		this.attributeConditions = new HashSet<>();
 		this.fieldConditions = new HashSet<>();
 	}
 	
-	private AbacPolicy(PolicyType policyType, AbacPolicy parentPolicy) 
-			throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException 
+	private AbacPolicy(AbacPolicy parentPolicy) throws InvalidPolicyException
 	{
+		if (parentPolicy == null)
+		{
+			throw new InvalidPolicyException("No parent policy found in sub-policy");
+		}
 		this.abacPolicyId = UUID.randomUUID().toString();
 		this.policyName = null;
-		if (policyType != null)
-		{
-			this.policyType = policyType.toString();			
-		}
-		if (policyType == PolicyType.UPDATE)
+		this.policyType = parentPolicy.policyType;
+		parentPolicy.getSubPolicies().add(this);
+		if (PolicyType.valueOf(this.policyType) == PolicyType.UPDATE)
 		{
 			CdPolicy cdPolicy = new CdPolicy(false, false, this);
 			this.cdPolicy = cdPolicy;
@@ -119,10 +123,6 @@ public class AbacPolicy
 		this.logicOperator = "AND";
 		this.resource = null;
 		this.parentPolicy = parentPolicy;
-		if (this.parentPolicy == null)
-		{
-			throw new NoParentPolicyOrResourceException();
-		}
 		this.subPolicies = new HashSet<>();
 		this.entityConditions = new HashSet<>();
 		this.attributeConditions = new HashSet<>();
@@ -181,6 +181,11 @@ public class AbacPolicy
 
 	public Resource getResource()
 	{
+		return resource;
+	}
+	
+	public Resource getRootResource()
+	{
 		if (this.resource != null)
 		{
 			return resource;			
@@ -195,10 +200,10 @@ public class AbacPolicy
 			{
 				return null;
 			}
-		}
+		}		
 	}
 
-	public void setResource(Resource resource) throws DuplicatedResourcePolicyException
+	public void setResource(Resource resource) throws InvalidPolicyException
 	{
 		this.resource = resource;
 		if (!resource.getPolicies().contains(this))
@@ -212,37 +217,19 @@ public class AbacPolicy
 		return subPolicies;
 	}
 	
-	public AbacPolicy addSubPolicy() throws NoParentPolicyOrResourceException
+	public AbacPolicy addSubPolicy() throws InvalidPolicyException
 	{
-		AbacPolicy subPolicy = null;
-		try
-		{
-			subPolicy = new AbacPolicy(this.getPolicyType(), this);
-			this.subPolicies.add(subPolicy);
-			subPolicy.setParentPolicy(this);
-		}
-		catch (DuplicatedResourcePolicyException e)
-		{
-			e.printStackTrace();
-		}
-		return subPolicy;
+		AbacPolicy subPolicy = new AbacPolicy(this);
+		this.subPolicies.add(subPolicy);
 		
+		return subPolicy;
 	}
 	
-	public AbacPolicy addSubPolicy(LogicOperator logicOperator) throws NoParentPolicyOrResourceException
+	public AbacPolicy addSubPolicy(LogicOperator logicOperator) throws InvalidPolicyException
 	{
-		AbacPolicy subPolicy = null;
-		try
-		{
-			subPolicy = new AbacPolicy(this.getPolicyType(), this);
-			subPolicy.setLogicOperator(logicOperator);
-			this.subPolicies.add(subPolicy);
-//			subPolicy.setParentPolicy(this);
-		}
-		catch (DuplicatedResourcePolicyException e)
-		{
-			e.printStackTrace();
-		}
+		AbacPolicy subPolicy = new AbacPolicy(this);
+		subPolicy.setLogicOperator(logicOperator);
+
 		return subPolicy;
 	}
 	
@@ -289,11 +276,11 @@ public class AbacPolicy
 		return fieldConditions;
 	}
 	
-	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value) throws IncorrectPolicy
+	public void addFieldConditions(String fieldName, ComparisonOperator comparison, String value) throws InvalidPolicyException
 	{
 		if (this.getPolicyType() == PolicyType.READ)
 		{
-			Set<ResourceField> resourceFields = this.getResource().getResourceFields();
+			Set<ResourceField> resourceFields = this.getRootResource().getResourceFields();
 			for (ResourceField next : resourceFields)
 			{
 				if (!next.getAssociation() && next.getResourceFieldName().equals(fieldName))
@@ -303,11 +290,11 @@ public class AbacPolicy
 					return;
 				}
 			}
-			throw new IncorrectPolicy("The indicated field does not belong to the referenced resource");		
+			throw new InvalidPolicyException("The indicated field does not belong to the referenced resource");		
 		}
 		else
 		{
-			throw new IncorrectPolicy("Field Conditions only apply to read policies");
+			throw new InvalidPolicyException("Field Conditions only apply to read policies");
 		}
 		
 	}
@@ -562,14 +549,20 @@ public class AbacPolicy
 		}
 	}
 
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((abacPolicyId == null) ? 0 : abacPolicyId.hashCode());
-		return result;
-	}
+//	@Override
+//	public int hashCode()
+//	{
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + ((attributeConditions == null) ? 0 : attributeConditions.hashCode());
+//		result = prime * result + ((cdPolicy == null) ? 0 : cdPolicy.hashCode());
+//		result = prime * result + ((entityConditions == null) ? 0 : entityConditions.hashCode());
+//		result = prime * result + ((fieldConditions == null) ? 0 : fieldConditions.hashCode());
+//		result = prime * result + ((logicOperator == null) ? 0 : logicOperator.hashCode());
+//		result = prime * result + ((resource == null) ? 0 : resource.hashCode());
+//		result = prime * result + ((subPolicies == null) ? 0 : subPolicies.hashCode());
+//		return result;
+//	}
 
 	@Override
 	public boolean equals(Object obj)
@@ -578,143 +571,43 @@ public class AbacPolicy
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		AbacPolicy other = (AbacPolicy) obj;
-		if (abacPolicyId == null)
+		if (attributeConditions == null)
 		{
-			if (other.abacPolicyId != null) return false;
+			if (other.attributeConditions != null) return false;
 		}
-		else if (!abacPolicyId.equals(other.abacPolicyId)) return false;
+		else if (!attributeConditions.equals(other.attributeConditions)) return false;
+		if (cdPolicy == null)
+		{
+			if (other.cdPolicy != null) return false;
+		}
+		else if (!cdPolicy.equals(other.cdPolicy)) return false;
+		if (entityConditions == null)
+		{
+			if (other.entityConditions != null) return false;
+		}
+		else if (!entityConditions.equals(other.entityConditions)) return false;
+		if (fieldConditions == null)
+		{
+			if (other.fieldConditions != null) return false;
+		}
+		else if (!fieldConditions.equals(other.fieldConditions)) return false;
+		if (logicOperator == null)
+		{
+			if (other.logicOperator != null) return false;
+		}
+		else if (!logicOperator.equals(other.logicOperator)) return false;
+		if (resource == null)
+		{
+			if (other.resource != null) return false;
+		}
+		else if (!resource.equals(other.resource)) return false;
+		if (subPolicies == null)
+		{
+			if (other.subPolicies != null) return false;
+		}
+		else if (!subPolicies.equals(other.subPolicies)) return false;
 		return true;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-//	public ResourceReadPolicy getReadPolicy(String resourceAlias, String projectAlias, User user)
-//	{	
-//		
-//		if (this.getLogicOperator() == LogicOperator.AND)
-//		{
-//			String conditions = null;
-//			for (ConditionGroup group : this.getConditionGroups())
-//			{
-//				ResourceReadPolicy groupReadPolicy = group.getReadAccessPolicy(resourceAlias, projectAlias, user);
-//				if (groupReadPolicy.isReadGranted())
-//				{
-//					if (
-//							(conditions == null || conditions.isEmpty()) && 
-//							(groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
-//						)
-//					{
-//						conditions = groupReadPolicy.getReadConditions();
-//					}
-//					else if (groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
-//					{
-//						conditions += " " + this.getLogicOperator() + " " + groupReadPolicy.getReadConditions();
-//					}
-//				}
-//				else
-//				{
-//					ResourceReadPolicy readPolicy = new ResourceReadPolicy();
-//					readPolicy.setReadGranted(false);
-//					return readPolicy;
-//				}
-//			}
-//			
-//			ResourceReadPolicy readPolicy = new ResourceReadPolicy();
-//			readPolicy.setReadGranted(true);
-//			readPolicy.setReadConditions(conditions);
-//			return readPolicy;
-//			
-//		}
-//		else // If Logic Operator is OR
-//		{
-//			ResourceReadPolicy readPolicy = new ResourceReadPolicy();
-//			readPolicy.setReadGranted(false);
-//			
-//			for (ConditionGroup group : this.getConditionGroups())
-//			{
-//				ResourceReadPolicy groupReadPolicy = group.getReadAccessPolicy(resourceAlias, projectAlias, user);
-//				if (groupReadPolicy.isReadGranted())
-//				{
-//					readPolicy.setReadGranted(true);
-//					String conditions = readPolicy.getReadConditions();
-//					if (
-//							(conditions == null || conditions.isEmpty()) && 
-//							(groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
-//						)
-//					{
-//						conditions = groupReadPolicy.getReadConditions();
-//					}
-//					else if (groupReadPolicy.getReadConditions() != null && !groupReadPolicy.getReadConditions().isEmpty())
-//					{
-//						conditions += " " + this.getLogicOperator() + " " + groupReadPolicy.getReadConditions();
-//					}
-//					readPolicy.setReadConditions(conditions);
-//				}
-//				
-//			}
-//			
-//			return readPolicy;
-//		}		
-//		
-//	}
-//	
-//	public boolean getModifyPolicy(ResourceAttribs resourceAttribs, UserAttribs userAttribs, User user)
-//	{
-//		if (this.getLogicOperator() == LogicOperator.AND)
-//		{
-//			for (ConditionGroup subGroup : this.getConditionGroups())
-//			{
-//				if (!subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
-//				{
-//					return false;
-//				}
-//			}
-//			
-//			return true;
-//			
-//		}
-//		else  // if logicOperator is OR 
-//		{
-//			for (ConditionGroup subGroup : this.getConditionGroups())
-//			{
-//				if (subGroup.getModifyAccessPolicy(resourceAttribs, userAttribs, user))
-//				{
-//					return true;
-//				}
-//			}
-//			
-//			return false;
-//		}
-//	}
-
-	
-	
 }
+

@@ -3,12 +3,14 @@ package com.unlimitedcompanies.coms.service.securityImpl;
 import java.util.List;
 
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unlimitedcompanies.coms.dao.security.ABACDao;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 import com.unlimitedcompanies.coms.domain.abac.PolicyType;
 import com.unlimitedcompanies.coms.domain.abac.Resource;
@@ -18,13 +20,14 @@ import com.unlimitedcompanies.coms.domain.abac.UserAttribs;
 import com.unlimitedcompanies.coms.domain.security.Role;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
+import com.unlimitedcompanies.coms.service.exceptions.RecordNotCreatedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
-import com.unlimitedcompanies.coms.service.security.ABACService;
+import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @Service
-@Transactional
-public class ABACServiceImpl implements ABACService
+@Transactional(rollbackFor = Exception.class)
+public class ABACServiceImpl implements AbacService
 {
 	
 	@Autowired
@@ -34,7 +37,7 @@ public class ABACServiceImpl implements ABACService
 	private SystemService systemService;
 	
 	@Override
-	public void savePolicy(AbacPolicy policy, String signedUsername) throws NoResourceAccessException
+	public void savePolicy(AbacPolicy policy, String signedUsername) throws NoResourceAccessException, InvalidPolicyException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
@@ -45,8 +48,26 @@ public class ABACServiceImpl implements ABACService
 		AbacPolicy abacPolicy = systemService.searchPolicy(policyResource, PolicyType.UPDATE);
 		if (abacPolicy.getModifyPolicy(null, userAttribs, signedUser) && abacPolicy.getCdPolicy().isCreatePolicy())
 		{
-			abacDao.savePolicy(policy);
-			systemService.clearEntityManager();
+			try
+			{
+				abacDao.savePolicy(policy);
+				systemService.clearEntityManager();
+			}
+			catch (PersistenceException e)
+			{
+				if (e.getCause() != null && e.getCause().getCause() != null)
+				{
+					String message = e.getCause().getCause().getMessage();
+					if (message.contains("for key 'Resource_PolicyType'"))
+					{
+						throw new InvalidPolicyException("The referenced resouce already contains a policy of the same type");
+					}
+					else if (message.contains("for key 'policyName_UNIQUE'"))
+					{
+						throw new InvalidPolicyException("The policy already exists");
+					}
+				}
+			}
 		}
 		else
 		{
@@ -208,6 +229,37 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
+	public AbacPolicy searchPolicyById(String abacPolicyId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
+	{
+		// Check if user has access to read policies
+		User user = systemService.searchFullUserByUsername(signedUsername);
+		Resource abacPolicyResource = this.searchResourceByName("AbacPolicy");
+		AbacPolicy policy = systemService.searchPolicy(abacPolicyResource, PolicyType.READ);
+		
+		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, user);
+		
+		// If user has access then read the requested policy and return it
+		if (resourceReadPolicy.isReadGranted())
+		{
+			AbacPolicy requestedPolicy;
+			try
+			{
+				requestedPolicy = abacDao.getPolicyById(abacPolicyId, resourceReadPolicy.getReadConditions());		
+				systemService.clearEntityManager();
+				return requestedPolicy;
+			}
+			catch (NoResultException e)
+			{
+				throw new NoResourceAccessException();
+			}
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
+	}
+	
+	@Override
 	public List<AbacPolicy> searchPoliciesByRange(int elements, int page, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		// Check if user has access to read policies
@@ -230,35 +282,9 @@ public class ABACServiceImpl implements ABACService
 		}
 	}
 
-//	@Override
-//	public AbacPolicy searchModifiablePolicy(Resource requestedResource, PolicyType policyType, String signedUsername) 
-//			throws NoResourceAccessException, RecordNotFoundException
-//	{
-//		// Check if user has access to read policies
-//		User signedUser = systemService.searchFullUserByUsername(signedUsername);
-//		
-//		Resource abacPolicyResource = this.searchResourceByName("AbacPolicy");
-//		
-//		AbacPolicy policy = systemService.searchPolicy(abacPolicyResource, PolicyType.READ);
-//		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, signedUser);
-//
-//		UserAttribs userAttribs = new UserAttribs(signedUsername);
-//		AbacPolicy abacPolicy = systemService.searchPolicy(abacPolicyResource, PolicyType.UPDATE);
-//		
-//		// If user has access then read and update the requested policy and return it
-//		if (resourceReadPolicy.isReadGranted() && abacPolicy.getModifyPolicy(null, userAttribs, signedUser))
-//		{
-//			AbacPolicy requestedPolicy = abacDao.getPolicy(requestedResource, policyType, resourceReadPolicy.getReadConditions());
-//			return requestedPolicy;
-//		}
-//		else
-//		{
-//			throw new NoResourceAccessException();
-//		}
-//	}
-
 	@Override
-	public void updatePolicy(AbacPolicy policy, String signedUsername) throws NoResourceAccessException
+	public void updatePolicy(String existingPolicyId, AbacPolicy updatedPolicy, String signedUsername) 
+			throws NoResourceAccessException, InvalidPolicyException, RecordNotCreatedException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
@@ -269,10 +295,40 @@ public class ABACServiceImpl implements ABACService
 		AbacPolicy abacPolicy = systemService.searchPolicy(policyResource, PolicyType.UPDATE);
 		if (abacPolicy.getModifyPolicy(null, userAttribs, signedUser) && abacPolicy.getCdPolicy().isCreatePolicy())
 		{
-			// TODO: implement this method by removing the existing policy and then saving the new one
-			abacDao.deletePolicy(policy.getAbacPolicyId());
-			abacDao.savePolicy(policy);			
-			systemService.clearEntityManager();
+			try
+			{
+				AbacPolicy existingPolicy = abacDao.getPolicyById(existingPolicyId, null);
+								
+				abacDao.deletePolicy(existingPolicyId);
+				systemService.clearEntityManager();
+				
+				System.out.println("Verifying the backup existing policy: " + existingPolicy.getPolicyName());
+				
+				try
+				{
+					abacDao.savePolicy(updatedPolicy);
+				}
+				catch (Exception e1)
+				{
+					abacDao.savePolicy(existingPolicy);
+					throw new RecordNotCreatedException();
+				}
+				finally
+				{
+					systemService.clearEntityManager();
+				}
+			}
+			catch (PersistenceException e)
+			{
+				if (e.getCause() != null && e.getCause().getCause() != null)
+				{
+					String message = e.getCause().getCause().getMessage();
+					if (message.contains("for key 'Resource_PolicyType'"))
+					{
+						throw new InvalidPolicyException("The referenced resouce already contains a policy of the same type");
+					}
+				}
+			}
 		}
 		else
 		{
@@ -281,7 +337,7 @@ public class ABACServiceImpl implements ABACService
 	}
 	
 	@Override
-	public void deletePolicy(AbacPolicy policy, String signedUsername) throws NoResourceAccessException
+	public void deletePolicy(String policyId, String signedUsername) throws NoResourceAccessException, RecordNotFoundException
 	{
 		User signedUser = systemService.searchFullUserByUsername(signedUsername);
 
@@ -292,7 +348,14 @@ public class ABACServiceImpl implements ABACService
 		AbacPolicy abacPolicy = systemService.searchPolicy(policyResource, PolicyType.UPDATE);
 		if (abacPolicy.getModifyPolicy(null, userAttribs, signedUser) && abacPolicy.getCdPolicy().isDeletePolicy())
 		{
-			abacDao.deletePolicy(policy.getAbacPolicyId());
+			try
+			{
+				abacDao.deletePolicy(policyId);
+			}
+			catch (NoResultException e)
+			{
+				throw new RecordNotFoundException("The referenced policy could not be found");
+			}
 		}
 		else
 		{

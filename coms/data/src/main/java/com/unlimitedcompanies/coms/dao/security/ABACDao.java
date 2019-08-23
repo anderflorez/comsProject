@@ -20,6 +20,7 @@ public interface ABACDao
 	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions);
 	public AbacPolicy getPolicyWithRestrictedFields(Resource requestedResource, PolicyType policyType,
 													String readConditions);
+	public AbacPolicy getPolicyById(String abacPolicyId, String accessConditions);
 	public List<AbacPolicy> getPoliciesByRange(int elements, int page, String accessConditions);
 	public List<String> getAllResourceNames();
 	public Resource getResourceByName(String name);

@@ -34,7 +34,7 @@ import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException
 import com.unlimitedcompanies.coms.service.exceptions.LastAdminRemovalException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
-import com.unlimitedcompanies.coms.service.security.ABACService;
+import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
@@ -55,7 +55,7 @@ public class SecurityServiceIntegrationTest
 	SystemService systemService;
 
 	@Autowired
-	ABACService abacService;
+	AbacService abacService;
 
 	@Test
 	public void saveSimpleContactTest() throws Exception
@@ -94,7 +94,7 @@ public class SecurityServiceIntegrationTest
 		AbacPolicy contactReadPolicy = abacService.searchPolicy(contactResource, PolicyType.READ, "administrator");
 		contactReadPolicy.setLogicOperator(LogicOperator.OR);
 		contactReadPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "manager");
-		abacService.updatePolicy(contactReadPolicy, "administrator");
+		abacService.updatePolicy(contactReadPolicy.getAbacPolicyId(), contactReadPolicy, "administrator");
 
 		ResourceField resourceField = contactResource.getResourceFieldByName("email");
 		Role role = authService.searchRoleByNameWithRestrictedFields("Administrators", "administrator");
@@ -432,7 +432,7 @@ public class SecurityServiceIntegrationTest
 		AbacPolicy contactReadPolicy = abacService.searchPolicy(contactResource, PolicyType.READ, "administrator");		
 		contactReadPolicy.setLogicOperator(LogicOperator.OR);
 		contactReadPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "manager");
-		abacService.updatePolicy(contactReadPolicy, "administrator");
+		abacService.updatePolicy(contactReadPolicy.getAbacPolicyId(), contactReadPolicy, "administrator");
 		
 		// Edit the contact
 		contact.setFirstName("Jane");
@@ -618,7 +618,7 @@ public class SecurityServiceIntegrationTest
 		AbacPolicy contactReadPolicy = abacService.searchPolicy(contactResource, PolicyType.READ, "administrator");
 		contactReadPolicy.setLogicOperator(LogicOperator.OR);
 		contactReadPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "manager");
-		abacService.updatePolicy(contactReadPolicy, "administrator");
+		abacService.updatePolicy(contactReadPolicy.getAbacPolicyId(), contactReadPolicy, "administrator");
 
 		// Edit the contact
 		contact.setFirstName("Jane");
@@ -818,7 +818,7 @@ public class SecurityServiceIntegrationTest
 		AbacPolicy contactReadPolicy = abacService.searchPolicy(contactResource, PolicyType.READ, "administrator");
 		contactReadPolicy.setLogicOperator(LogicOperator.OR);
 		contactReadPolicy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "manager");
-		abacService.updatePolicy(contactReadPolicy, "administrator");
+		abacService.updatePolicy(contactReadPolicy.getAbacPolicyId(), contactReadPolicy, "administrator");
 
 		// Add field restrictions for administrator user
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");

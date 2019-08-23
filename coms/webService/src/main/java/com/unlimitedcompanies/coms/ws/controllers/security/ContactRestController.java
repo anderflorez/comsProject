@@ -142,7 +142,7 @@ public class ContactRestController
 //	}
 //	
 	@ExceptionHandler(RecordNotFoundException.class)
-	public ResponseEntity<ErrorRep> contactNotFoundExceptionHandler(RecordNotFoundException e) 
+	public ResponseEntity<ErrorRep> recordNotFoundExceptionHandler(RecordNotFoundException e) 
 	{
 		ErrorRep errorResponse = new ErrorRep();
 		errorResponse.setStatusCode(HttpStatus.NOT_FOUND.value());

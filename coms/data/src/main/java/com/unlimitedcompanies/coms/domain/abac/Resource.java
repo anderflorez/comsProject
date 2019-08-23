@@ -12,8 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.unlimitedcompanies.coms.data.exceptions.DuplicatedResourcePolicyException;
-import com.unlimitedcompanies.coms.data.exceptions.NoParentPolicyOrResourceException;
+import com.unlimitedcompanies.coms.data.exceptions.InvalidPolicyException;
 
 @Entity
 @Table(name = "resources")
@@ -94,39 +93,20 @@ public class Resource
 		this.policies = policies;
 	}
 	
-	public void addPolicy(AbacPolicy policy) throws DuplicatedResourcePolicyException
+	public void addPolicy(AbacPolicy policy) throws InvalidPolicyException
 	{
-		if (!this.verifyExistingPolicy(policy))
+		this.policies.add(policy);
+		if (policy.getResource() != this)
 		{
-			this.policies.add(policy);
-			if (policy.getResource() != this)
-			{
-				policy.setResource(this);
-			}
-		}
-		else
-		{
-			throw new DuplicatedResourcePolicyException();
+			policy.setResource(this);
 		}
 	}
 	
-	public void addPolicy(String policyName, PolicyType policyType) throws DuplicatedResourcePolicyException, NoParentPolicyOrResourceException
+	public void addPolicy(String policyName, PolicyType policyType) throws InvalidPolicyException
 	{
 		new AbacPolicy(policyName, policyType, this);
 	}
 	
-	private boolean verifyExistingPolicy(AbacPolicy policy)
-	{
-		for (AbacPolicy next : this.policies)
-		{
-			if (next.getPolicyType() == policy.getPolicyType())
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	@Override
 	public int hashCode()
 	{

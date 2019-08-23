@@ -12,6 +12,12 @@
 		</Console>
 	</Appenders>
 	<Loggers>
+		<Logger level="ERROR" name="org.codehaus.jackson" additivity="false">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
+		<Logger level="ERROR" name="com.fasterxml.jackson" additivity="false">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
 		<Logger level="ERROR" name="org.hibernate" additivity="false">
 			<AppenderRef ref="STDOUT" />
 		</Logger>

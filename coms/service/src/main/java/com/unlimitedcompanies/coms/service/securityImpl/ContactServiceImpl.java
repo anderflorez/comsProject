@@ -24,7 +24,7 @@ import com.unlimitedcompanies.coms.service.exceptions.DuplicateRecordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
-import com.unlimitedcompanies.coms.service.security.ABACService;
+import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
@@ -39,7 +39,7 @@ public class ContactServiceImpl implements ContactService
 	private SystemService systemService;
 	
 	@Autowired
-	private ABACService abacService;
+	private AbacService abacService;
 
 	@Override
 	public void saveContact(Contact contact, String signedUsername) 

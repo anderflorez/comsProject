@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unlimitedcompanies.coms.ws.config.RestLinks;
+import com.unlimitedcompanies.coms.ws.controllers.abac.PolicyRestController;
 import com.unlimitedcompanies.coms.ws.reps.ResourceLink;
 import com.unlimitedcompanies.coms.ws.reps.ResourceLinkCollection;
 
@@ -24,7 +25,7 @@ public class LinkDirectoryController
 		List<Link> links = new ArrayList<>();
 		try
 		{
-			links.add(new Link("http://localhost/comsws/rest/").withRel("base_rest"));
+			links.add(new Link(RestLinks.URI_BASE).withRel("base_rest"));
 //			links.add(linkTo(methodOn(ContactRestController.class).saveNewContact(null)).withRel("base_contact"));
 //			links.add(linkTo(methodOn(UserRestController.class).saveNewUser(null)).withRel("base_user"));
 //			links.add(linkTo(methodOn(RoleRestController.class).saveNewRole(null)).withRel("base_role"));
