@@ -54,6 +54,7 @@ public class PolicyDTO extends ResourceSupport
 		
 		this.policyName = policy.getPolicyName();
 		this.policyType = policy.getPolicyType().toString();
+		this.policyType = this.policyType.substring(0, 1).toUpperCase() + this.policyType.substring(1).toLowerCase();
 		this.logicOperator = policy.getLogicOperator().toString();
 		
 		if (policy.getCdPolicy() != null)
@@ -122,6 +123,7 @@ public class PolicyDTO extends ResourceSupport
 	public void setPolicyType(String policyType)
 	{
 		this.policyType = policyType;
+		this.policyType = this.policyType.substring(0, 1).toUpperCase() + this.policyType.substring(1).toLowerCase();
 	}
 
 	public String getLogicOperator()

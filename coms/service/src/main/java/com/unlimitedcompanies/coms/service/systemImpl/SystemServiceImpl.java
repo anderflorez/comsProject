@@ -49,17 +49,21 @@ public class SystemServiceImpl implements SystemService
 	/*
 	 * Initial setup of resources for the security system
 	 */
-	
 	@Override
 	public void initialSetup() throws InvalidPolicyException
 	{
-		// TODO: Check and make sure there are no risks by performing this operation
-		// Get the number of records for several important resources
-		// This code will run only for initial setup; it will run if and only if the app has never been used before		
+		/** TODO: Check and make sure there are no risks by performing this operation
+		* Get the number of records for several important resources
+		* This code will run only for initial setup; it will run if and only if the app has never been used before		
+		*/
 		
-		// This method will create an initial administrator contact, user and role
-		// and then it will check all the entities and their fields available and save the lists in the db
-		// with that information it will create the permissions for the administrator role
+		/** This method will check all the entities with their fields available and it will 
+		 * register them in the database. Having that information, it will create policies to allow
+		 * the role "Administrators" CRUD access to policies, contacts, users, and roles.
+		 * After that setting is done, it will create the actual "Administrators" role as well as a contact
+		 * and user with the names of "Administrator" and "administrator" respectively assigning it to 
+		 * the "Administrators" role.
+		 */
 		
 		int contacts = contactDao.getNumberOfContacts();
 		int users = authDao.getNumberOfUsers();
@@ -77,38 +81,38 @@ public class SystemServiceImpl implements SystemService
 			
 			AbacPolicy abacUpdatePolicy = new AbacPolicy("PolicyUpdate", PolicyType.UPDATE, policyResource);
 			abacUpdatePolicy.setCdPolicy(true, true);
-			abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacUpdatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(abacUpdatePolicy);
 			
 			AbacPolicy abacPolicy = new AbacPolicy("PolicyRead", PolicyType.READ, policyResource);
-			abacPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			abacPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(abacPolicy);
 			
 			AbacPolicy contactUpdatePolicy = new AbacPolicy("ContactUpdate", PolicyType.UPDATE, contactResource);
 			contactUpdatePolicy.setCdPolicy(true, true);
-			contactUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			contactUpdatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(contactUpdatePolicy);
 			
 			AbacPolicy contactReadPolicy = new AbacPolicy("ContactRead", PolicyType.READ, contactResource);
-			contactReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			contactReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(contactReadPolicy);
 			
 			AbacPolicy userCreatePolicy = new AbacPolicy("UserUpdate", PolicyType.UPDATE, userResource);
 			userCreatePolicy.setCdPolicy(true, true);
-			userCreatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			userCreatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(userCreatePolicy);
 			
 			AbacPolicy userReadPolicy = new AbacPolicy("UserRead", PolicyType.READ, userResource);
-			userReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			userReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(userReadPolicy);
 			
 			AbacPolicy roleUpdate = new AbacPolicy("RoleUpdate", PolicyType.UPDATE, roleResource);
 			roleUpdate.setCdPolicy(true, true);
-			roleUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			roleUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(roleUpdate);
 			
 			AbacPolicy roleRead = new AbacPolicy("RoleRead", PolicyType.READ, roleResource);
-			roleRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+			roleRead.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 			abacDao.savePolicy(roleRead);
 			
 			authDao.createRole(new Role("Administrators"));
@@ -130,9 +134,9 @@ public class SystemServiceImpl implements SystemService
 //		
 //		AbacPolicy abacUpdatePolicy = new AbacPolicy("ProjectRead", PolicyType.READ, projectResource);
 //		abacUpdatePolicy.setCdPolicy(true, true);
-//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Managers");
-//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "RootGroup");
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Managers");
+//		abacUpdatePolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "RootGroup");
 //		abacUpdatePolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 //		abacUpdatePolicy.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.NOT_EQUALS, UserAttribute.USERNAME);
 //		abacUpdatePolicy.addFieldConditions("jobNumber", ComparisonOperator.EQUALS, "36549651");
@@ -140,8 +144,8 @@ public class SystemServiceImpl implements SystemService
 //		abacUpdatePolicy.addSubPolicy();
 //		abacUpdatePolicy.addSubPolicy();
 //		AbacPolicy subpolicy = abacUpdatePolicy.addSubPolicy(LogicOperator.OR);
-//		subpolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-//		subpolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Managers");
+//		subpolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
+//		subpolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Managers");
 //		subpolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 //		subpolicy.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.NOT_EQUALS, UserAttribute.USERNAME);
 //		subpolicy.addFieldConditions("jobNumber", ComparisonOperator.EQUALS, "36549651");
@@ -154,6 +158,12 @@ public class SystemServiceImpl implements SystemService
 	{
 		abacDao.checkResourceList();
 		abacDao.checkResourceFieldList();
+	}
+	
+	@Override
+	public List<Resource> searchAllResources()
+	{
+		return abacDao.getAllResources();
 	}
 
 	@Override

@@ -78,11 +78,11 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		AbacPolicy restrictionFieldRead = new AbacPolicy("RestrictedRead", PolicyType.READ, restrictedFieldResource);
-		restrictionFieldRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldRead.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldRead, "administrator");
 
 		Contact managerContact = new Contact("Manager", null, null);
@@ -166,11 +166,11 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		AbacPolicy restrictionFieldRead = new AbacPolicy("RestrictedRead", PolicyType.READ, restrictedFieldResource);
-		restrictionFieldRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldRead.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldRead, "administrator");
 
 		contactService.saveContact(new Contact("John", null, "Doe", "john@example.com"), "administrator");
@@ -232,7 +232,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("restrictionFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		Contact john = new Contact("John", null, "Doe");
@@ -284,11 +284,11 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		AbacPolicy restrictionFieldRead = new AbacPolicy("RestrictedRead", PolicyType.READ, restrictedFieldResource);
-		restrictionFieldRead.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldRead.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldRead, "administrator");
 
 		Contact john = new Contact("John", null, "Doe", "john@example.com");
@@ -323,7 +323,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Contact contact = new Contact("John", null, "Doe");
@@ -361,7 +361,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
@@ -415,7 +415,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Create the new contact to be used for testing
@@ -509,7 +509,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions for administrator user
@@ -560,7 +560,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions for administrator user
@@ -600,7 +600,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Create the new contact to be used for testing
@@ -669,7 +669,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Contact contact = contactService.searchContactByEmail("uec_ops_support@unlimitedcompanies.com", "administrator");
@@ -709,7 +709,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions for administrator user
@@ -760,7 +760,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions for administrator user
@@ -800,7 +800,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add the new contact with its address for testing
@@ -868,7 +868,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Contact contact = contactService.searchContactByEmail("uec_ops_support@unlimitedcompanies.com", "administrator");
@@ -909,7 +909,7 @@ public class SecurityServiceIntegrationTest
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions
@@ -934,7 +934,7 @@ public class SecurityServiceIntegrationTest
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions
@@ -959,7 +959,7 @@ public class SecurityServiceIntegrationTest
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		// Add field restrictions
@@ -1035,7 +1035,7 @@ public class SecurityServiceIntegrationTest
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Contact firstContact = new Contact("John", null, "Doe", "johnd@example.com");
@@ -1152,7 +1152,7 @@ public class SecurityServiceIntegrationTest
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		List<User> foundUsers = authService.searchAllUsers(10, 1, "administrator");
@@ -1191,7 +1191,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Role role = authService.searchRoleByName("Administrators", "administrator");
@@ -1222,7 +1222,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Role role = authService.searchRoleByName("Administrators", "administrator");
@@ -1271,7 +1271,7 @@ public class SecurityServiceIntegrationTest
 
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 
 		Role role = authService.searchRoleByName("Administrators", "administrator");

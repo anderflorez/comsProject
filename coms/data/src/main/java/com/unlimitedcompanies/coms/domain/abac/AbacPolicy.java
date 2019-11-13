@@ -305,8 +305,8 @@ public class AbacPolicy
 	 * =======================
 	 */
 	
-	private boolean isEntityAccessGranted(User user)
-	{
+	public boolean isEntityAccessGranted(User user)
+	{		
 		if (this.entityConditions.isEmpty())
 		{
 			if (!this.attributeConditions.isEmpty() || !this.fieldConditions.isEmpty())

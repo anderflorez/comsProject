@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.service.securityImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -26,7 +27,7 @@ import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.service.system.SystemService;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional
 public class ABACServiceImpl implements AbacService
 {
 	
@@ -137,6 +138,54 @@ public class ABACServiceImpl implements AbacService
 		systemService.clearEntityManager();
 		return resource;
 	}
+	
+	@Override
+	public List<String> allawedResources(String username)
+	{
+		User user = systemService.searchFullUserByUsername(username);
+		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
+		
+		System.out.println("Running allowedResources in AbacServiceImpl");
+		System.out.println("requesting user: " + user.getUsername());
+		System.out.println("\nUserAttribs found:");
+		System.out.println("==============================================================");
+		System.out.println("Username: " + userAttribs.getUsername());
+		System.out.println("Roles: \n-------");
+		userAttribs.getRoles().forEach(role -> {System.out.println(role);});
+		System.out.println("==============================================================");
+
+		List<Resource> qualifiedResources = new ArrayList<>();
+		List<Resource> allResources = systemService.searchAllResources(); 
+		
+		allResources.forEach((resource) -> {
+			if (resource.getResourceName().equals("AbacPolicy") ||
+				resource.getResourceName().equals("Contact") ||
+				resource.getResourceName().equals("User") ||
+				resource.getResourceName().equals("Role") ||
+				resource.getResourceName().equals("Employee") ||
+				resource.getResourceName().equals("Project"))
+			{
+				qualifiedResources.add(resource);
+			}
+		});
+		
+		List<String> allowedResourceNames = new ArrayList<>();
+		for (Resource resource : qualifiedResources)
+		{
+			AbacPolicy policy;
+			try
+			{
+				policy = systemService.searchPolicy(resource, PolicyType.READ);
+				if (policy.isEntityAccessGranted(user) || policy.getModifyPolicy(null, userAttribs, user))
+				{
+					allowedResourceNames.add(resource.getResourceName());
+				}
+			}
+			catch (NoResourceAccessException e) {}
+		}
+		
+		return allowedResourceNames;
+	}
 
 	@Override
 	public int getNumberOfPolicies()
@@ -160,6 +209,27 @@ public class ABACServiceImpl implements AbacService
 	public int getNumberOfRestrictedFields()
 	{
 		return abacDao.getNumberOfRestrictedFields();
+	}
+	
+	@Override
+	public int getNumberOfMainPolicies(String signedUsername) throws RecordNotFoundException, NoResourceAccessException
+	{
+		// Check if user has access to read policies
+		User user = systemService.searchFullUserByUsername(signedUsername);
+		Resource abacPolicyResource = this.searchResourceByName("AbacPolicy");
+		AbacPolicy policy = systemService.searchPolicy(abacPolicyResource, PolicyType.READ);
+		
+		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, user);
+		
+		// If user has access then read the requested policy and return it
+		if (resourceReadPolicy.isReadGranted())
+		{
+			return abacDao.getNumberOfMainPolicies();
+		}
+		else
+		{
+			throw new NoResourceAccessException();
+		}
 	}
 	
 	@Override

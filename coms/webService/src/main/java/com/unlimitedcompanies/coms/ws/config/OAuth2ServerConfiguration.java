@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
+import com.unlimitedcompanies.coms.data.config.ServerURLs;
+
 @Configuration
 public class OAuth2ServerConfiguration
 {
@@ -24,7 +26,7 @@ public class OAuth2ServerConfiguration
 	@Configuration
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter
-	{		
+	{	
 		@Autowired
 		@Qualifier("authenticationManagerBean")
 		private AuthenticationManager authenticationManager;
@@ -49,7 +51,7 @@ public class OAuth2ServerConfiguration
 						.secret("{noop}somesecret")
 						.resourceIds(SERVER_RESOURCE_ID)
 						.autoApprove(true)
-						.redirectUris("http://localhost:8080/coms/tokenmanager");
+						.redirectUris(ServerURLs.CLIENT_REDIRECT.toString());
 		}
 
 	}
@@ -76,7 +78,6 @@ public class OAuth2ServerConfiguration
 //						.access("#oauth2.hasScope('read')")
 					.and().csrf().disable()
 					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-			
 		}
 
 	}

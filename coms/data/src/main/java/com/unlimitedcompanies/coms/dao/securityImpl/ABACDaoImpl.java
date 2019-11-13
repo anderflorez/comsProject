@@ -75,6 +75,14 @@ public class ABACDaoImpl implements ABACDao
 	}
 	
 	@Override
+	public int getNumberOfMainPolicies()
+	{
+		BigInteger bigInt = (BigInteger) em.createNativeQuery("SELECT COUNT(abacPolicyId) FROM abacPolicies WHERE abacPolicyId_FK IS NULL").getSingleResult();
+		return bigInt.intValue();
+	}
+	
+	@Override
+	@Transactional(noRollbackFor = NoResultException.class)
 	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions)
 	{
 		String queryString = "select p1 from AbacPolicy p1 "
@@ -86,12 +94,12 @@ public class ABACDaoImpl implements ABACDao
 		if (accessConditions != null && !accessConditions.isEmpty())
 		{
 			queryString += " and (" + accessConditions + ")";
-		}		
+		}
 
 		return em.createQuery(queryString, AbacPolicy.class)
 				 .setParameter("resource", resource)
 				 .setParameter("policyType", policyType.toString())
-				 .getSingleResult();		
+				 .getSingleResult();
 	}
 	
 	@Override
@@ -149,6 +157,13 @@ public class ABACDaoImpl implements ABACDao
 				 .setFirstResult(page * elements)
 				 .setMaxResults(elements)
 				 .getResultList();
+	}
+	
+	@Override
+	public List<Resource> getAllResources()
+	{
+		return em.createQuery("select resource from Resource resource", Resource.class)
+					.getResultList();
 	}
 	
 	@Override

@@ -47,7 +47,7 @@ public class UserRestController
 	
 	private final String resource = "user";
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "loggedUser", method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "loggedUser", method = RequestMethod.GET)
 	public UserDTO getUserInfo() throws RecordNotFoundException, NoResourceAccessException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -63,7 +63,7 @@ public class UserRestController
 		return loggedUser;
 	}
 	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "s", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "s", method = RequestMethod.GET)
 //	public UserCollectionResponse allUsers(@RequestParam(name = "pag", required = false) Integer pag,
 //										   @RequestParam(name = "epp", required = false) Integer epp)
 //	{
@@ -71,14 +71,14 @@ public class UserRestController
 //		if (epp == null) epp = 10;
 //				
 //		UserCollectionResponse foundUsers = new UserCollectionResponse(authService.searchUsersByRange(pag, epp));
-//		Link baseLink = new Link(RestLinks.URL_BASE + resource).withRel("base_url");
+//		Link baseLink = new Link(RestLinks.FULL_REST_URL_BASE + resource).withRel("base_url");
 //		foundUsers.add(baseLink);
 //
 //		if (pag > 1)
 //		{
 //			int prev = pag - 1;
 //			foundUsers.setPrevPage(prev);
-//			Link prevLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+//			Link prevLink = new Link(RestLinks.FULL_REST_URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
 //			foundUsers.add(prevLink);
 //		}
 //		
@@ -86,7 +86,7 @@ public class UserRestController
 //		{
 //			int next = pag + 1;
 //			foundUsers.setNextPage(next);
-//			Link nextLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");			
+//			Link nextLink = new Link(RestLinks.FULL_REST_URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");			
 //			foundUsers.add(nextLink);
 //		}		
 //				
@@ -102,7 +102,7 @@ public class UserRestController
 //		return foundUsers;
 //	}
 //	
-	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}", method = RequestMethod.GET)
 	public UserDTO findUserById(@PathVariable Integer id) throws RecordNotFoundException, NoResourceAccessException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -118,7 +118,7 @@ public class UserRestController
 		return userResponse;
 	}
 	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource, method = RequestMethod.POST)
 //	@ResponseStatus(value = HttpStatus.CREATED)
 //	public UserDTO saveNewUser(@RequestBody UserDTO newUser) throws RecordNotFoundException, RecordNotCreatedException
 //	{
@@ -132,7 +132,7 @@ public class UserRestController
 //		return createdUser;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource, method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.OK)
 //	public UserDTO updateUser(@RequestBody UserDTO editedUser) throws RecordNotFoundException
 //	{		
@@ -146,7 +146,7 @@ public class UserRestController
 //		return updatedUser;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/password", method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/password", method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public int chagePassword(@RequestBody UserPasswordDTO password) throws RecordNotFoundException, 
 //																			IncorrectPasswordException, 
@@ -158,7 +158,7 @@ public class UserRestController
 //		return 0;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.DELETE)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}", method = RequestMethod.DELETE)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public void deleteUser(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException 
 //	{
@@ -186,7 +186,7 @@ public class UserRestController
 		error.addError(e.getMessage());
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
 	}
@@ -199,7 +199,7 @@ public class UserRestController
 		error.addError("The new user could not be created");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -212,7 +212,7 @@ public class UserRestController
 //		error.addError(e.getMessage());
 //		
 //		MultiValueMap<String, String> headers = new HttpHeaders();
-//		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+//		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 //		
 //		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 //	}
@@ -226,7 +226,7 @@ public class UserRestController
 		error.addError("The user password you have provided is incorrect");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 		
 		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -240,7 +240,7 @@ public class UserRestController
 		errorResponse.addMessage("The user could not be deleted. Please try again or contact your system administrator");
 		
 		MultiValueMap<String, String> headers = new HttpHeaders();
-		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 		
 		return new ResponseEntity<>(errorResponse, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 	}

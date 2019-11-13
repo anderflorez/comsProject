@@ -20,6 +20,7 @@ public interface SystemService
 	 */
 	public void initialSetup() throws InvalidPolicyException;
 	public void checkAllResources();
+	public List<Resource> searchAllResources();
 	public List<String> searchAllResourceNames();	
 	
 	// Get objects with system rights which is without checking any permissions to obtain them

@@ -17,11 +17,13 @@ public interface ABACDao
 	public int getNumberOfEntityConditions();
 	public int getNumberOfAttributeConditions();
 	public int getNumberOfRestrictedFields();
+	public int getNumberOfMainPolicies();
 	public AbacPolicy getPolicy(Resource resource, PolicyType policyType, String accessConditions);
 	public AbacPolicy getPolicyWithRestrictedFields(Resource requestedResource, PolicyType policyType,
 													String readConditions);
 	public AbacPolicy getPolicyById(String abacPolicyId, String accessConditions);
 	public List<AbacPolicy> getPoliciesByRange(int elements, int page, String accessConditions);
+	public List<Resource> getAllResources();
 	public List<String> getAllResourceNames();
 	public Resource getResourceByName(String name);
 	public Resource getResourceByNameWithFields(String name);

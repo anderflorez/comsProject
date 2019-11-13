@@ -92,6 +92,14 @@ class ABACAuthenticationIntegrationTests
 	}
 	
 	@Test
+	public void numberOfMainPolicies() throws Exception
+	{
+		systemService.initialSetup();
+		
+		assertEquals(8, abacService.getNumberOfMainPolicies("administrator"));
+	}
+	
+	@Test
 	public void saveSingleResourcePolicyTest() throws Exception
 	{
 		systemService.initialSetup();
@@ -172,7 +180,7 @@ class ABACAuthenticationIntegrationTests
 		Resource employeeResource = abacService.searchResourceByNameWithFields("Employee");
 		
 		AbacPolicy policy = new AbacPolicy("Employee", PolicyType.READ, employeeResource);
-		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		policy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		policy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "Admin");
 		
 		abacService.savePolicy(policy, "administrator");
@@ -187,7 +195,7 @@ class ABACAuthenticationIntegrationTests
 		Resource employeeResource = abacService.searchResourceByNameWithFields("Employee");
 		
 		AbacPolicy policy = new AbacPolicy("EmployeeRead", PolicyType.READ, employeeResource);
-		policy.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECTS);
+		policy.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECT);
 		policy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		
 		abacService.savePolicy(policy, "administrator");
@@ -202,7 +210,7 @@ class ABACAuthenticationIntegrationTests
 		Resource projectResource = abacService.searchResourceByName("Project");
 		
 		AbacPolicy policy = new AbacPolicy("ProjectRead", PolicyType.READ, projectResource);
-		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		policy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		policy.addEntityCondition(UserAttribute.USERNAME, ComparisonOperator.EQUALS, "administrator");
 		abacService.savePolicy(policy, "administrator");
 		
@@ -219,7 +227,7 @@ class ABACAuthenticationIntegrationTests
 		Resource employeeResource = abacService.searchResourceByNameWithFields("Employee");
 		
 		AbacPolicy policy = new AbacPolicy("EmployeeRead", PolicyType.READ, employeeResource);
-		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		policy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		policy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		policy.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		abacService.savePolicy(policy, "administrator");
@@ -238,7 +246,7 @@ class ABACAuthenticationIntegrationTests
 		
 		AbacPolicy policy = abacService.searchPolicyWithRestrictedFields(contactResource, PolicyType.READ, "administrator");		
 		policy.setLogicOperator(LogicOperator.OR);
-		policy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		policy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		policy.addFieldConditions("lastName", ComparisonOperator.EQUALS, "Doe");
 		policy.addFieldConditions("firstName", ComparisonOperator.EQUALS, "Richard");
 		abacService.updatePolicy(policy.getAbacPolicyId(), policy, "administrator");
@@ -309,9 +317,9 @@ class ABACAuthenticationIntegrationTests
 		
 		Resource projectResource = abacService.searchResourceByName("Project");
 		AbacPolicy projectReadPolicy = new AbacPolicy("ProjectRead", PolicyType.READ, projectResource);
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Operation Managers");
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Managers");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Operation Managers");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Project Managers");
 		projectReadPolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		projectReadPolicy.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		AbacPolicy projectReadPolicyB = projectReadPolicy.addSubPolicy();
@@ -345,9 +353,9 @@ class ABACAuthenticationIntegrationTests
 		
 		Resource projectResource = abacService.searchResourceByName("Project");
 		AbacPolicy projectReadPolicy = new AbacPolicy("ProjectRead", PolicyType.READ, projectResource);
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Operation Managers");
-		projectReadPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Managers");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Operation Managers");
+		projectReadPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Project Managers");
 		projectReadPolicy.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		projectReadPolicy.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		AbacPolicy projectReadPolicyB = projectReadPolicy.addSubPolicy();
@@ -366,6 +374,16 @@ class ABACAuthenticationIntegrationTests
 		assertThrows(NoResourceAccessException.class, ()-> abacService.searchPolicy(projectResource, PolicyType.READ, "administrator"));
 		assertEquals(8, abacService.getNumberOfPolicies());
 		assertEquals(8, abacService.getNumberOfEntityConditions());
+	}
+	
+	@Test
+	public void findResourcesAccessibleToUserTest() throws Exception
+	{
+		systemService.initialSetup();
+		
+		List<String> allowedResources = abacService.allawedResources("administrator");
+		
+		assertTrue(allowedResources.size() > 0);
 	}
 	
 	/*
@@ -387,7 +405,7 @@ class ABACAuthenticationIntegrationTests
 		
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 		
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
@@ -407,7 +425,7 @@ class ABACAuthenticationIntegrationTests
 		
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");
@@ -429,7 +447,7 @@ class ABACAuthenticationIntegrationTests
 		// Add ABAC policies to allow storing field restrictions
 		AbacPolicy fieldRestrictPolicy = new AbacPolicy("RestrictedFieldUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		fieldRestrictPolicy.setCdPolicy(true, false);
-		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		fieldRestrictPolicy.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(fieldRestrictPolicy, "administrator");
 		
 		// Add field restrictions
@@ -449,7 +467,7 @@ class ABACAuthenticationIntegrationTests
 		
 		AbacPolicy restrictionFieldUpdate = new AbacPolicy("RestrictedUpdate", PolicyType.UPDATE, restrictedFieldResource);
 		restrictionFieldUpdate.setCdPolicy(true, false);
-		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrators");
+		restrictionFieldUpdate.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrators");
 		abacService.savePolicy(restrictionFieldUpdate, "administrator");
 
 		Role adminRole = authService.searchRoleByName("Administrators", "administrator");

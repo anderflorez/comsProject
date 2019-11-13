@@ -7,14 +7,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ResourceLink
 {
 	private String resourceName;
-	private String resourceBaseURL;
+	private String resourceURI;
 
 	public ResourceLink() {}
 
-	public ResourceLink(String resourceName, String resourceBaseURL)
+	public ResourceLink(String resourceName, String resourceURI)
 	{
 		this.resourceName = resourceName;
-		this.resourceBaseURL = resourceBaseURL;
+		this.resourceURI = resourceURI;
 	}
 
 	@XmlElement(name = "resource_name")
@@ -28,14 +28,14 @@ public class ResourceLink
 		this.resourceName = resourceName;
 	}
 
-	@XmlElement(name = "resource_base_url")
-	public String getResourceBaseURL()
+	@XmlElement(name = "resource_uri")
+	public String getResourceURI()
 	{
-		return resourceBaseURL;
+		return resourceURI;
 	}
 
-	public void setResourceBaseURL(String resourceBaseURL)
+	public void setResourceURI(String resourceURI)
 	{
-		this.resourceBaseURL = resourceBaseURL;
+		this.resourceURI = resourceURI;
 	}
 }

@@ -85,8 +85,8 @@ public class EntityCondition
 		// TODO: Test all possible situations in this method after the code to save employees and projects has been completed
 		
 		if (this.comparison == ComparisonOperator.EQUALS)
-		{
-			if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
+		{			
+			if (this.userAttribute.equals(UserAttribute.ROLE.toString()))
 			{
 				if (this.value.equals("ANY"))
 				{
@@ -103,7 +103,7 @@ public class EntityCondition
 
 				return false;
 			}
-			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
+			else if (this.userAttribute.equals(UserAttribute.PROJECT.toString()))
 			{
 				if (this.value.equals("ANY"))
 				{
@@ -129,7 +129,7 @@ public class EntityCondition
 		}
 		else // In the case it is not EQUALS
 		{
-			if (this.userAttribute.equals(UserAttribute.ROLES.toString()))
+			if (this.userAttribute.equals(UserAttribute.ROLE.toString()))
 			{
 				for (Role next : user.getRoles())
 				{
@@ -140,7 +140,7 @@ public class EntityCondition
 				}
 				return true;
 			}
-			else if (this.userAttribute.equals(UserAttribute.PROJECTS.toString()))
+			else if (this.userAttribute.equals(UserAttribute.PROJECT.toString()))
 			{
 				List<String> projectNames = user.getContact().getEmployee().getAssociatedProjectNames();
 				for (String project : projectNames)

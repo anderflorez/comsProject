@@ -137,10 +137,10 @@ public class ABACAuthenticationUnitTest
 		policy.setLogicOperator(LogicOperator.OR);
 		AbacPolicy subPolicy1 = policy.addSubPolicy(LogicOperator.OR);
 		AbacPolicy subPolicy2 = policy.addSubPolicy(LogicOperator.AND);
-		subPolicy1.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Administrator");
-		subPolicy1.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.EQUALS, "Testin Building");
-		subPolicy2.addEntityCondition(UserAttribute.ROLES, ComparisonOperator.EQUALS, "Project Manager");
-		subPolicy2.addEntityCondition(UserAttribute.PROJECTS, ComparisonOperator.NOT_EQUALS, "Sample Project");
+		subPolicy1.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Administrator");
+		subPolicy1.addEntityCondition(UserAttribute.PROJECT, ComparisonOperator.EQUALS, "Testin Building");
+		subPolicy2.addEntityCondition(UserAttribute.ROLE, ComparisonOperator.EQUALS, "Project Manager");
+		subPolicy2.addEntityCondition(UserAttribute.PROJECT, ComparisonOperator.NOT_EQUALS, "Sample Project");
 		
 		Iterator<AbacPolicy> iterator = testResource.getPolicies().get(0).getSubPolicies().iterator();
 		assertEquals(2, iterator.next().getEntityConditions().size());
@@ -155,7 +155,7 @@ public class ABACAuthenticationUnitTest
 		policy.setLogicOperator(LogicOperator.OR);
 		AbacPolicy groupA = policy.addSubPolicy(LogicOperator.AND);
 		AbacPolicy groupB = policy.addSubPolicy(LogicOperator.OR);
-		groupA.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECTS);
+		groupA.addAttributeCondition(ResourceAttribute.PROJECT_NAME, ComparisonOperator.EQUALS, UserAttribute.PROJECT);
 		groupB.addAttributeCondition(ResourceAttribute.P_MANAGERS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		groupB.addAttributeCondition(ResourceAttribute.P_SUPERINTENDENTS, ComparisonOperator.EQUALS, UserAttribute.USERNAME);
 		groupB.addAttributeCondition(ResourceAttribute.P_FOREMEN, ComparisonOperator.EQUALS, UserAttribute.USERNAME);

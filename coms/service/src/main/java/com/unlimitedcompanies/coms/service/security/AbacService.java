@@ -19,9 +19,11 @@ public interface AbacService
 	public int getNumberOfEntityConditions();
 	public int getNumberOfAttributeConditions();
 	public int getNumberOfRestrictedFields();
+	public int getNumberOfMainPolicies(String signedUsername) throws RecordNotFoundException, NoResourceAccessException;
 
 	public Resource searchResourceByName(String name) throws RecordNotFoundException;
 	public Resource searchResourceByNameWithFields(String name);
+	public List<String> allawedResources(String string);
 	
 	// TODO: Analyze if next two methods are actually needed only internally in the application or the end user needs access to it
 	public AbacPolicy searchPolicy(Resource requestedResource, PolicyType policyType, String signedUsername) 

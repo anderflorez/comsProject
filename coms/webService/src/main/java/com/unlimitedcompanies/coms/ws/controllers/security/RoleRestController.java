@@ -38,7 +38,7 @@ public class RoleRestController
 //	
 //	private final String resource = "role";
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "s", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "s", method = RequestMethod.GET)
 //	public RoleCollectionResponse displayAllRoles(@RequestParam(name = "pag", required = false) Integer pag,
 //												  @RequestParam(name = "epp", required = false) Integer epp)
 //	{
@@ -46,14 +46,14 @@ public class RoleRestController
 //		if (epp == null) epp = 10;
 //		
 //		RoleCollectionResponse allRoles = new RoleCollectionResponse(authService.searchRolesByRange(pag, epp));
-//		Link baseLink = new Link(RestLinks.URL_BASE + resource).withRel("base_url");
+//		Link baseLink = new Link(RestLinks.FULL_REST_URL_BASE + resource).withRel("base_url");
 //		allRoles.add(baseLink);
 //		
 //		if (pag > 1)
 //		{
 //			int prev = pag - 1;
 //			allRoles.setPrev(prev);
-//			Link prevLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
+//			Link prevLink = new Link(RestLinks.FULL_REST_URL_BASE + resource + "?pag=" + prev + "&epp=" + epp).withRel("previous");
 //			allRoles.add(prevLink);
 //		}
 //		
@@ -61,7 +61,7 @@ public class RoleRestController
 //		{
 //			int next = pag + 1;
 //			allRoles.setNext(next);
-//			Link nextLink = new Link(RestLinks.URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");
+//			Link nextLink = new Link(RestLinks.FULL_REST_URL_BASE + resource + "?pag=" + next + "&epp=" + epp).withRel("next");
 //			allRoles.add(nextLink);
 //		}		
 //
@@ -79,7 +79,7 @@ public class RoleRestController
 //		return allRoles;
 //	}
 //
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}", method = RequestMethod.GET)
 //	public RoleDTO findRoleById(@PathVariable int id) throws RecordNotFoundException
 //	{
 //		Role role = authService.searchRoleById(id);
@@ -93,7 +93,7 @@ public class RoleRestController
 //		return roleResponse;
 //	}
 //
-//	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.POST)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource, method = RequestMethod.POST)
 //	@ResponseStatus(value = HttpStatus.CREATED)
 //	public RoleDTO saveNewRole(@RequestBody RoleDTO role) throws RecordNotCreatedException
 //	{		
@@ -111,7 +111,7 @@ public class RoleRestController
 //		return roleResponse;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource, method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource, method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.OK)
 //	public RoleDTO updateRole(@RequestBody RoleDTO editedRole) throws RecordNotFoundException, RecordNotChangedException
 //	{
@@ -127,7 +127,7 @@ public class RoleRestController
 //		return updatedRole;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}", method = RequestMethod.DELETE)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}", method = RequestMethod.DELETE)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public void deleteRole(@PathVariable int id) throws RecordNotFoundException, RecordNotDeletedException
 //	{		
@@ -135,7 +135,7 @@ public class RoleRestController
 //		authService.deleteRole(id);
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}/members", method = RequestMethod.GET)
 //	public UserDetailedCollection findRoleMembersById(@PathVariable int id) throws RecordNotFoundException
 //	{
 //		Role role = authService.searchRoleByIdWithMembers(id);
@@ -153,7 +153,7 @@ public class RoleRestController
 //		return membersResponse;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/members", method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}/members", method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public void addRoleMembers(@PathVariable int id, @RequestBody int[] memberIds) throws RecordNotFoundException
 //	{
@@ -166,7 +166,7 @@ public class RoleRestController
 //		}
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}/nonmembers", method = RequestMethod.GET)
 //	public UserDetailedCollection RoleNonMemberSearch(@PathVariable int id, @RequestParam String query)
 //	{
 //		UserDetailedCollection usersResponse = new UserDetailedCollection(authService.searchRoleNonMembers(id, query));
@@ -186,7 +186,7 @@ public class RoleRestController
 //		return usersResponse;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + resource + "/{id}/nonmembers", method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + resource + "/{id}/nonmembers", method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public void removeMembers(@PathVariable int id, @RequestBody int[] memberIds) throws RecordNotFoundException
 //	{
@@ -207,7 +207,7 @@ public class RoleRestController
 //		error.addError(e.getMessage());
 //		
 //		MultiValueMap<String, String> headers = new HttpHeaders();
-//		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+//		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 //		
 //		return new ResponseEntity<>(error, headers, HttpStatus.NOT_FOUND);
 //	}
@@ -220,7 +220,7 @@ public class RoleRestController
 //		error.addError("The new role could not be created");
 //		
 //		MultiValueMap<String, String> headers = new HttpHeaders();
-//		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+//		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 //		
 //		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 //	}
@@ -233,7 +233,7 @@ public class RoleRestController
 //		error.addError(e.getMessage());
 //		
 //		MultiValueMap<String, String> headers = new HttpHeaders();
-//		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+//		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 //		
 //		return new ResponseEntity<>(error, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 //	}
@@ -247,7 +247,7 @@ public class RoleRestController
 //		errorResponse.addMessage("The role could not be deleted. Please try again or contact your system administrator");
 //		
 //		MultiValueMap<String, String> headers = new HttpHeaders();
-//		headers.add("comsAPI", RestLinks.URL_BASE + resource);
+//		headers.add("comsAPI", RestLinks.FULL_REST_URL_BASE + resource);
 //		
 //		return new ResponseEntity<>(errorResponse, headers, HttpStatus.INTERNAL_SERVER_ERROR);
 //	}

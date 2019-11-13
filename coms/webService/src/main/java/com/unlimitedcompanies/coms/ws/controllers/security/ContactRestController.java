@@ -42,7 +42,7 @@ public class ContactRestController
 	@Autowired
 	AuthService authService;
 	
-//	@RequestMapping(value = RestLinks.URI_BASE + "contacts", method = RequestMethod.GET)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + "contacts", method = RequestMethod.GET)
 //	public ContactCollectionResponse allContacts(@RequestParam(name = "pag", required = false) Integer pag,
 //												 @RequestParam(name = "epp", required = false) Integer epp)
 //	{
@@ -90,7 +90,7 @@ public class ContactRestController
 //		return allContacts;
 //	}
 //
-	@RequestMapping(value = RestLinks.URI_BASE + "contact/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "contact/{id}", method = RequestMethod.GET)
 	public ContactDTO findContactById(@PathVariable Integer id) throws RecordNotFoundException, NoResourceAccessException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -103,7 +103,7 @@ public class ContactRestController
 		return contact;
 	}
 	
-//	@RequestMapping(value = RestLinks.URI_BASE + "contact", method = RequestMethod.POST)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + "contact", method = RequestMethod.POST)
 //	@ResponseStatus(value = HttpStatus.CREATED)
 //	public ContactDTO saveNewContact(@RequestBody Contact newContact) 
 //			throws DuplicateRecordException
@@ -120,7 +120,7 @@ public class ContactRestController
 //		return contactResponse;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + "contact", method = RequestMethod.PUT)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + "contact", method = RequestMethod.PUT)
 //	@ResponseStatus(value = HttpStatus.OK)
 //	public ContactDTO updateContact(@RequestBody Contact editedContact) throws RecordNotFoundException
 //	{
@@ -131,7 +131,7 @@ public class ContactRestController
 //		return contactResponse;
 //	}
 //	
-//	@RequestMapping(value = RestLinks.URI_BASE + "contact/{id}", method = RequestMethod.DELETE)
+//	@RequestMapping(value = RestLinks.URI_REST_BASE + "contact/{id}", method = RequestMethod.DELETE)
 //	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 //	public void deleteContact(@PathVariable Integer id) throws RecordNotFoundException, RecordNotDeletedException
 //	{		

@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.unlimitedcompanies.coms.domain.abac.ComparisonOperator;
 import com.unlimitedcompanies.coms.domain.abac.FieldCondition;
 
 @XmlRootElement(name = "fieldCondition")
@@ -20,8 +21,16 @@ public class FieldConditionDTO extends ResourceSupport
 	{
 		this.fieldConditionId = fieldCondition.getFieldConditionId();
 		this.fieldName = fieldCondition.getFieldName();
-		this.value = fieldCondition.getValue();
-		this.comparison = fieldCondition.getComparison().toString();
+		this.value = fieldCondition.getValue();		
+		if (fieldCondition.getComparison().equals(ComparisonOperator.EQUALS)) {
+			this.comparison = "is equal to";
+		}
+		else if (fieldCondition.getComparison().equals(ComparisonOperator.NOT_EQUALS)) {
+			this.comparison = "is not equal to";
+		}
+		else {
+			this.comparison = fieldCondition.getComparison().toString();
+		}
 	}
 
 	public String getFieldConditionId()

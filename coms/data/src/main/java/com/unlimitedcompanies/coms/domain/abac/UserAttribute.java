@@ -8,8 +8,8 @@ import com.unlimitedcompanies.coms.domain.security.User;
 public enum UserAttribute
 {
 	USERNAME("username"), 
-	ROLES("role.roleName"), 
-	PROJECTS("project.projectName");
+	ROLE("role.roleName"), 
+	PROJECT("project.projectName");
 	
 	private String userField;
 	

@@ -1,5 +1,6 @@
 package com.unlimitedcompanies.coms.ws.controllers.abac;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,12 +41,35 @@ public class PolicyRestController
 	@Autowired
 	AbacService abacService;
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "policies", method = RequestMethod.GET)
-	public PolicyCollectionResponse getAllPolicies(@RequestParam(name = "epp", required = false) Integer epp,
-									 @RequestParam(name = "pag", required = false) Integer pag) throws NoResourceAccessException, RecordNotFoundException
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "resources", method = RequestMethod.GET)
+	public List<String> getAllowedResources()
 	{
-		if (epp == null) epp = 10;
-		if (pag == null) pag = 1;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
+		List<String> resources = abacService.allawedResources(userDetails.getUsername());
+		
+		return resources;
+	}
+	
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policies/count", method = RequestMethod.GET)
+	public List<Integer> getPolicyCount() throws RecordNotFoundException, NoResourceAccessException
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		
+		List<Integer> policyCount = new ArrayList<>();
+		policyCount.add(abacService.getNumberOfMainPolicies(userDetails.getUsername()));
+		
+		return policyCount;
+	}
+	
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policies", method = RequestMethod.GET)
+	public PolicyCollectionResponse getAllPolicies(@RequestParam(name = "epp", required = false) Integer epp,
+									 			   @RequestParam(name = "pag", required = false) Integer pag) throws NoResourceAccessException, RecordNotFoundException
+	{
+		if (epp == null || epp == 0) epp = 10;
+		if (pag == null || epp == 0) pag = 1;
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -59,7 +84,7 @@ public class PolicyRestController
 		return policyCollection;
 	}
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "policy/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policy/{id}", method = RequestMethod.GET)
 	public PolicyDTO getPolicyById(@PathVariable String id) throws NoResourceAccessException, RecordNotFoundException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,7 +97,7 @@ public class PolicyRestController
 		return policyDTO;
 	}
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "policy", method = RequestMethod.POST)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policy", method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public void saveNewPolicy(@RequestBody PolicyDTO policyDTO) throws RecordNotFoundException, InvalidPolicyException, NoResourceAccessException
 	{
@@ -88,7 +113,7 @@ public class PolicyRestController
 		abacService.savePolicy(abacPolicy, userDetails.getUsername());
 	}
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "policy", method = RequestMethod.PUT)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policy", method = RequestMethod.PUT)
 	@ResponseStatus(value = HttpStatus.OK)
 	public void updatePolicy(@RequestBody PolicyDTO policyDTO) 
 			throws RecordNotFoundException, InvalidPolicyException, NoResourceAccessException, RecordNotCreatedException
@@ -105,7 +130,7 @@ public class PolicyRestController
 		abacService.updatePolicy(policyDTO.getAbacPolicyId(), abacPolicy, userDetails.getUsername());
 	}
 	
-	@RequestMapping(value = RestLinks.URI_BASE + "policy/{id}", method = RequestMethod.DELETE)
+	@RequestMapping(value = RestLinks.URI_REST_BASE + "policy/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deletePolicy(@PathVariable String id) throws NoResourceAccessException, RecordNotFoundException
 	{
