@@ -32,6 +32,8 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AbacService;
 import com.unlimitedcompanies.coms.ws.config.RestLinks;
 import com.unlimitedcompanies.coms.ws.reps.ErrorRep;
+import com.unlimitedcompanies.coms.ws.reps.ResourceLink;
+import com.unlimitedcompanies.coms.ws.reps.ResourceLinkCollection;
 import com.unlimitedcompanies.coms.ws.reps.abac.PolicyCollectionResponse;
 import com.unlimitedcompanies.coms.ws.reps.abac.PolicyDTO;
 
@@ -42,12 +44,45 @@ public class PolicyRestController
 	AbacService abacService;
 	
 	@RequestMapping(value = RestLinks.URI_REST_BASE + "resources", method = RequestMethod.GET)
-	public List<String> getAllowedResources()
+	public ResourceLinkCollection getAllowedResources()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		
-		List<String> resources = abacService.allawedResources(userDetails.getUsername());
+		List<String> resourceNames = abacService.allawedResources(userDetails.getUsername());
+		ResourceLinkCollection resources = new ResourceLinkCollection();
+		
+		resourceNames.forEach(resourceName -> {
+			try
+			{
+				switch(resourceName)
+				{
+					case "AbacPolicy":
+						Link policyLink = linkTo(methodOn(PolicyRestController.class).getAllPolicies(null, null)).withRel(resourceName).expand();
+						resources.addResources(new ResourceLink(policyLink.getRel(), policyLink.getHref()));
+						break;
+					case "Contact":
+						resources.addResources(new ResourceLink("Contact", null));
+						break;
+					case "User":
+						resources.addResources(new ResourceLink("User", null));
+						break;
+					case "Role":
+						resources.addResources(new ResourceLink("Role", null));
+						break;
+					case "Employee":
+						resources.addResources(new ResourceLink("Employee", null));
+						break;
+					case "Project":
+						resources.addResources(new ResourceLink("Project", null));
+						break;
+				}
+			}
+			catch (NoResourceAccessException | RecordNotFoundException e)
+			{
+				// These exceptions are never expected to occur
+			}
+		});
 		
 		return resources;
 	}

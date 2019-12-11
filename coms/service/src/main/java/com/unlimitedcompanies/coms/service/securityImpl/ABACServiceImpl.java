@@ -144,15 +144,6 @@ public class ABACServiceImpl implements AbacService
 	{
 		User user = systemService.searchFullUserByUsername(username);
 		UserAttribs userAttribs = systemService.getUserAttribs(user.getUserId());
-		
-		System.out.println("Running allowedResources in AbacServiceImpl");
-		System.out.println("requesting user: " + user.getUsername());
-		System.out.println("\nUserAttribs found:");
-		System.out.println("==============================================================");
-		System.out.println("Username: " + userAttribs.getUsername());
-		System.out.println("Roles: \n-------");
-		userAttribs.getRoles().forEach(role -> {System.out.println(role);});
-		System.out.println("==============================================================");
 
 		List<Resource> qualifiedResources = new ArrayList<>();
 		List<Resource> allResources = systemService.searchAllResources(); 
