@@ -3,6 +3,8 @@ package com.unlimitedcompanies.coms.ws.controllers.security;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpHeaders;
@@ -11,17 +13,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.unlimitedcompanies.coms.domain.security.Contact;
+import com.unlimitedcompanies.coms.data.config.ServerURLs;
 import com.unlimitedcompanies.coms.domain.security.User;
 import com.unlimitedcompanies.coms.service.exceptions.IncorrectPasswordException;
 import com.unlimitedcompanies.coms.service.exceptions.NoResourceAccessException;
@@ -30,11 +32,10 @@ import com.unlimitedcompanies.coms.service.exceptions.RecordNotDeletedException;
 import com.unlimitedcompanies.coms.service.exceptions.RecordNotFoundException;
 import com.unlimitedcompanies.coms.service.security.AuthService;
 import com.unlimitedcompanies.coms.service.security.ContactService;
+import com.unlimitedcompanies.coms.ws.config.OAuth2ServerConfiguration;
 import com.unlimitedcompanies.coms.ws.config.RestLinks;
 import com.unlimitedcompanies.coms.ws.reps.ErrorRep;
-import com.unlimitedcompanies.coms.ws.reps.security.UserCollectionResponse;
 import com.unlimitedcompanies.coms.ws.reps.security.UserDTO;
-import com.unlimitedcompanies.coms.ws.reps.security.UserPasswordDTO;
 
 @RestController
 public class UserRestController
@@ -48,7 +49,7 @@ public class UserRestController
 	private final String resource = "user";
 	
 	@RequestMapping(value = RestLinks.URI_REST_BASE + "loggedUser", method = RequestMethod.GET)
-	public UserDTO getUserInfo() throws RecordNotFoundException, NoResourceAccessException
+	public UserDTO getUserInfo(HttpServletRequest request) throws RecordNotFoundException, NoResourceAccessException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();

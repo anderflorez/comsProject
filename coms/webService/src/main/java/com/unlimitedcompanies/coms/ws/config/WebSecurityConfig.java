@@ -21,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.unlimitedcompanies.coms.data.config.ApplicationConfig;
 import com.unlimitedcompanies.coms.data.config.ServerURLs;
+import com.unlimitedcompanies.coms.ws.config.CustomLogoutSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
     	CorsConfiguration configuration = new CorsConfiguration();
     	configuration.addAllowedOrigin(ServerURLs.CLIENT.toString());
     	configuration.addAllowedMethod(HttpMethod.GET);
+    	configuration.addAllowedMethod(HttpMethod.POST);
     	configuration.addAllowedHeader("Authorization");
     	configuration.addAllowedHeader("Content-Type");
     	
@@ -95,15 +97,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 						
 			// Logout configuration
 			.and().logout()
-						.deleteCookies("JSESSIONID")
-						.clearAuthentication(true)
 						.invalidateHttpSession(true)
-						// TODO: when the user logs out send back a message to the client so it knows the user is not logged in anymore
-//						.logoutSuccessUrl(ServerURLs.PROVIDER + "/coms/logout")
-//						.logoutSuccessUrl(ServerURLs.CLIENT.toString())
+						.clearAuthentication(true)
 						.logoutSuccessHandler(logoutSuccessHandler)
 						.permitAll()
-				
+
 			.and().csrf().disable();
 	}
 

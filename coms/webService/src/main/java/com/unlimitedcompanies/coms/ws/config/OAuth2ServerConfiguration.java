@@ -21,7 +21,7 @@ import com.unlimitedcompanies.coms.data.config.ServerURLs;
 public class OAuth2ServerConfiguration
 {
 	private static final String SERVER_RESOURCE_ID = "oauth2-server";
-	private static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+	public static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
 	
 	@Configuration
 	@EnableAuthorizationServer
@@ -70,7 +70,9 @@ public class OAuth2ServerConfiguration
 		@Override
 		public void configure(HttpSecurity http) throws Exception
 		{
-			http.antMatcher("/rest/**")
+			http.cors()
+			
+				.and().antMatcher("/rest/**")
 					.authorizeRequests()
 						.antMatchers("/rest/**")
 //						.hasAuthority("TRUSTED_CLIENT")

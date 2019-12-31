@@ -6,7 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -23,20 +22,9 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler
 	public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
 			throws IOException, ServletException
 	{
-		if (authentication != null && authentication.getDetails() != null)
-		{
-			try
-			{
-				request.getSession().invalidate();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
+		response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		
-		response.setStatus(HttpServletResponse.SC_OK);
-		
+		// TODO: Change the hard coded address to the ServerURLs.CLIENT when no port is necessary
 		if (request.getRemoteAddr().equals("192.168.1.31")) 
 		{
 			response.sendRedirect(ServerURLs.CLIENT.toString());
