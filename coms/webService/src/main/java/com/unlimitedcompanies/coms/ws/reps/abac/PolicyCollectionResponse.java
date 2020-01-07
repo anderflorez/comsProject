@@ -16,6 +16,7 @@ import com.unlimitedcompanies.coms.domain.abac.AbacPolicy;
 public class PolicyCollectionResponse extends ResourceSupport
 {
 	private List<PolicyDTO> policies;
+	private Integer page;
 	private Integer prevPage;
 	private Integer nextPage;
 	
@@ -109,6 +110,16 @@ public class PolicyCollectionResponse extends ResourceSupport
 //			this.policies.add(policyDTO);
 //		}
 //	}
+	
+	public Integer getPage()
+	{
+		return page;
+	}
+	
+	public void setPage(Integer page)
+	{
+		this.page = page;
+	}
 
 	public Integer getPrevPage()
 	{

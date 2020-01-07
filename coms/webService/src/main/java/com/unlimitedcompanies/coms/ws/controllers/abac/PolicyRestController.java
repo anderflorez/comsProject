@@ -88,13 +88,15 @@ public class PolicyRestController
 	}
 	
 	@RequestMapping(value = RestLinks.URI_REST_BASE + "policies/count", method = RequestMethod.GET)
-	public List<Integer> getPolicyCount() throws RecordNotFoundException, NoResourceAccessException
+	public Integer getPolicyCount() throws RecordNotFoundException, NoResourceAccessException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		
-		List<Integer> policyCount = new ArrayList<>();
-		policyCount.add(abacService.getNumberOfMainPolicies(userDetails.getUsername()));
+//		List<Integer> policyCount = new ArrayList<>();
+//		policyCount.add(abacService.getNumberOfMainPolicies(userDetails.getUsername()));
+		
+		Integer policyCount = abacService.getNumberOfMainPolicies(userDetails.getUsername());
 		
 		return policyCount;
 	}
@@ -111,6 +113,8 @@ public class PolicyRestController
 		
 		List<AbacPolicy> policies = abacService.searchPoliciesByRange(epp, pag, userDetails.getUsername());
 		PolicyCollectionResponse policyCollection = new PolicyCollectionResponse(policies);
+		
+		policyCollection.setPage(pag);
 		
 		// TODO: Add support for links as well as for previous and next page links
 		Link selfLink = linkTo(methodOn(PolicyRestController.class).getAllPolicies(epp, pag)).withSelfRel();

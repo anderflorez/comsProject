@@ -213,6 +213,7 @@ public class ABACServiceImpl implements AbacService
 		ResourceReadPolicy resourceReadPolicy = policy.getReadPolicy(AbacPolicy.class, user);
 		
 		// If user has access then read the requested policy and return it
+		// TODO: Return number of policies with any kind of access, not just read
 		if (resourceReadPolicy.isReadGranted())
 		{
 			return abacDao.getNumberOfMainPolicies();
