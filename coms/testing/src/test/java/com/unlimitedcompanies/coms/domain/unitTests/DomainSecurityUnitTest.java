@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalField;
+import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
@@ -107,10 +109,12 @@ class DomainSecurityUnitTest
 		Contact contact = new Contact("John", null, "Doe", "john@example.com");
 		User user = new User("admin", "mypass", contact);
 		
+		ZonedDateTime createdDate = user.getDateAdded().withZoneSameInstant(ZoneId.systemDefault());
+		
 		String monthDay = "";
-		if (user.getDateAdded().getDayOfMonth() < 10) monthDay += "0";
-		monthDay += user.getDateAdded().getDayOfMonth();		
-		String initialDate = user.getDateAdded().getMonth() + " " + monthDay + ", " + user.getDateAdded().getYear();
+		if (createdDate.getDayOfMonth() < 10) monthDay += "0";
+		monthDay += createdDate.getDayOfMonth();
+		String initialDate = createdDate.getMonth() + " " + monthDay + ", " + createdDate.getYear();
 		
 		ZonedDateTime tmp = user.getLastAccess().withZoneSameInstant(ZoneId.systemDefault());
 		monthDay = "";
